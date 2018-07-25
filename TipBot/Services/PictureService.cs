@@ -9,16 +9,20 @@ namespace TipBot.Services
 {
     public class PictureService
     {
-        private readonly HttpClient http;
+        /// <remarks>Set by DI.</remarks>
+        private readonly Settings Settings;
 
-        public PictureService(HttpClient http)
+        private readonly HttpClient httpClient;
+
+        public PictureService(HttpClient httpClient, Settings setting)
         {
-            this.http = http;
+            this.httpClient = httpClient;
+            this.Settings = setting;
         }
 
         public async Task<Stream> GetStratisLogoAsync()
         {
-            HttpResponseMessage resp = await this.http.GetAsync(Constants.StratisLogoUrl);
+            HttpResponseMessage resp = await this.httpClient.GetAsync(this.Settings.StratisLogoUrl);
 
             Stream stream = await resp.Content.ReadAsStreamAsync();
 

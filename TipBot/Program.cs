@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using TipBot.Helpers;
 using TipBot.Services;
 
 namespace TipBot
@@ -26,12 +27,15 @@ namespace TipBot
         {
             IServiceProvider services = this.ConfigureServices();
 
+            var settings = services.GetRequiredService<Settings>();
+            settings.Initialize(new TextFileConfiguration(args));
+
             var client = services.GetRequiredService<DiscordSocketClient>();
 
             client.Log += this.LogAsync;
             services.GetRequiredService<CommandService>().Log += this.LogAsync;
 
-            await client.LoginAsync(TokenType.Bot, "NDY4MDI1ODM0NTE5NjU4NDk2.DizKmA.pBifJbNeB0OlIJ5yZxF2kkJSaI8");
+            await client.LoginAsync(TokenType.Bot, settings.BotToken);
             await client.StartAsync();
 
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
@@ -54,6 +58,7 @@ namespace TipBot
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
                 .AddSingleton<PictureService>()
+                .AddSingleton<Settings>()
                 .BuildServiceProvider();
         }
     }

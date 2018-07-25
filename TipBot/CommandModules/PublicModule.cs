@@ -9,10 +9,11 @@ using TipBot.Services;
 
 namespace TipBot.CommandModules
 {
+    // TODO that came from example. Remove it later.
     // Modules must be public and inherit from an IModuleBase
     public class PublicModule : ModuleBase<SocketCommandContext>
     {
-        // Dependency Injection will fill this value in for us
+        /// <remarks>Set by DI.</remarks>
         public PictureService PictureService { get; set; }
 
         [Command("ping")]

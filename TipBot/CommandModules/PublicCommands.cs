@@ -11,7 +11,7 @@ namespace TipBot.CommandModules
 {
     public class PublicCommands : ModuleBase<SocketCommandContext>
     {
-        /// <remarks>Set via DI.</remarks>
+        /// <remarks>Set by DI.</remarks>
         public PictureService PictureService { get; set; }
 
         [Command("tip")]
