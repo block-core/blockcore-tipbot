@@ -25,6 +25,7 @@ namespace TipBot.CommandModules
                 answer += $" Reason: {message}";
             }
 
+            // TODO
             return this.ReplyAsync(answer);
         }
 
@@ -40,6 +41,7 @@ namespace TipBot.CommandModules
         [Command("withdraw")]
         public Task WithdrawAsync(string address, double amount)
         {
+            // TODO
             throw new NotImplementedException();
         }
 
@@ -49,6 +51,21 @@ namespace TipBot.CommandModules
             // TODO user will be able to start a quiz. First to answer will get a reward.
             // Quiz creator specifies SHA256 of an answer.
 
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        [Command("answerQuiz")]
+        public Task AnswerQuizAsync([Remainder]string answer)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        [Command("help")]
+        public Task HelpAsync()
+        {
+            // TODO
             throw new NotImplementedException();
         }
 
@@ -59,7 +76,7 @@ namespace TipBot.CommandModules
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
-            string text = $"Version: {version}";
+            string text = $"Version: {version}" + Environment.NewLine + "github: https://github.com/noescape00/DiscordTipBot";
             await this.Context.Channel.SendFileAsync(stream, "logo.png", text);
         }
     }

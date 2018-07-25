@@ -1,0 +1,1 @@
+#### Tipbot for Discord that works with Stratis

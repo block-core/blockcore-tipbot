@@ -14,6 +14,7 @@ namespace TipBot
         TODO:
         1) Connect to DB. SQL + EntityFramework?
         2) Outline all methods we want to implement.
+        3) Add logging
     */
 
     internal class Program
