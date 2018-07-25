@@ -45,6 +45,13 @@ namespace TipBot.CommandModules
             throw new NotImplementedException();
         }
 
+        [Command("balance")]
+        public Task BalanceAsync()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
         [Command("createQuiz")]
         public Task CreateQuizAsync(double amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
