@@ -9,16 +9,22 @@ using TipBot.Services;
 
 namespace TipBot
 {
-    class Program
+    /*
+        TODO:
+        1) Connect to DB. SQL + EntityFramework?
+        2) Outline all methods we want to implement.
+    */
+
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             new Program().MainAsync(args).GetAwaiter().GetResult();
         }
 
         public async Task MainAsync(string[] args)
         {
-            var services = this.ConfigureServices();
+            IServiceProvider services = this.ConfigureServices();
 
             var client = services.GetRequiredService<DiscordSocketClient>();
 

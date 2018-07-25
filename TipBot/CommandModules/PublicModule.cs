@@ -22,18 +22,6 @@ namespace TipBot.CommandModules
             return this.ReplyAsync("pong!");
         }
 
-        [Command("cat")]
-        public async Task CatAsync()
-        {
-            // Get a stream containing an image of a cat
-            Stream stream = await this.PictureService.GetCatPictureAsync();
-
-            // Streams must be seeked to their beginning before being uploaded!
-            stream.Seek(0, SeekOrigin.Begin);
-
-            await this.Context.Channel.SendFileAsync(stream, "cat.png");
-        }
-
         // Get info on a user, or the user who invoked the command if one is not specified
         [Command("userinfo")]
         public async Task UserInfoAsync(IUser user = null)

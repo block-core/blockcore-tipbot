@@ -16,10 +16,16 @@ namespace TipBot.Services
             this.http = http;
         }
 
-        public async Task<Stream> GetCatPictureAsync()
+        public async Task<Stream> GetStratisLogoAsync()
         {
-            HttpResponseMessage resp = await this.http.GetAsync("https://cataas.com/cat");
-            return await resp.Content.ReadAsStreamAsync();
+            HttpResponseMessage resp = await this.http.GetAsync(Constants.StratisLogoUrl);
+
+            Stream stream = await resp.Content.ReadAsStreamAsync();
+
+            // Streams must be seeked to their beginning before being uploaded!
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
         }
     }
 }
