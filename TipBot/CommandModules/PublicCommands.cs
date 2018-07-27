@@ -26,16 +26,26 @@ namespace TipBot.CommandModules
         [Command("tip")]
         public Task TipAsync(IUser userBeingTipped, double amount, [Remainder]string message = null)
         {
-            TipCommandResponse response;
-
             IUser sender = this.Context.User;
+
+            string response;
 
             lock (this.lockObject)
             {
-                response = this.UsersManager.TipUser(sender, userBeingTipped, amount, message);
+                try
+                {
+                    this.UsersManager.TipUser(sender, userBeingTipped, amount, message);
+
+                    //TODO put more data here
+                    response = "Success!";
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
             }
 
-            return this.ReplyAsync(response.ToString());
+            return this.ReplyAsync(response);
         }
 
         [Command("deposit")]

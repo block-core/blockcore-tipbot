@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Discord;
+using Discord.Commands;
 using Microsoft.EntityFrameworkCore.Internal;
 using NLog;
 using TipBot.Database;
@@ -26,36 +27,17 @@ namespace TipBot.Logic
             this.logger = LogManager.GetCurrentClassLogger();
         }
 
-        public TipCommandResponse TipUser(IUser sender, IUser userBeingTipped, double amount, string message = null)
+        public void TipUser(IUser sender, IUser userBeingTipped, double amount, string message = null)
         {
             this.logger.Trace("({0}:'{1}',{2}:'{3}',{4}:{5},{6}:'{7}')", nameof(sender), sender.Id,
                 nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount, nameof(message), message);
 
-            if (amount <= 0)
-            {
-                var errorResponse = new TipCommandResponse() { Success = false, ErrorMessage = "Amount can't be less than or equal to zero." };
-
-                this.logger.Trace("(-)[INVALID_AMOUNT_VALUE]:'{0}'", errorResponse);
-                return errorResponse;
-            }
-
-            if (sender.Id == userBeingTipped.Id)
-            {
-                var errorResponse = new TipCommandResponse() { Success = false, ErrorMessage = "You can't tip yourself!" };
-
-                this.logger.Trace("(-)[SELFTIPPING]:'{0}'", errorResponse);
-                return errorResponse;
-            }
+            this.AssertAmountPositive(amount);
+            this.AssertUsersNotEqual(sender, userBeingTipped);
 
             DiscordUser discordUserSender = this.GetOrCreateUser(sender);
 
-            if (discordUserSender.Balance < amount)
-            {
-                var errorResponse = new TipCommandResponse() { Success = false, ErrorMessage = "Insufficient funds." };
-
-                this.logger.Trace("(-)[INVALID_AMOUNT_VALUE]:'{0}'", errorResponse);
-                return errorResponse;
-            }
+            this.AssertBalanceIsSufficient(discordUserSender, amount);
 
             // TODO
             throw new NotImplementedException();
@@ -104,25 +86,53 @@ namespace TipBot.Logic
             return userExists;
         }
 
+        private void AssertBalanceIsSufficient(DiscordUser user, double balanceRequired)
+        {
+            this.logger.Trace("({0}:'{1}',{2}:{3})", nameof(user), user, nameof(balanceRequired), balanceRequired);
+
+            if (user.Balance < balanceRequired)
+            {
+                this.logger.Trace("(-)[INVALID_AMOUNT_VALUE]");
+                throw new CommandExecutionException("Insufficient funds.");
+            }
+        }
+
+        private void AssertUsersNotEqual(IUser user1, IUser user2)
+        {
+            this.logger.Trace("({0}:{1},{2}:{3})", nameof(user1), user1.Id, nameof(user2), user2.Id);
+
+            if (user1.Id == user2.Id)
+            {
+                this.logger.Trace("(-)[SAME_USERS]'");
+                throw new CommandExecutionException("You can't tip yourself!");
+            }
+
+            this.logger.Trace("(-)");
+        }
+
+        private void AssertAmountPositive(double amount)
+        {
+            this.logger.Trace("({0}:{1})", nameof(amount), amount);
+
+            if (amount <= 0)
+            {
+                this.logger.Trace("(-)[AMOUNT_NOT_POSITIVE]'");
+                throw new CommandExecutionException("Amount can't be less than or equal to zero.");
+            }
+
+            this.logger.Trace("(-)");
+        }
+
         public void Dispose()
         {
             this.context.Dispose();
         }
     }
 
-    public class TipCommandResponse
+    public class CommandExecutionException : Exception
     {
-        public bool Success;
-
-        public string ErrorMessage;
-
-        public override string ToString()
+        public CommandExecutionException(string message) : base(message)
         {
-            if (!this.Success)
-                return "Error: " + this.ErrorMessage;
-
-            // TODO
-            throw new NotImplementedException();
         }
     }
 }
