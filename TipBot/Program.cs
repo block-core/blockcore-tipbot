@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using TipBot.Database;
 using TipBot.Helpers;
 using TipBot.Logic;
 using TipBot.Services;
@@ -34,6 +36,12 @@ namespace TipBot
 
             try
             {
+                // Migrate DB in case there are updates in the db layout.
+                using (var db = new BotDbContext())
+                {
+                    db.Database.Migrate();
+                }
+
                 IServiceProvider services = this.ConfigureServices();
 
                 var settings = services.GetRequiredService<Settings>();

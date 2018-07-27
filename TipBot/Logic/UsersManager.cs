@@ -39,6 +39,14 @@ namespace TipBot.Logic
                 return errorResponse;
             }
 
+            if (sender.Id == userBeingTipped.Id)
+            {
+                var errorResponse = new TipCommandResponse() { Success = false, ErrorMessage = "You can't tip yourself!" };
+
+                this.logger.Trace("(-)[SELFTIPPING]:'{0}'", errorResponse);
+                return errorResponse;
+            }
+
             DiscordUser discordUserSender = this.GetOrCreateUser(sender);
 
             if (discordUserSender.Balance < amount)

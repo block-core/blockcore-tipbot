@@ -14,6 +14,10 @@ namespace TipBot.Database
         {
             // TODO local DB is for testing only.
             optionsBuilder.UseSqlite("Data Source=testOnlyDb.db");
+
+            /*
+             * In order to update DB do `Add-Migration [MigrationName]` in Package Manager Console
+             */
         }
     }
 }
