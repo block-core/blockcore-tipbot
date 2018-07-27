@@ -14,12 +14,6 @@ using TipBot.Services;
 
 namespace TipBot
 {
-    /*
-        TODO:
-        1) Connect to DB. SQL + EntityFramework?
-        2) Outline all methods we want to implement.
-    */
-
     internal class Program
     {
         private Logger logger = LogManager.GetCurrentClassLogger();
