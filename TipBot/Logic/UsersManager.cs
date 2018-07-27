@@ -27,10 +27,11 @@ namespace TipBot.Logic
             this.logger = LogManager.GetCurrentClassLogger();
         }
 
-        public void TipUser(IUser sender, IUser userBeingTipped, double amount, string message = null)
+        /// <summary>Transfers <paramref name="amount"/> of money from <paramref name="sender"/> to <paramref name="userBeingTipped"/>.</summary>
+        /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
+        public void TipUser(IUser sender, IUser userBeingTipped, double amount)
         {
-            this.logger.Trace("({0}:'{1}',{2}:'{3}',{4}:{5},{6}:'{7}')", nameof(sender), sender.Id,
-                nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount, nameof(message), message);
+            this.logger.Trace("({0}:'{1}',{2}:'{3}',{4}:{5})", nameof(sender), sender.Id, nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount);
 
             this.AssertAmountPositive(amount);
             this.AssertUsersNotEqual(sender, userBeingTipped);
@@ -39,8 +40,24 @@ namespace TipBot.Logic
 
             this.AssertBalanceIsSufficient(discordUserSender, amount);
 
-            // TODO
-            throw new NotImplementedException();
+            DiscordUser discordUserReceiver = this.GetOrCreateUser(userBeingTipped);
+
+            discordUserSender.Balance -= amount;
+            discordUserReceiver.Balance += amount;
+
+            this.context.SaveChanges();
+        }
+
+        public double GetBalance(IUser user)
+        {
+            this.logger.Trace("({0}:{1})", nameof(user), user.Id);
+
+            DiscordUser discordUser = this.GetOrCreateUser(user);
+
+            double balance = discordUser.Balance;
+
+            this.logger.Trace("(-):{0}", balance);
+            return balance;
         }
 
         private DiscordUser GetOrCreateUser(IUser user)

@@ -14,6 +14,8 @@ namespace TipBot
 
         public string BotToken { get; private set; }
 
-        public string StratisLogoUrl { get; } = "https://stratisplatform.com/wp-content/uploads/2016/08/Stratis_Logo_Gradient.png";
+        public string LogoUrl { get; } = "https://stratisplatform.com/wp-content/uploads/2016/08/Stratis_Logo_Gradient.png";
+
+        public string Ticker { get; } = "STRAT";
     }
 }

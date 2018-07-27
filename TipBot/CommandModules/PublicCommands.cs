@@ -20,6 +20,9 @@ namespace TipBot.CommandModules
         /// <remarks>Set by DI.</remarks>
         public UsersManager UsersManager { get; set; }
 
+        /// <remarks>Set by DI.</remarks>
+        public Settings Settings { get; set; }
+
         /// <summary>Protects access to <see cref="UsersManager"/>.</summary>
         private object lockObject = new object();
 
@@ -34,10 +37,12 @@ namespace TipBot.CommandModules
             {
                 try
                 {
-                    this.UsersManager.TipUser(sender, userBeingTipped, amount, message);
+                    this.UsersManager.TipUser(sender, userBeingTipped, amount);
 
-                    //TODO put more data here
-                    response = "Success!";
+                    response = $"{sender.Mention} tipped {userBeingTipped.Mention} {amount} {this.Settings.Ticker}";
+
+                    if (message != null)
+                        response += $"with message '{message}'";
                 }
                 catch (CommandExecutionException exception)
                 {
@@ -67,8 +72,18 @@ namespace TipBot.CommandModules
         [Command("balance")]
         public Task BalanceAsync()
         {
-            // TODO
-            throw new NotImplementedException();
+            IUser sender = this.Context.User;
+
+            string response;
+
+            lock (this.lockObject)
+            {
+                double balance = this.UsersManager.GetBalance(sender);
+
+                response = $"{sender.Mention}, you have {balance} {this.Settings.Ticker}!";
+            }
+
+            return this.ReplyAsync(response);
         }
 
         [Command("createQuiz")]
@@ -98,7 +113,7 @@ namespace TipBot.CommandModules
         [Command("about")]
         public async Task AboutAsync()
         {
-            Stream stream = await this.PictureService.GetStratisLogoAsync();
+            Stream stream = await this.PictureService.GetLogoAsync();
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 

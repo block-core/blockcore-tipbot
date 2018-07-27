@@ -20,9 +20,9 @@ namespace TipBot.Services
             this.Settings = setting;
         }
 
-        public async Task<Stream> GetStratisLogoAsync()
+        public async Task<Stream> GetLogoAsync()
         {
-            HttpResponseMessage resp = await this.httpClient.GetAsync(this.Settings.StratisLogoUrl);
+            HttpResponseMessage resp = await this.httpClient.GetAsync(this.Settings.LogoUrl);
 
             Stream stream = await resp.Content.ReadAsStreamAsync();
 
