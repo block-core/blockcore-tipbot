@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using NLog;
 using TipBot.Services;
 
 namespace TipBot.CommandModules
@@ -16,11 +17,18 @@ namespace TipBot.CommandModules
         /// <remarks>Set by DI.</remarks>
         public PictureService PictureService { get; set; }
 
+        private Logger logger = LogManager.GetCurrentClassLogger();
+
         [Command("ping")]
         [Alias("pong", "hello")]
         public Task PingAsync()
         {
-            return this.ReplyAsync("pong!");
+            this.logger.Trace("()");
+
+            Task<IUserMessage> task = this.ReplyAsync("pong!");
+
+            this.logger.Trace("(-)");
+            return task;
         }
 
         // Get info on a user, or the user who invoked the command if one is not specified

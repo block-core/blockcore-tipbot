@@ -12,6 +12,13 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.2" />
+    <PackageReference Include="NLog" Version="4.5.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

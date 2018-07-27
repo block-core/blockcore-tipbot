@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
 using TipBot.Helpers;
 using TipBot.Services;
 
@@ -19,6 +21,8 @@ namespace TipBot
 
     internal class Program
     {
+        private Logger logger = LogManager.GetCurrentClassLogger();
+
         private static void Main(string[] args)
         {
             new Program().MainAsync(args).GetAwaiter().GetResult();
@@ -26,27 +30,36 @@ namespace TipBot
 
         public async Task MainAsync(string[] args)
         {
-            IServiceProvider services = this.ConfigureServices();
+            this.logger.Info("Starting application.");
 
-            var settings = services.GetRequiredService<Settings>();
-            settings.Initialize(new TextFileConfiguration(args));
+            try
+            {
+                IServiceProvider services = this.ConfigureServices();
 
-            var client = services.GetRequiredService<DiscordSocketClient>();
+                var settings = services.GetRequiredService<Settings>();
+                settings.Initialize(new TextFileConfiguration(args));
 
-            client.Log += this.LogAsync;
-            services.GetRequiredService<CommandService>().Log += this.LogAsync;
+                var client = services.GetRequiredService<DiscordSocketClient>();
 
-            await client.LoginAsync(TokenType.Bot, settings.BotToken);
-            await client.StartAsync();
+                client.Log += this.LogAsync;
+                services.GetRequiredService<CommandService>().Log += this.LogAsync;
 
-            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+                await client.LoginAsync(TokenType.Bot, settings.BotToken);
+                await client.StartAsync();
 
-            await Task.Delay(-1);
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
+                await Task.Delay(-1);
+            }
+            catch (Exception exception)
+            {
+                this.logger.Fatal(exception.ToString());
+            }
         }
 
         private Task LogAsync(LogMessage log)
         {
-            Console.WriteLine(log.ToString());
+            this.logger.Info("DiscordLog: " + log.ToString());
 
             return Task.CompletedTask;
         }
