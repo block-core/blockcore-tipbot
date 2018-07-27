@@ -1,27 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Discord;
-using Discord.Commands;
-using Microsoft.EntityFrameworkCore.Internal;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
 
 namespace TipBot.Logic
 {
-    /// <summary>
-    /// TODO
-    /// </summary>
+    /// <summary>Implements logic behind all commands that can be invoked by bot's users.</summary>
     /// <remarks>This class is not thread safe.</remarks>
-    public class UsersManager : IDisposable
+    public class CommandsManager : IDisposable
     {
         private BotDbContext context;
 
         private readonly Logger logger;
 
-        public UsersManager()
+        public CommandsManager()
         {
             this.context = new BotDbContext();
             this.logger = LogManager.GetCurrentClassLogger();
@@ -46,6 +40,8 @@ namespace TipBot.Logic
             discordUserReceiver.Balance += amount;
 
             this.context.SaveChanges();
+
+            this.logger.Trace("(-)");
         }
 
         public double GetBalance(IUser user)
@@ -76,7 +72,6 @@ namespace TipBot.Logic
         private DiscordUser CreateUser(IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
-
             this.logger.Debug("Creating a new user with id {0} and username '{1}'.", user.Id, user.Username);
 
             var discordUser = new DiscordUser()

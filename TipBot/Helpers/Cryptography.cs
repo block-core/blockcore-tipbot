@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,9 +8,7 @@ namespace TipBot.Helpers
     {
         private static readonly SHA256 sha256 = new SHA256CryptoServiceProvider();
 
-        /// <summary>
-        /// Hashes the specified data using SHA256.
-        /// </summary>
+        /// <summary>Hashes the specified data using SHA256.</summary>
         /// <param name="data">HEX encoded hash.</param>
         public static string Hash(string data)
         {
@@ -22,9 +19,7 @@ namespace TipBot.Helpers
             return ByteArrayToHexString(output);
         }
 
-        /// <summary>
-        /// Determines whether <paramref name="data"/>'s hash is equal to <paramref name="hash"/>.
-        /// </summary>
+        /// <summary>Determines whether <paramref name="data"/>'s hash is equal to <paramref name="hash"/>.</summary>
         public static bool IsHashOfData(string data, string hash)
         {
             string actualHash = Hash(data);

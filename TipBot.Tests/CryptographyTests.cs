@@ -1,4 +1,3 @@
-using System;
 using TipBot.Helpers;
 using Xunit;
 

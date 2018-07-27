@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TipBot.Database.Models;
 
 namespace TipBot.Database
@@ -12,7 +9,7 @@ namespace TipBot.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // TODO local DB is for testing only.
+            // Local DB is for testing only. TODO remove when bot is written.
             optionsBuilder.UseSqlite("Data Source=testOnlyDb.db");
 
             /*

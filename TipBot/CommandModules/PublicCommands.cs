@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -14,16 +12,27 @@ namespace TipBot.CommandModules
 {
     public class PublicCommands : ModuleBase<SocketCommandContext>
     {
+        /// <inheritdoc cref="PictureService"/>
         /// <remarks>Set by DI.</remarks>
         public PictureService PictureService { get; set; }
 
-        /// <remarks>Set by DI.</remarks>
-        public UsersManager UsersManager { get; set; }
+        /// <inheritdoc cref="CommandsManager"/>
+        /// <remarks>
+        /// Set by DI.
+        /// <para>
+        /// All access to it should be protected by <see cref="lockObject"/>.
+        /// This basically reduces the amount of simultaneous calls the bot can handle and this is intentional
+        /// because at the same time such approach guarantees that there will be no race conditions which might
+        /// lead to funds being lost.
+        /// </para>
+        /// </remarks>
+        public CommandsManager CommandsManager { get; set; }
 
+        /// <inheritdoc cref="Settings"/>
         /// <remarks>Set by DI.</remarks>
         public Settings Settings { get; set; }
 
-        /// <summary>Protects access to <see cref="UsersManager"/>.</summary>
+        /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private object lockObject = new object();
 
         [Command("tip")]
@@ -37,7 +46,7 @@ namespace TipBot.CommandModules
             {
                 try
                 {
-                    this.UsersManager.TipUser(sender, userBeingTipped, amount);
+                    this.CommandsManager.TipUser(sender, userBeingTipped, amount);
 
                     response = $"{sender.Mention} tipped {userBeingTipped.Mention} {amount} {this.Settings.Ticker}";
 
@@ -78,7 +87,7 @@ namespace TipBot.CommandModules
 
             lock (this.lockObject)
             {
-                double balance = this.UsersManager.GetBalance(sender);
+                double balance = this.CommandsManager.GetBalance(sender);
 
                 response = $"{sender.Mention}, you have {balance} {this.Settings.Ticker}!";
             }
