@@ -17,7 +17,7 @@ namespace TipBot.CommandModules
         /// <remarks>Set by DI.</remarks>
         public PictureService PictureService { get; set; }
 
-        private Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         [Command("ping")]
         [Alias("pong", "hello")]

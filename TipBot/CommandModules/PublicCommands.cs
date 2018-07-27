@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using TipBot.Logic;
 using TipBot.Services;
 
 namespace TipBot.CommandModules
@@ -16,17 +17,25 @@ namespace TipBot.CommandModules
         /// <remarks>Set by DI.</remarks>
         public PictureService PictureService { get; set; }
 
+        /// <remarks>Set by DI.</remarks>
+        public UsersManager UsersManager { get; set; }
+
+        /// <summary>Protects access to <see cref="UsersManager"/>.</summary>
+        private object lockObject = new object();
+
         [Command("tip")]
-        public Task TipAsync(IUser user, double amount, [Remainder]string message = null)
+        public Task TipAsync(IUser userBeingTipped, double amount, [Remainder]string message = null)
         {
-            string answer = $"User: {user.Mention}, Amount: {amount}";
-            if (message != null)
+            TipCommandResponse response;
+
+            IUser sender = this.Context.User;
+
+            lock (this.lockObject)
             {
-                answer += $" Reason: {message}";
+                response = this.UsersManager.TipUser(sender, userBeingTipped, amount, message);
             }
 
-            // TODO
-            return this.ReplyAsync(answer);
+            return this.ReplyAsync(response.ToString());
         }
 
         [Command("deposit")]

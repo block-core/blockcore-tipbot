@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using TipBot.Helpers;
+using TipBot.Logic;
 using TipBot.Services;
 
 namespace TipBot
@@ -16,7 +17,6 @@ namespace TipBot
         TODO:
         1) Connect to DB. SQL + EntityFramework?
         2) Outline all methods we want to implement.
-        3) Add logging
     */
 
     internal class Program
@@ -73,6 +73,7 @@ namespace TipBot
                 .AddSingleton<HttpClient>()
                 .AddSingleton<PictureService>()
                 .AddSingleton<Settings>()
+                .AddSingleton<UsersManager>()
                 .BuildServiceProvider();
         }
     }
