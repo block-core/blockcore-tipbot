@@ -16,16 +16,20 @@ namespace TipBot
 {
     internal class Program
     {
-        private Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        private IServiceProvider services;
 
         private static void Main(string[] args)
         {
             new Program().MainAsync(args).GetAwaiter().GetResult();
         }
 
-        public async Task MainAsync(string[] args)
+        private async Task MainAsync(string[] args)
         {
             this.logger.Info("Starting application.");
+
+            Console.CancelKeyPress += this.ShutdownHandler;
 
             try
             {
@@ -35,20 +39,20 @@ namespace TipBot
                     db.Database.Migrate();
                 }
 
-                IServiceProvider services = this.ConfigureServices();
+                this.services = this.ConfigureServices();
 
-                var settings = services.GetRequiredService<Settings>();
+                var settings = this.services.GetRequiredService<Settings>();
                 settings.Initialize(new TextFileConfiguration(args));
 
-                var client = services.GetRequiredService<DiscordSocketClient>();
+                var client = this.services.GetRequiredService<DiscordSocketClient>();
 
                 client.Log += this.LogAsync;
-                services.GetRequiredService<CommandService>().Log += this.LogAsync;
+                this.services.GetRequiredService<CommandService>().Log += this.LogAsync;
 
                 await client.LoginAsync(TokenType.Bot, settings.BotToken);
                 await client.StartAsync();
 
-                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+                await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
                 await Task.Delay(-1);
             }
@@ -76,6 +80,21 @@ namespace TipBot
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
                 .BuildServiceProvider();
+        }
+
+        /// <summary>Shutdown the handler. Executed when user presses CTRL+C on console.</summary>
+        private void ShutdownHandler(object sender, ConsoleCancelEventArgs args)
+        {
+            this.logger.Info("Application is shutting down...");
+
+            this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
+            this.services.GetRequiredService<HttpClient>()?.Dispose();
+            this.services.GetRequiredService<CommandsManager>()?.Dispose();
+
+            args.Cancel = true;
+            this.logger.Info("Shutdown completed.");
+
+            Environment.Exit(0);
         }
     }
 }

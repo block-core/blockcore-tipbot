@@ -11,7 +11,7 @@ namespace TipBot.Logic
     /// <remarks>This class is not thread safe.</remarks>
     public class CommandsManager : IDisposable
     {
-        private BotDbContext context;
+        private readonly BotDbContext context;
 
         private readonly Logger logger;
 
@@ -44,7 +44,7 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
-        public double GetBalance(IUser user)
+        public double GetUserBalance(IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
 
@@ -137,7 +137,11 @@ namespace TipBot.Logic
 
         public void Dispose()
         {
+            this.logger.Trace("()");
+
             this.context.Dispose();
+
+            this.logger.Trace("(-)");
         }
     }
 

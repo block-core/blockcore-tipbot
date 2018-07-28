@@ -87,7 +87,7 @@ namespace TipBot.CommandModules
 
             lock (this.lockObject)
             {
-                double balance = this.CommandsManager.GetBalance(sender);
+                double balance = this.CommandsManager.GetUserBalance(sender);
 
                 response = $"{sender.Mention}, you have {balance} {this.Settings.Ticker}!";
             }
