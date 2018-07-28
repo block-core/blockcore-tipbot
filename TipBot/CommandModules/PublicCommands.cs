@@ -33,7 +33,7 @@ namespace TipBot.CommandModules
         public Settings Settings { get; set; }
 
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
-        private object lockObject = new object();
+        private readonly object lockObject = new object();
 
         [Command("tip")]
         public Task TipAsync(IUser userBeingTipped, double amount, [Remainder]string message = null)

@@ -17,7 +17,7 @@ namespace TipBot.Logic
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private IServiceProvider services;
+        protected IServiceProvider services;
 
         public async Task StartAsync(string[] args)
         {
@@ -25,7 +25,7 @@ namespace TipBot.Logic
 
             try
             {
-                this.services = this.ConfigureServices();
+                this.services = this.GetServicesCollection().BuildServiceProvider();
 
                 var settings = this.services.GetRequiredService<Settings>();
                 settings.Initialize(new TextFileConfiguration(args));
@@ -59,7 +59,7 @@ namespace TipBot.Logic
             return Task.CompletedTask;
         }
 
-        protected virtual IServiceProvider ConfigureServices()
+        protected virtual IServiceCollection GetServicesCollection()
         {
             return new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
@@ -69,8 +69,7 @@ namespace TipBot.Logic
                 .AddSingleton<PictureService>()
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
-                .AddSingleton<IContextFactory, ContextFactory>()
-                .BuildServiceProvider();
+                .AddSingleton<IContextFactory, ContextFactory>();
         }
 
         public void Dispose()
