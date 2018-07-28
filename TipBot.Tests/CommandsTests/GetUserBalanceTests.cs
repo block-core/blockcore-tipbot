@@ -42,5 +42,27 @@ namespace TipBot.Tests.CommandsTests
                 Assert.Equal(user.Username, discordUser.Username);
             }
         }
+
+        [Fact]
+        public void ReturnsBalance()
+        {
+            using (BotDbContext dbContext = this.testContext.CreateContext())
+            {
+                dbContext.Users.Add(new DiscordUser()
+                {
+                    DiscordUserId = 1,
+                    Username = "user",
+                    Balance = 100
+                });
+
+                dbContext.SaveChanges();
+            }
+
+            IUser user = this.testContext.SetupUser(1, "user");
+
+            double balance = this.testContext.CommandsManager.GetUserBalance(user);
+
+            Assert.Equal(100, balance);
+        }
     }
 }

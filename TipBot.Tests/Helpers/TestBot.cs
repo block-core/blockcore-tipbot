@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ namespace TipBot.Tests.Helpers
             ServiceDescriptor factoryToReplace = servicesCollection.First(x => x.ServiceType == typeof(IContextFactory));
             servicesCollection.Remove(factoryToReplace);
 
-            var descriptor = new ServiceDescriptor(typeof(IContextFactory), typeof(TestContextFactory), ServiceLifetime.Transient);
+            var descriptor = new ServiceDescriptor(typeof(IContextFactory), typeof(TestContextFactory), ServiceLifetime.Singleton);
             servicesCollection.Add(descriptor);
 
             return servicesCollection;
@@ -36,12 +37,29 @@ namespace TipBot.Tests.Helpers
 
     public class TestContextFactory : IContextFactory
     {
+        private readonly string uniqueDbName;
+
+        public TestContextFactory()
+        {
+            // Unique in-memory DB is generated for every instance of TestContextFactory so the tests can ran in parallel.
+            this.uniqueDbName = RandomString(30);
+        }
+
         public BotDbContext CreateContext()
         {
             DbContextOptions<BotDbContext> options = new DbContextOptionsBuilder<BotDbContext>()
-                .UseInMemoryDatabase(databaseName: "testDb").Options;
+                .UseInMemoryDatabase(databaseName: this.uniqueDbName).Options;
 
             return new BotDbContext(options);
+        }
+
+        private static Random random = new Random();
+
+        private static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }
