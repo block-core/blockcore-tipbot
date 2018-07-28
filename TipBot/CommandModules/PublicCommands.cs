@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -35,7 +38,7 @@ namespace TipBot.CommandModules
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private readonly object lockObject = new object();
 
-        [Command("tip")]
+        [CommandWithHelp("tip", "transfers specified amount of money to mentioned user", "tip <user> <amount> <message>*")]
         public Task TipAsync(IUser userBeingTipped, double amount, [Remainder]string message = null)
         {
             IUser sender = this.Context.User;
@@ -62,7 +65,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [Command("deposit")]
+        [CommandWithHelp("deposit", "TODO")]
         public Task DepositAsync()
         {
             SocketUser user = this.Context.User;
@@ -71,14 +74,14 @@ namespace TipBot.CommandModules
             throw new NotImplementedException();
         }
 
-        [Command("withdraw")]
+        [CommandWithHelp("withdraw", "TODO")]
         public Task WithdrawAsync(string address, double amount)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        [Command("balance")]
+        [CommandWithHelp("balance", "displays your current balance")]
         public Task BalanceAsync()
         {
             IUser sender = this.Context.User;
@@ -95,7 +98,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [Command("createQuiz")]
+        [CommandWithHelp("createQuiz", "TODO")]
         public Task CreateQuizAsync(double amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
             // TODO user will be able to start a quiz. First to answer will get a reward.
@@ -105,7 +108,7 @@ namespace TipBot.CommandModules
             throw new NotImplementedException();
         }
 
-        [Command("answerQuiz")]
+        [CommandWithHelp("answerQuiz", "TODO")]
         public Task AnswerQuizAsync([Remainder]string answer)
         {
             // TODO
@@ -115,18 +118,44 @@ namespace TipBot.CommandModules
         [Command("help")]
         public Task HelpAsync()
         {
-            // TODO
-            throw new NotImplementedException();
+            var helpAttributes = new List<CommandWithHelpAttribute>();
+
+            foreach (MemberInfo memberInfo in this.GetType().GetMembers())
+            {
+                foreach (CommandWithHelpAttribute attribute in memberInfo.GetCustomAttributes(typeof(CommandWithHelpAttribute), true).ToList())
+                    helpAttributes.Add(attribute);
+            }
+
+            var builder = new StringBuilder();
+
+            builder.AppendLine("__List of bot commands:__");
+            builder.AppendLine("");
+
+            foreach (CommandWithHelpAttribute helpAttr in helpAttributes)
+            {
+                string helpStr = $"`{helpAttr.Text}`- " + helpAttr.HelpInfo;
+
+                if (helpAttr.UsageExample != null)
+                    helpStr += Environment.NewLine + "      " + helpAttr.UsageExample;
+
+                builder.AppendLine(helpStr);
+            }
+
+            builder.AppendLine("");
+            builder.AppendLine("parameters marked with * are optional");
+
+            return this.ReplyAsync(builder.ToString());
         }
 
-        [Command("about")]
+        [CommandWithHelp("about", "displays information about the bot")]
         public async Task AboutAsync()
         {
             Stream stream = await this.PictureService.GetLogoAsync();
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
-            string text = $"Version: {version}" + Environment.NewLine + "github: https://github.com/noescape00/DiscordTipBot";
+            string text = "`TipBot`" + Environment.NewLine +
+                $"Version: {version}" + Environment.NewLine + "Github: https://github.com/noescape00/DiscordTipBot";
             await this.Context.Channel.SendFileAsync(stream, "logo.png", text);
         }
     }

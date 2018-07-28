@@ -12,6 +12,8 @@
 
         //TODO add history of Tips, Withdrawals, Deposits
 
+        //TODO add nullable uniques deposit address
+
         public override string ToString()
         {
             return $"{nameof(this.Id)}:{this.Id},{nameof(this.Username)}:{this.Username},{nameof(this.DiscordUserId)}:{this.DiscordUserId},{nameof(this.Balance)}:{this.Balance})";
