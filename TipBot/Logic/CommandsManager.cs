@@ -13,11 +13,15 @@ namespace TipBot.Logic
     {
         private readonly BotDbContext context;
 
+        private readonly RPCIntegration rpc;
+
         private readonly Logger logger;
 
-        public CommandsManager(IContextFactory contextFactory)
+        public CommandsManager(IContextFactory contextFactory, RPCIntegration rpc)
         {
             this.context = contextFactory.CreateContext();
+            this.rpc = rpc;
+
             this.logger = LogManager.GetCurrentClassLogger();
         }
 

@@ -69,7 +69,8 @@ namespace TipBot.Logic
                 .AddSingleton<PictureService>()
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
-                .AddSingleton<IContextFactory, ContextFactory>();
+                .AddSingleton<IContextFactory, ContextFactory>()
+                .AddSingleton<RPCIntegration>();
         }
 
         public void Dispose()
