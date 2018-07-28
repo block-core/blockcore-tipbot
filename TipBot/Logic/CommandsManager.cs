@@ -15,9 +15,9 @@ namespace TipBot.Logic
 
         private readonly Logger logger;
 
-        public CommandsManager()
+        public CommandsManager(IContextFactory contextFactory)
         {
-            this.context = new BotDbContext();
+            this.context = contextFactory.CreateContext();
             this.logger = LogManager.GetCurrentClassLogger();
         }
 
