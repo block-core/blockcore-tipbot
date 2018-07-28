@@ -1,12 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TipBot.Database;
 
 namespace TipBot.Tests.Helpers
 {
+    /// <summary>
+    /// Bot for testing that is exactly the same as <see cref="TipBot.Logic.TipBot"/>
+    /// except for it uses temporary in-memory database.
+    /// </summary>
     public class TestBot : Logic.TipBot
     {
         public async Task StartAsync()
@@ -32,34 +34,6 @@ namespace TipBot.Tests.Helpers
         {
             var service = this.services.GetRequiredService<T>();
             return service;
-        }
-    }
-
-    public class TestContextFactory : IContextFactory
-    {
-        private readonly string uniqueDbName;
-
-        public TestContextFactory()
-        {
-            // Unique in-memory DB is generated for every instance of TestContextFactory so the tests can ran in parallel.
-            this.uniqueDbName = RandomString(30);
-        }
-
-        public BotDbContext CreateContext()
-        {
-            DbContextOptions<BotDbContext> options = new DbContextOptionsBuilder<BotDbContext>()
-                .UseInMemoryDatabase(databaseName: this.uniqueDbName).Options;
-
-            return new BotDbContext(options);
-        }
-
-        private static Random random = new Random();
-
-        private static string RandomString(int length)
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

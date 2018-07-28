@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Discord;
-using Moq;
-using TipBot.CommandModules;
 using TipBot.Database;
 using TipBot.Database.Models;
-using TipBot.Logic;
 using TipBot.Tests.Helpers;
 using Xunit;
 

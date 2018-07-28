@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Discord;
+﻿using Discord;
 using Moq;
 using TipBot.Database;
 using TipBot.Logic;
@@ -10,9 +7,9 @@ namespace TipBot.Tests.Helpers
 {
     public class TestContext
     {
-        public TestBot TestBot;
+        public readonly TestBot TestBot;
 
-        public CommandsManager CommandsManager;
+        public readonly CommandsManager CommandsManager;
 
         public TestContext()
         {
