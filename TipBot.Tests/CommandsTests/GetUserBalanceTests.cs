@@ -39,19 +39,9 @@ namespace TipBot.Tests.CommandsTests
         [Fact]
         public void ReturnsBalance()
         {
-            using (BotDbContext dbContext = this.testContext.CreateContext())
-            {
-                dbContext.Users.Add(new DiscordUser()
-                {
-                    DiscordUserId = 1,
-                    Username = "user",
-                    Balance = 100
-                });
-
-                dbContext.SaveChanges();
-            }
-
             IUser user = this.testContext.SetupUser(1, "user");
+
+            this.testContext.CreateDiscordUser(user, 100);
 
             double balance = this.testContext.CommandsManager.GetUserBalance(user);
 

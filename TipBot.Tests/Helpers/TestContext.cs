@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Moq;
 using TipBot.Database;
+using TipBot.Database.Models;
 using TipBot.Logic;
 
 namespace TipBot.Tests.Helpers
@@ -26,6 +27,21 @@ namespace TipBot.Tests.Helpers
             userMock.Setup(x => x.Username).Returns(username);
 
             return userMock.Object;
+        }
+
+        public void CreateDiscordUser(IUser user, double amount)
+        {
+            using (BotDbContext dbContext = this.CreateContext())
+            {
+                dbContext.Users.Add(new DiscordUser()
+                {
+                    DiscordUserId = user.Id,
+                    Username = user.Username,
+                    Balance = amount
+                });
+
+                dbContext.SaveChanges();
+            }
         }
 
         public BotDbContext CreateContext()
