@@ -88,9 +88,14 @@ namespace TipBot.Logic
         }
 
         //TODO monitor if some address received a payment
+        /*
+         * Get list of assigned deposit addresses + total received amount
+         * Check those addresses in the background and notify CommandsManager if new deposit happened
+         * create min confirmations value in settings
+         */
         //private void QWE()
         //{
-        //    this.coinService.GetReceivedByAddress()
+        //    var q = this.coinService.GetReceivedByAddress("", 5);
         //}
 
         public uint GetBlocksCount()
