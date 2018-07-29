@@ -39,7 +39,7 @@ namespace TipBot.CommandModules
         private readonly object lockObject = new object();
 
         [CommandWithHelp("tip", "transfers specified amount of money to mentioned user", "tip <user> <amount> <message>*")]
-        public Task TipAsync(IUser userBeingTipped, double amount, [Remainder]string message = null)
+        public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder]string message = null)
         {
             IUser sender = this.Context.User;
 
@@ -65,6 +65,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
+        //TODO tell how many confirmations required
         [CommandWithHelp("deposit", "displays your unique deposit address or assigns you one if it wasn't assigned before")]
         public Task DepositAsync()
         {
@@ -89,7 +90,7 @@ namespace TipBot.CommandModules
         }
 
         [CommandWithHelp("withdraw", "withdraws given amount to specified address", "withdraw <address> <amount>")]
-        public Task WithdrawAsync(string address, double amount)
+        public Task WithdrawAsync(string address, decimal amount)
         {
             // TODO
             throw new NotImplementedException();
@@ -104,7 +105,7 @@ namespace TipBot.CommandModules
 
             lock (this.lockObject)
             {
-                double balance = this.CommandsManager.GetUserBalance(sender);
+                decimal balance = this.CommandsManager.GetUserBalance(sender);
 
                 response = $"{sender.Mention}, you have {balance} {this.Settings.Ticker}!";
             }
@@ -113,7 +114,7 @@ namespace TipBot.CommandModules
         }
 
         [CommandWithHelp("createQuiz", "TODO")]
-        public Task CreateQuizAsync(double amount, string answerSHA256, int durationMinutes, [Remainder]string question)
+        public Task CreateQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
             // TODO user will be able to start a quiz. First to answer will get a reward.
             // Quiz creator specifies SHA256 of an answer.

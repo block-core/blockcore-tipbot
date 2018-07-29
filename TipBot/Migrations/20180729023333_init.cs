@@ -27,7 +27,8 @@ namespace TipBot.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Username = table.Column<string>(nullable: true),
                     DiscordUserId = table.Column<ulong>(nullable: false),
-                    Balance = table.Column<double>(nullable: false)
+                    Balance = table.Column<decimal>(nullable: false),
+                    DepositAddress = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

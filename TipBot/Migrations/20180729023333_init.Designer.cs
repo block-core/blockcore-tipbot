@@ -8,8 +8,8 @@ using TipBot.Database;
 namespace TipBot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20180729004734_addr")]
-    partial class addr
+    [Migration("20180729023333_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,7 +34,7 @@ namespace TipBot.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double>("Balance");
+                    b.Property<decimal>("Balance");
 
                     b.Property<string>("DepositAddress");
 

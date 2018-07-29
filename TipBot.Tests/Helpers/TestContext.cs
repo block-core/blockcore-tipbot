@@ -29,7 +29,7 @@ namespace TipBot.Tests.Helpers
             return userMock.Object;
         }
 
-        public void CreateDiscordUser(IUser user, double amount)
+        public void CreateDiscordUser(IUser user, decimal amount)
         {
             using (BotDbContext dbContext = this.CreateContext())
             {

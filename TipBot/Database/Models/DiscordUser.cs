@@ -8,7 +8,7 @@
 
         public ulong DiscordUserId { get; set; }
 
-        public double Balance { get; set; }
+        public decimal Balance { get; set; }
 
         public string DepositAddress { get; set; }
 

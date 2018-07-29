@@ -21,7 +21,7 @@ namespace TipBot.Tests.CommandsTests
         {
             IUser user = this.testContext.SetupUser(1, "user");
 
-            double balance = this.testContext.CommandsManager.GetUserBalance(user);
+            decimal balance = this.testContext.CommandsManager.GetUserBalance(user);
             Assert.Equal(0, balance);
 
             // Make sure new user was created.
@@ -43,7 +43,7 @@ namespace TipBot.Tests.CommandsTests
 
             this.testContext.CreateDiscordUser(user, 100);
 
-            double balance = this.testContext.CommandsManager.GetUserBalance(user);
+            decimal balance = this.testContext.CommandsManager.GetUserBalance(user);
 
             Assert.Equal(100, balance);
         }
