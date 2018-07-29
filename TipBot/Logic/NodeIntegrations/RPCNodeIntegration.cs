@@ -80,10 +80,21 @@ namespace TipBot.Logic.NodeIntegrations
                 throw new InvalidAddressException();
             }
 
-            // TODO this returns an error: (500). Investigate why. //RpcInternalServerErrorException
-            this.coinService.SendToAddress(address, amount, null, null, true);
+            try
+            {
+                this.coinService.SendFrom(AccountName, address, amount);
+            }
+            catch (RpcInternalServerErrorException e)
+            {
+                if (e.Message == "Insufficient funds")
+                {
+                    // This should never happen.
+                    this.logger.Fatal("Insufficient funds!");
+                }
 
-            // TODO what exception is thrown when bot doesn't have money?
+                this.logger.Error(e.ToString);
+                throw;
+            }
 
             this.logger.Trace("(-)");
         }
