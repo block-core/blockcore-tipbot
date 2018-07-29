@@ -26,7 +26,7 @@ namespace TipBot.Logic
 
         private Task depositsCheckingTask;
 
-        private CancellationTokenSource cancellation;
+        private readonly CancellationTokenSource cancellation;
 
         public RPCIntegration(Settings settings, IContextFactory contextFactory)
         {
@@ -125,7 +125,7 @@ namespace TipBot.Logic
                             }
                         }
 
-                        await Task.Delay(60 * 1000, this.cancellation.Token);
+                        await Task.Delay(30 * 1000, this.cancellation.Token);
                     }
                 }
                 catch (OperationCanceledException)
@@ -141,7 +141,10 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
-        // TODO add comment and test this properly
+        /// <summary>
+        /// Checks if money were deposited to an address associated with any user who has a deposit address.
+        /// When money are deposited user's balance is updated.
+        /// </summary>
         private void CheckDeposits(BotDbContext context)
         {
             this.logger.Trace("()");
@@ -155,7 +158,7 @@ namespace TipBot.Logic
 
                 if (receivedByAddress > user.LastCheckedReceivedAmountByAddress)
                 {
-                    this.logger.Trace("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
+                    this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
 
                     decimal recentlyReceived = receivedByAddress - user.LastCheckedReceivedAmountByAddress;
                     user.LastCheckedReceivedAmountByAddress = receivedByAddress;
