@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using TipBot.Database;
 using TipBot.Helpers;
+using TipBot.Logic.NodeIntegrations;
 using TipBot.Services;
 
 namespace TipBot.Logic
@@ -36,7 +37,7 @@ namespace TipBot.Logic
                     db.Database.Migrate();
                 }
 
-                this.services.GetRequiredService<RPCIntegration>().Initialize();
+                this.services.GetRequiredService<INodeIntegration>().Initialize();
 
                 var client = this.services.GetRequiredService<DiscordSocketClient>();
 
@@ -72,7 +73,8 @@ namespace TipBot.Logic
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
                 .AddSingleton<IContextFactory, ContextFactory>()
-                .AddSingleton<RPCIntegration>();
+                // Replace implementation to use API instead of RPC.
+                .AddSingleton<INodeIntegration, RPCNodeIntegration>();
         }
 
         public void Dispose()
@@ -81,7 +83,7 @@ namespace TipBot.Logic
 
             this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
             this.services.GetRequiredService<HttpClient>()?.Dispose();
-            this.services.GetRequiredService<RPCIntegration>()?.Dispose();
+            this.services.GetRequiredService<INodeIntegration>()?.Dispose();
 
             this.logger.Info("Shutdown completed.");
         }

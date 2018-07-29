@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using TipBot.CommandModules;
 
 namespace TipBot.Services
 {

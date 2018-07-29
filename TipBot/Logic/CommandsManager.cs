@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Discord;
-using Discord.Commands;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
+using TipBot.Logic.NodeIntegrations;
 
 namespace TipBot.Logic
 {
@@ -14,16 +14,16 @@ namespace TipBot.Logic
     {
         private readonly IContextFactory contextFactory;
 
-        private readonly RPCIntegration rpc;
+        private readonly INodeIntegration nodeIntegration;
 
         private readonly Settings settings;
 
         private readonly Logger logger;
 
-        public CommandsManager(IContextFactory contextFactory, RPCIntegration rpc, Settings settings)
+        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings)
         {
             this.contextFactory = contextFactory;
-            this.rpc = rpc;
+            this.nodeIntegration = nodeIntegration;
             this.settings = settings;
 
             this.logger = LogManager.GetCurrentClassLogger();
@@ -117,7 +117,7 @@ namespace TipBot.Logic
 
                 try
                 {
-                    this.rpc.Withdraw(amount, address);
+                    this.nodeIntegration.Withdraw(amount, address);
                 }
                 catch (InvalidAddressException)
                 {

@@ -11,9 +11,9 @@ using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
 
-namespace TipBot.Logic
+namespace TipBot.Logic.NodeIntegrations
 {
-    public class RPCIntegration : IDisposable
+    public class RPCNodeIntegration : INodeIntegration
     {
         private readonly ICoinService coinService;
 
@@ -29,7 +29,7 @@ namespace TipBot.Logic
 
         private readonly CancellationTokenSource cancellation;
 
-        public RPCIntegration(Settings settings, IContextFactory contextFactory)
+        public RPCNodeIntegration(Settings settings, IContextFactory contextFactory)
         {
             this.coinService = new BitcoinService(settings.DaemonUrl, settings.RpcUsername, settings.RpcPassword, settings.WalletPassword, settings.RpcRequestTimeoutInSeconds);
             this.contextFactory = contextFactory;
@@ -38,6 +38,7 @@ namespace TipBot.Logic
             this.logger = LogManager.GetCurrentClassLogger();
         }
 
+        /// <inheritdoc />
         public void Initialize()
         {
             this.logger.Trace("()");
@@ -59,8 +60,7 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
-        /// <summary>Withdraws specified amount or money to specified address.</summary>
-        /// <remarks>Address will be validated prior to withdrawal.</remarks>
+        /// <inheritdoc />
         /// <exception cref="InvalidAddressException">Thrown if <paramref name="address"/> is invalid.</exception>
         public void Withdraw(decimal amount, string address)
         {
@@ -209,10 +209,5 @@ namespace TipBot.Logic
 
             this.logger.Trace("(-)");
         }
-    }
-
-    public class InvalidAddressException : Exception
-    {
-        public InvalidAddressException() : base("Address specified is invalid.") { }
     }
 }
