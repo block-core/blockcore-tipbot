@@ -15,23 +15,28 @@ namespace TipBot.Logic.NodeIntegrations
 {
     public class RPCNodeIntegration : INodeIntegration
     {
-        private readonly ICoinService coinService;
-
-        private readonly IContextFactory contextFactory;
-
-        private readonly Settings settings;
-
         private const string AccountName = "account 0";
 
+        private readonly ICoinService coinService;
+        private readonly IContextFactory contextFactory;
+        private readonly Settings settings;
         private readonly Logger logger;
 
         private Task depositsCheckingTask;
-
         private readonly CancellationTokenSource cancellation;
+
+        private readonly string walletPassword;
 
         public RPCNodeIntegration(Settings settings, IContextFactory contextFactory)
         {
-            this.coinService = new BitcoinService(settings.DaemonUrl, settings.RpcUsername, settings.RpcPassword, settings.WalletPassword, settings.RpcRequestTimeoutInSeconds);
+            // To run stratis daemon that supports RPC use "dotnet exec ...\netcoreapp2.1\Stratis.StratisD.dll -rpcuser=user -rpcpassword=4815162342 -rpcport=23521 -server=1"
+            var daemonUrl = settings.ConfigReader.GetOrDefault<string>("daemonUrl", "http://127.0.0.1:23521/");
+            var rpcUsername = settings.ConfigReader.GetOrDefault<string>("rpcUsername", "user");
+            var rpcPassword = settings.ConfigReader.GetOrDefault<string>("rpcPassword", "4815162342");
+            var rpcRequestTimeoutInSeconds = settings.ConfigReader.GetOrDefault<short>("rpcTimeout", 20);
+            this.walletPassword = settings.ConfigReader.GetOrDefault<string>("walletPassword", "4815162342");
+
+            this.coinService = new BitcoinService(daemonUrl, rpcUsername, rpcPassword, this.walletPassword, rpcRequestTimeoutInSeconds);
             this.contextFactory = contextFactory;
             this.settings = settings;
             this.cancellation = new CancellationTokenSource();
@@ -44,7 +49,7 @@ namespace TipBot.Logic.NodeIntegrations
             this.logger.Trace("()");
 
             // Unlock wallet.
-            this.coinService.WalletPassphrase(this.settings.WalletPassword, int.MaxValue);
+            this.coinService.WalletPassphrase(this.walletPassword, int.MaxValue);
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
