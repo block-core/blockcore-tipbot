@@ -36,6 +36,8 @@ namespace TipBot.Logic
                     db.Database.Migrate();
                 }
 
+                this.services.GetRequiredService<RPCIntegration>().Initialize();
+
                 var client = this.services.GetRequiredService<DiscordSocketClient>();
 
                 client.Log += this.LogAsync;
