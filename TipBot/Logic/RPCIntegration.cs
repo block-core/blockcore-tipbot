@@ -39,7 +39,7 @@ namespace TipBot.Logic
             {
                 int addressesCount = context.UnusedAddresses.Count();
 
-                // Generate addresses.
+                // Generate addresses when running for the first time.
                 if (addressesCount == 0)
                 {
                     this.logger.Info("Database was not prefilled with addresses. Starting.");
@@ -62,9 +62,13 @@ namespace TipBot.Logic
                         }
                         catch (RpcException e)
                         {
-                            this.logger.Info("Too many attempts. Waiting 1 sec.", toGenerateCount);
-                            Thread.Sleep(1000);
+                            this.logger.Info("Too many attempts. Waiting 10 sec.", toGenerateCount);
+                            Thread.Sleep(10000);
+                            i--;
                         }
+
+                        if (i % 1000 == 0)
+                            this.logger.Info("Generated {0} addresses.", i);
                     }
 
                     List<string> allAddresses = this.coinService.GetAddressesByAccount(AccountName);

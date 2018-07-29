@@ -8,14 +8,26 @@ using TipBot.Database;
 namespace TipBot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20180727214740_Init")]
-    partial class Init
+    [Migration("20180729003728_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.1.1-rtm-30846");
+
+            modelBuilder.Entity("TipBot.Database.Models.AddressModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Address");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UnusedAddresses");
+                });
 
             modelBuilder.Entity("TipBot.Database.Models.DiscordUser", b =>
                 {
