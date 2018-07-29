@@ -51,11 +51,11 @@ namespace TipBot.Services
             {
                 if (result.Error.Value == CommandError.UnknownCommand)
                 {
-                    await context.Channel.SendMessageAsync("Unknown command. Use `help` command to display all supported commands.");
+                    await context.Channel.SendMessageAsync(":no_entry: Unknown command. Use `help` command to display all supported commands.");
                 }
                 else
                 {
-                    await context.Channel.SendMessageAsync($"Error: {result.Error}. {result.ErrorReason}");
+                    await context.Channel.SendMessageAsync($":no_entry: Error: {result.Error}. {result.ErrorReason}");
                 }
             }
         }
