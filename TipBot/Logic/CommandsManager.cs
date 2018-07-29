@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Discord;
+using Discord.Commands;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
@@ -15,12 +16,15 @@ namespace TipBot.Logic
 
         private readonly RPCIntegration rpc;
 
+        private readonly Settings settings;
+
         private readonly Logger logger;
 
-        public CommandsManager(IContextFactory contextFactory, RPCIntegration rpc)
+        public CommandsManager(IContextFactory contextFactory, RPCIntegration rpc, Settings settings)
         {
             this.contextFactory = contextFactory;
             this.rpc = rpc;
+            this.settings = settings;
 
             this.logger = LogManager.GetCurrentClassLogger();
         }
@@ -29,7 +33,7 @@ namespace TipBot.Logic
         /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
         public void TipUser(IUser sender, IUser userBeingTipped, decimal amount)
         {
-            this.logger.Trace("({0}:'{1}',{2}:'{3}',{4}:{5})", nameof(sender), sender.Id, nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount);
+            this.logger.Trace("({0}:{1},{2}:'{3}',{4}:{5})", nameof(sender), sender.Id, nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount);
 
             this.AssertAmountPositive(amount);
             this.AssertUsersNotEqual(sender, userBeingTipped);
@@ -53,10 +57,10 @@ namespace TipBot.Logic
         }
 
         /// <summary>Gets deposit address for a user.</summary>
-        /// <exception cref="OutOfDepositAddresses">Thrown when bot ran out of unused deposit addresses.</exception>
+        /// <exception cref="OutOfDepositAddressesException">Thrown when bot ran out of unused deposit addresses.</exception>
         public string GetDepositAddress(IUser user)
         {
-            this.logger.Trace("({0}:'{1}')", nameof(user), user.Id);
+            this.logger.Trace("({0}:{1})", nameof(user), user.Id);
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
@@ -75,7 +79,7 @@ namespace TipBot.Logic
                     {
                         this.logger.Fatal("Bot ran out of deposit addresses!");
                         this.logger.Trace("(-)[NO_ADDRESSES]");
-                        throw new OutOfDepositAddresses();
+                        throw new OutOfDepositAddressesException();
                     }
 
                     context.UnusedAddresses.Remove(unusedAddress);
@@ -89,6 +93,45 @@ namespace TipBot.Logic
                 this.logger.Trace("(-):'{0}'", depositAddress);
                 return depositAddress;
             }
+        }
+
+        /// <summary>Withdraws given amount of money to specified address.</summary>
+        /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
+        public void Withdraw(IUser user, decimal amount, string address)
+        {
+            this.logger.Trace("({0}:{1},{2}:{3},{4}:'{5}')", nameof(user), user.Id, nameof(amount), amount, nameof(address), address);
+
+            this.AssertAmountPositive(amount);
+
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                DiscordUser discordUser = this.GetOrCreateUser(context, user);
+
+                this.AssertBalanceIsSufficient(discordUser, amount);
+
+                if (amount < this.settings.MinWithdrawAmount)
+                {
+                    this.logger.Trace("(-)[MIN_WITHDRAW_AMOUNT]");
+                    throw new CommandExecutionException($"Minimal withdraw amount is {this.settings.MinWithdrawAmount}.");
+                }
+
+                try
+                {
+                    this.rpc.Withdraw(amount, address);
+                }
+                catch (InvalidAddressException)
+                {
+                    this.logger.Trace("(-)[INVALID_ADDRESS]");
+                    throw new CommandExecutionException("Address specified is invalid.");
+                }
+
+                discordUser.Balance -= amount;
+
+                context.Update(discordUser);
+                context.SaveChanges();
+            }
+
+            this.logger.Trace("(-)");
         }
 
         public decimal GetUserBalance(IUser user)
@@ -157,6 +200,8 @@ namespace TipBot.Logic
                 this.logger.Trace("(-)[INVALID_AMOUNT_VALUE]");
                 throw new CommandExecutionException("Insufficient funds.");
             }
+
+            this.logger.Trace("(-)");
         }
 
         private void AssertUsersNotEqual(IUser user1, IUser user2)
@@ -191,8 +236,8 @@ namespace TipBot.Logic
         public CommandExecutionException(string message) : base(message) { }
     }
 
-    public class OutOfDepositAddresses : Exception
+    public class OutOfDepositAddressesException : Exception
     {
-        public OutOfDepositAddresses() : base("Bot ran out of deposit addresses.") { }
+        public OutOfDepositAddressesException() : base("Bot ran out of deposit addresses.") { }
     }
 }

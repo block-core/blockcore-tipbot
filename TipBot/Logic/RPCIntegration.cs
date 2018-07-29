@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BitcoinLib.ExceptionHandling.Rpc;
+using BitcoinLib.Responses;
 using BitcoinLib.Services.Coins.Base;
 using BitcoinLib.Services.Coins.Bitcoin;
 using NLog;
@@ -41,6 +42,9 @@ namespace TipBot.Logic
         {
             this.logger.Trace("()");
 
+            // Unlock wallet.
+            this.coinService.WalletPassphrase(this.settings.WalletPassword, int.MaxValue);
+
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
                 int addressesCount = context.UnusedAddresses.Count();
@@ -55,13 +59,34 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
+        /// <summary>Withdraws specified amount or money to specified address.</summary>
+        /// <remarks>Address will be validated prior to withdrawal.</remarks>
+        /// <exception cref="InvalidAddressException">Thrown if <paramref name="address"/> is invalid.</exception>
+        public void Withdraw(decimal amount, string address)
+        {
+            this.logger.Trace("({0}:{1},{2}:'{3}')", nameof(amount), amount, nameof(address), address);
+
+            ValidateAddressResponse validationResult = this.coinService.ValidateAddress(address);
+
+            if (!validationResult.IsValid)
+            {
+                this.logger.Trace("(-)[INVALID_ADDRESS]");
+                throw new InvalidAddressException();
+            }
+
+            // TODO this returns an error: (500). Investigate why.
+            this.coinService.SendToAddress(address, amount, null, null, true);
+
+            // TODO what exception is thrown when bot doesn't have money?
+
+            this.logger.Trace("(-)");
+        }
+
         /// <summary>Populates database with unused addresses.</summary>
         private void PregenerateAddresses(BotDbContext context)
         {
             this.logger.Trace("()");
             this.logger.Info("Database was not prefilled with addresses. Starting.");
-
-            this.coinService.WalletPassphrase(this.settings.WalletPassword, int.MaxValue);
 
             int alreadyGenerated = this.coinService.GetAddressesByAccount(AccountName).Count;
 
@@ -184,5 +209,10 @@ namespace TipBot.Logic
 
             this.logger.Trace("(-)");
         }
+    }
+
+    public class InvalidAddressException : Exception
+    {
+        public InvalidAddressException() : base("Address specified is invalid.") { }
     }
 }

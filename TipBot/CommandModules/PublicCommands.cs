@@ -78,7 +78,7 @@ namespace TipBot.CommandModules
                 {
                     depositAddress = this.CommandsManager.GetDepositAddress(user);
                 }
-                catch (OutOfDepositAddresses)
+                catch (OutOfDepositAddressesException)
                 {
                     return this.ReplyAsync("Bot ran out of deposit addresses. Tell bot admin about it.");
                 }
@@ -90,11 +90,28 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("withdraw", "Withdraws given amount to specified address.", "withdraw <address> <amount>")]
-        public Task WithdrawAsync(string address, decimal amount)
+        [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount.", "withdraw <address> <amount>")]
+        public Task WithdrawAsync(decimal amount, string address)
         {
-            // TODO
-            throw new NotImplementedException();
+            IUser sender = this.Context.User;
+
+            string response;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    this.CommandsManager.Withdraw(sender, amount, address);
+
+                    response = $"{sender.Mention}, withdrawal of {amount} {this.Settings.Ticker} completed.";
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            return this.ReplyAsync(response);
         }
 
         [CommandWithHelp("balance", "Displays your current balance.")]
