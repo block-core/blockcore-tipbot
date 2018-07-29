@@ -49,7 +49,8 @@ namespace TipBot.Logic.NodeIntegrations
             this.logger.Trace("()");
 
             // Unlock wallet.
-            this.coinService.WalletPassphrase(this.walletPassword, int.MaxValue);
+            if (this.coinService.IsWalletEncrypted())
+                this.coinService.WalletPassphrase(this.walletPassword, int.MaxValue);
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
@@ -79,7 +80,7 @@ namespace TipBot.Logic.NodeIntegrations
                 throw new InvalidAddressException();
             }
 
-            // TODO this returns an error: (500). Investigate why.
+            // TODO this returns an error: (500). Investigate why. //RpcInternalServerErrorException
             this.coinService.SendToAddress(address, amount, null, null, true);
 
             // TODO what exception is thrown when bot doesn't have money?

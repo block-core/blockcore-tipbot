@@ -19,7 +19,7 @@ namespace TipBot
 
         public string Ticker { get; } = "STRAT";
 
-        public uint PregeneratedAddressesCount { get; } = 10000;
+        public uint PregeneratedAddressesCount { get; } = 5000;
 
         public int MinConfirmationsForDeposit { get; } = 5; //TODO set to 16. 5 is for testing
 
