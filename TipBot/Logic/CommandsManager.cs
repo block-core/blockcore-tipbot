@@ -20,11 +20,14 @@ namespace TipBot.Logic
 
         private readonly Logger logger;
 
-        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings)
+        private readonly QuizManager quizManager;
+
+        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings, QuizManager quizManager)
         {
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;
             this.settings = settings;
+            this.quizManager = quizManager;
 
             this.logger = LogManager.GetCurrentClassLogger();
         }

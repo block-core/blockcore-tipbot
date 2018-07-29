@@ -20,6 +20,8 @@ namespace TipBot.Database
 
         public DbSet<DiscordUser> Users { get; set; }
 
+        public DbSet<QuizModel> ActiveQuizes { get; set; }
+
         /// <summary>Pregenerated receiving addresses that will be assigned to users who wish to deposit.</summary>
         public DbSet<AddressModel> UnusedAddresses { get; set; }
     }

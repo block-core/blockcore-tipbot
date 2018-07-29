@@ -136,6 +136,7 @@ namespace TipBot.CommandModules
         {
             // TODO user will be able to start a quiz. First to answer will get a reward.
             // Quiz creator specifies SHA256 of an answer.
+            // after expiration the owner is refunded
 
             // TODO
             throw new NotImplementedException();
