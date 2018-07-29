@@ -56,3 +56,9 @@ through the OAuth2 flow.
 	>[!NOTE]
 	Only servers where you have the `MANAGE_SERVER` permission will be
 	present in this list.
+
+## Testing the bot is responsive
+
+When you see the bot in the online status on your discord server, you are ready to test it. if the bots name is "BOT", then you would enter:
+
+`@bot about`
