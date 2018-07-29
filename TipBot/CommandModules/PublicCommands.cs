@@ -88,7 +88,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("withdraw", "withdraws given amount to specified address")]
+        [CommandWithHelp("withdraw", "withdraws given amount to specified address", "withdraw <address> <amount>")]
         public Task WithdrawAsync(string address, double amount)
         {
             // TODO
