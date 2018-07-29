@@ -4,7 +4,7 @@ A Stratis node with RPC turned on also needs to be running.
 
 See http://stratisdevelopmentfoundation.com/install_qt/ for more information about setting this up.
 
-Sample stratis.conf, to be placed in qt note roaming folder:
+Sample stratis.conf, to be placed in qt node roaming folder:
 
 ```
 # RPC Settings
