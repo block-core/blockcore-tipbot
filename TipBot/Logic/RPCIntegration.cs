@@ -107,29 +107,34 @@ namespace TipBot.Logic
 
             this.depositsCheckingTask = Task.Run(async () =>
             {
-                while (!this.cancellation.IsCancellationRequested)
+                try
                 {
-                    uint currentBlock = this.coinService.GetBlockCount();
-
-                    this.logger.Trace("Current block is {0}, last checked block is {1}", currentBlock, lastCheckedBlock);
-
-                    if (currentBlock > lastCheckedBlock)
+                    while (!this.cancellation.IsCancellationRequested)
                     {
-                        lastCheckedBlock = currentBlock;
+                        uint currentBlock = this.coinService.GetBlockCount();
 
-                        using (BotDbContext context = this.contextFactory.CreateContext())
+                        this.logger.Trace("Current block is {0}, last checked block is {1}", currentBlock, lastCheckedBlock);
+
+                        if (currentBlock > lastCheckedBlock)
                         {
-                            this.CheckDeposits(context);
-                        }
-                    }
+                            lastCheckedBlock = currentBlock;
 
-                    try
-                    {
+                            using (BotDbContext context = this.contextFactory.CreateContext())
+                            {
+                                this.CheckDeposits(context);
+                            }
+                        }
+
                         await Task.Delay(60 * 1000, this.cancellation.Token);
                     }
-                    catch (OperationCanceledException)
-                    {
-                    }
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception exception)
+                {
+                    this.logger.Fatal(exception.ToString);
+                    throw;
                 }
             });
 
