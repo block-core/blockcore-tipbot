@@ -24,6 +24,8 @@ namespace TipBot
 
         public uint PregeneratedAddressesCount { get; } = 10000;
 
+        public int MinConfirmationsForDeposit { get; } = 16;
+
         // RPC
         public string DaemonUrl { get; private set; }
         public string RpcUsername { get; private set; }

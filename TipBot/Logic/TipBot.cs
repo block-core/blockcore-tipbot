@@ -82,6 +82,7 @@ namespace TipBot.Logic
             this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
             this.services.GetRequiredService<HttpClient>()?.Dispose();
             this.services.GetRequiredService<CommandsManager>()?.Dispose();
+            this.services.GetRequiredService<RPCIntegration>()?.Dispose();
 
             this.logger.Info("Shutdown completed.");
         }

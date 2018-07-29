@@ -10,7 +10,10 @@
 
         public decimal Balance { get; set; }
 
-        public string DepositAddress { get; set; }
+        public string DepositAddress { get; set; } = null;
+
+        /// <summary>How much money was received in total by <see cref="DepositAddress"/> by the time last check happened.</summary>
+        public decimal LastCheckedReceivedAmountByAddress { get; set; } = 0;
 
         //TODO add history of Tips, Withdrawals, Deposits
 

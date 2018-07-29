@@ -38,7 +38,7 @@ namespace TipBot.CommandModules
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private readonly object lockObject = new object();
 
-        [CommandWithHelp("tip", "transfers specified amount of money to mentioned user", "tip <user> <amount> <message>*")]
+        [CommandWithHelp("tip", "Transfers specified amount of money to mentioned user.", "tip <user> <amount> <message>*")]
         public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder]string message = null)
         {
             IUser sender = this.Context.User;
@@ -65,8 +65,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        //TODO tell how many confirmations required
-        [CommandWithHelp("deposit", "displays your unique deposit address or assigns you one if it wasn't assigned before")]
+        [CommandWithHelp("deposit", "Displays your unique deposit address or assigns you one if it wasn't assigned before.")]
         public Task DepositAsync()
         {
             SocketUser user = this.Context.User;
@@ -86,17 +85,19 @@ namespace TipBot.CommandModules
             }
 
             string response = $"Your unique deposit address is `{depositAddress}`";
+            response += Environment.NewLine + $"Money are deposited after {this.Settings.MinConfirmationsForDeposit} confirmations.";
+
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("withdraw", "withdraws given amount to specified address", "withdraw <address> <amount>")]
+        [CommandWithHelp("withdraw", "Withdraws given amount to specified address.", "withdraw <address> <amount>")]
         public Task WithdrawAsync(string address, decimal amount)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        [CommandWithHelp("balance", "displays your current balance")]
+        [CommandWithHelp("balance", "Displays your current balance.")]
         public Task BalanceAsync()
         {
             IUser sender = this.Context.User;
@@ -162,7 +163,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(builder.ToString());
         }
 
-        [CommandWithHelp("about", "displays information about the bot")]
+        [CommandWithHelp("about", "Displays information about the bot.")]
         public async Task AboutAsync()
         {
             Stream stream = await this.PictureService.GetLogoAsync();
