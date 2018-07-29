@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using TipBot.CommandModules;
 
 namespace TipBot.Services
 {
@@ -50,10 +51,12 @@ namespace TipBot.Services
             {
                 if (result.Error.Value == CommandError.UnknownCommand)
                 {
-                    // TODO send 'unknown command' error and display help
+                    await context.Channel.SendMessageAsync("Unknown command. Use `help` command to display all supported commands.");
                 }
                 else
-                    await context.Channel.SendMessageAsync(result.ToString());
+                {
+                    await context.Channel.SendMessageAsync($"Error: {result.Error}. {result.ErrorReason}");
+                }
             }
         }
     }

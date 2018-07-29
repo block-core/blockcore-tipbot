@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using BitcoinLib.ExceptionHandling.Rpc;
@@ -87,13 +86,6 @@ namespace TipBot.Logic
         public uint GetBlocksCount()
         {
             return this.coinService.GetBlockCount();
-        }
-
-        public string GenerateNewAddress()
-        {
-            string address = this.coinService.GetAccountAddress("account 0");
-
-            return address;
         }
     }
 }
