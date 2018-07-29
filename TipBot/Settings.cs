@@ -24,7 +24,7 @@ namespace TipBot
 
         public uint PregeneratedAddressesCount { get; } = 10000;
 
-        public int MinConfirmationsForDeposit { get; } = 16;
+        public int MinConfirmationsForDeposit { get; } = 5; //TODO set to 16. 5 is for testing
 
         // RPC
         public string DaemonUrl { get; private set; }
