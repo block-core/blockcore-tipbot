@@ -22,6 +22,7 @@ namespace TipBot.Logic
 
         public async Task StartAsync(string[] args)
         {
+            this.logger.Trace("({0}.{1}:{2})", nameof(args), nameof(args.Length), args.Length);
             this.logger.Info("Starting the bot.");
 
             try
@@ -40,6 +41,7 @@ namespace TipBot.Logic
                 this.services.GetRequiredService<INodeIntegration>().Initialize();
                 this.services.GetRequiredService<QuizManager>().Initialize();
 
+                // Initialize discord API wrapper.
                 var client = this.services.GetRequiredService<DiscordSocketClient>();
 
                 client.Log += this.LogAsync;
@@ -54,6 +56,8 @@ namespace TipBot.Logic
             {
                 this.logger.Fatal(exception.ToString());
             }
+
+            this.logger.Trace("(-)");
         }
 
         private Task LogAsync(LogMessage log)
@@ -65,7 +69,9 @@ namespace TipBot.Logic
 
         protected virtual IServiceCollection GetServicesCollection()
         {
-            return new ServiceCollection()
+            this.logger.Trace("()");
+
+            IServiceCollection collection = new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
@@ -77,10 +83,14 @@ namespace TipBot.Logic
                 .AddSingleton<IContextFactory, ContextFactory>()
                 // Replace implementation to use API instead of RPC.
                 .AddSingleton<INodeIntegration, RPCNodeIntegration>();
+
+            this.logger.Trace("(-)");
+            return collection;
         }
 
         public void Dispose()
         {
+            this.logger.Trace("()");
             this.logger.Info("Application is shutting down...");
 
             this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
@@ -89,6 +99,7 @@ namespace TipBot.Logic
             this.services.GetRequiredService<QuizManager>()?.Dispose();
 
             this.logger.Info("Shutdown completed.");
+            this.logger.Trace("(-)");
         }
     }
 }
