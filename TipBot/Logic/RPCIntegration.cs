@@ -16,7 +16,7 @@ namespace TipBot.Logic
     {
         private readonly ICoinService coinService;
 
-        private readonly BotDbContext context;
+        private readonly IContextFactory contextFactory;
 
         private readonly Settings settings;
 
@@ -31,7 +31,7 @@ namespace TipBot.Logic
         public RPCIntegration(Settings settings, IContextFactory contextFactory)
         {
             this.coinService = new BitcoinService(settings.DaemonUrl, settings.RpcUsername, settings.RpcPassword, settings.WalletPassword, settings.RpcRequestTimeoutInSeconds);
-            this.context = contextFactory.CreateContext();
+            this.contextFactory = contextFactory;
             this.settings = settings;
             this.cancellation = new CancellationTokenSource();
             this.logger = LogManager.GetCurrentClassLogger();
@@ -41,11 +41,14 @@ namespace TipBot.Logic
         {
             this.logger.Trace("()");
 
-            int addressesCount = this.context.UnusedAddresses.Count();
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                int addressesCount = context.UnusedAddresses.Count();
 
-            // Generate addresses when running for the first time.
-            if (addressesCount == 0)
-                this.PregenerateAddresses();
+                // Generate addresses when running for the first time.
+                if (addressesCount == 0)
+                    this.PregenerateAddresses(context);
+            }
 
             this.StartCheckingDepositsContinously();
 
@@ -53,7 +56,7 @@ namespace TipBot.Logic
         }
 
         /// <summary>Populates database with unused addresses.</summary>
-        private void PregenerateAddresses()
+        private void PregenerateAddresses(BotDbContext context)
         {
             this.logger.Trace("()");
             this.logger.Info("Database was not prefilled with addresses. Starting.");
@@ -88,9 +91,9 @@ namespace TipBot.Logic
             List<string> allAddresses = this.coinService.GetAddressesByAccount(AccountName);
 
             foreach (string address in allAddresses)
-                this.context.UnusedAddresses.Add(new AddressModel() { Address = address });
+                context.UnusedAddresses.Add(new AddressModel() { Address = address });
 
-            this.context.SaveChanges();
+            context.SaveChanges();
             this.logger.Info("Addresses generated.");
             this.logger.Trace("(-)");
         }
@@ -114,7 +117,10 @@ namespace TipBot.Logic
                     {
                         lastCheckedBlock = currentBlock;
 
-                        this.CheckDeposits();
+                        using (BotDbContext context = this.contextFactory.CreateContext())
+                        {
+                            this.CheckDeposits(context);
+                        }
                     }
 
                     try
@@ -131,11 +137,11 @@ namespace TipBot.Logic
         }
 
         // TODO add comment and test this properly
-        private void CheckDeposits()
+        private void CheckDeposits(BotDbContext context)
         {
             this.logger.Trace("()");
 
-            List<DiscordUser> usersToTrack = this.context.Users.Where(x => x.DepositAddress != null).ToList();
+            List<DiscordUser> usersToTrack = context.Users.Where(x => x.DepositAddress != null).ToList();
             this.logger.Trace("Tracking {0} users.", usersToTrack.Count);
 
             foreach (DiscordUser user in usersToTrack)
@@ -153,7 +159,8 @@ namespace TipBot.Logic
 
                     this.logger.Info("User '{0}' deposited {1}!", user, recentlyReceived);
 
-                    this.context.SaveChanges();
+                    context.Update(user);
+                    context.SaveChanges();
                 }
             }
 
@@ -166,8 +173,6 @@ namespace TipBot.Logic
 
             this.cancellation.Cancel();
             this.depositsCheckingTask?.GetAwaiter().GetResult();
-
-            this.context.Dispose();
 
             this.logger.Trace("(-)");
         }

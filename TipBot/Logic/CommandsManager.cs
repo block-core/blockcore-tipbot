@@ -9,9 +9,9 @@ namespace TipBot.Logic
 {
     /// <summary>Implements logic behind all commands that can be invoked by bot's users.</summary>
     /// <remarks>This class is not thread safe.</remarks>
-    public class CommandsManager : IDisposable
+    public class CommandsManager
     {
-        private readonly BotDbContext context;
+        private readonly IContextFactory contextFactory;
 
         private readonly RPCIntegration rpc;
 
@@ -19,7 +19,7 @@ namespace TipBot.Logic
 
         public CommandsManager(IContextFactory contextFactory, RPCIntegration rpc)
         {
-            this.context = contextFactory.CreateContext();
+            this.contextFactory = contextFactory;
             this.rpc = rpc;
 
             this.logger = LogManager.GetCurrentClassLogger();
@@ -34,16 +34,20 @@ namespace TipBot.Logic
             this.AssertAmountPositive(amount);
             this.AssertUsersNotEqual(sender, userBeingTipped);
 
-            DiscordUser discordUserSender = this.GetOrCreateUser(sender);
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                DiscordUser discordUserSender = this.GetOrCreateUser(context, sender);
 
-            this.AssertBalanceIsSufficient(discordUserSender, amount);
+                this.AssertBalanceIsSufficient(discordUserSender, amount);
 
-            DiscordUser discordUserReceiver = this.GetOrCreateUser(userBeingTipped);
+                DiscordUser discordUserReceiver = this.GetOrCreateUser(context, userBeingTipped);
 
-            discordUserSender.Balance -= amount;
-            discordUserReceiver.Balance += amount;
+                discordUserSender.Balance -= amount;
+                discordUserReceiver.Balance += amount;
 
-            this.context.SaveChanges();
+                context.Update(discordUserReceiver);
+                context.SaveChanges();
+            }
 
             this.logger.Trace("(-)");
         }
@@ -54,62 +58,68 @@ namespace TipBot.Logic
         {
             this.logger.Trace("({0}:'{1}')", nameof(user), user.Id);
 
-            DiscordUser discordUser = this.GetOrCreateUser(user);
-
-            string depositAddress = discordUser.DepositAddress;
-
-            // Assign deposit address if it wasn't assigned it.
-            if (depositAddress  == null)
+            using (BotDbContext context = this.contextFactory.CreateContext())
             {
-                this.logger.Trace("Assigning deposit address for '{0}'.", discordUser);
+                DiscordUser discordUser = this.GetOrCreateUser(context, user);
 
-                AddressModel unusedAddress = this.context.UnusedAddresses.FirstOrDefault();
+                string depositAddress = discordUser.DepositAddress;
 
-                if (unusedAddress == null)
+                // Assign deposit address if it wasn't assigned it.
+                if (depositAddress == null)
                 {
-                    this.logger.Fatal("Bot ran out of deposit addresses!");
-                    this.logger.Trace("(-)[NO_ADDRESSES]");
-                    throw new OutOfDepositAddresses();
+                    this.logger.Trace("Assigning deposit address for '{0}'.", discordUser);
+
+                    AddressModel unusedAddress = context.UnusedAddresses.FirstOrDefault();
+
+                    if (unusedAddress == null)
+                    {
+                        this.logger.Fatal("Bot ran out of deposit addresses!");
+                        this.logger.Trace("(-)[NO_ADDRESSES]");
+                        throw new OutOfDepositAddresses();
+                    }
+
+                    context.UnusedAddresses.Remove(unusedAddress);
+
+                    depositAddress = unusedAddress.Address;
+                    discordUser.DepositAddress = depositAddress;
+                    context.Update(discordUser);
+                    context.SaveChanges();
                 }
 
-                this.context.UnusedAddresses.Remove(unusedAddress);
-
-                depositAddress = unusedAddress.Address;
-                discordUser.DepositAddress = depositAddress;
-
-                this.context.SaveChanges();
+                this.logger.Trace("(-):'{0}'", depositAddress);
+                return depositAddress;
             }
-
-            this.logger.Trace("(-):'{0}'", depositAddress);
-            return depositAddress;
         }
 
         public decimal GetUserBalance(IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
 
-            DiscordUser discordUser = this.GetOrCreateUser(user);
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                DiscordUser discordUser = this.GetOrCreateUser(context, user);
 
-            decimal balance = discordUser.Balance;
+                decimal balance = discordUser.Balance;
 
-            this.logger.Trace("(-):{0}", balance);
-            return balance;
+                this.logger.Trace("(-):{0}", balance);
+                return balance;
+            }
         }
 
-        private DiscordUser GetOrCreateUser(IUser user)
+        private DiscordUser GetOrCreateUser(BotDbContext context, IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
 
-            DiscordUser discordUser = this.context.Users.SingleOrDefault(x => x.DiscordUserId == user.Id);
+            DiscordUser discordUser = context.Users.SingleOrDefault(x => x.DiscordUserId == user.Id);
 
             if (discordUser == null)
-                discordUser = this.CreateUser(user);
+                discordUser = this.CreateUser(context, user);
 
             this.logger.Trace("(-):'{0}'", discordUser);
             return discordUser;
         }
 
-        private DiscordUser CreateUser(IUser user)
+        private DiscordUser CreateUser(BotDbContext context, IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
             this.logger.Debug("Creating a new user with id {0} and username '{1}'.", user.Id, user.Username);
@@ -121,18 +131,18 @@ namespace TipBot.Logic
                 Username = user.Username
             };
 
-            this.context.Users.Add(discordUser);
-            this.context.SaveChanges();
+            context.Users.Add(discordUser);
+            context.SaveChanges();
 
             this.logger.Trace("(-):'{0}'", discordUser);
             return discordUser;
         }
 
-        private bool UserExists(ulong discordUserId)
+        private bool UserExists(BotDbContext context, ulong discordUserId)
         {
             this.logger.Trace("({0}:{1})", nameof(discordUserId), discordUserId);
 
-            bool userExists = this.context.Users.Any(x => x.DiscordUserId == discordUserId);
+            bool userExists = context.Users.Any(x => x.DiscordUserId == discordUserId);
 
             this.logger.Trace("(-):{0}", userExists);
             return userExists;
@@ -171,15 +181,6 @@ namespace TipBot.Logic
                 this.logger.Trace("(-)[AMOUNT_NOT_POSITIVE]'");
                 throw new CommandExecutionException("Amount can't be less than or equal to zero.");
             }
-
-            this.logger.Trace("(-)");
-        }
-
-        public void Dispose()
-        {
-            this.logger.Trace("()");
-
-            this.context.Dispose();
 
             this.logger.Trace("(-)");
         }
