@@ -48,6 +48,42 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
+        /// <summary>Gets deposit address for a user.</summary>
+        /// <exception cref="OutOfDepositAddresses">Thrown when bot ran out of unused deposit addresses.</exception>
+        public string GetDepositAddress(IUser user)
+        {
+            this.logger.Trace("({0}:'{1}')", nameof(user), user.Id);
+
+            DiscordUser discordUser = this.GetOrCreateUser(user);
+
+            string depositAddress = discordUser.DepositAddress;
+
+            // Assign deposit address if it wasn't assigned it.
+            if (depositAddress  == null)
+            {
+                this.logger.Trace("Assigning deposit address for '{0}'.", discordUser);
+
+                AddressModel unusedAddress = this.context.UnusedAddresses.FirstOrDefault();
+
+                if (unusedAddress == null)
+                {
+                    this.logger.Fatal("Bot ran out of deposit addresses!");
+                    this.logger.Trace("(-)[NO_ADDRESSES]");
+                    throw new OutOfDepositAddresses();
+                }
+
+                this.context.UnusedAddresses.Remove(unusedAddress);
+
+                depositAddress = unusedAddress.Address;
+                discordUser.DepositAddress = depositAddress;
+
+                this.context.SaveChanges();
+            }
+
+            this.logger.Trace("(-):'{0}'", depositAddress);
+            return depositAddress;
+        }
+
         public double GetUserBalance(IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
@@ -151,8 +187,11 @@ namespace TipBot.Logic
 
     public class CommandExecutionException : Exception
     {
-        public CommandExecutionException(string message) : base(message)
-        {
-        }
+        public CommandExecutionException(string message) : base(message) { }
+    }
+
+    public class OutOfDepositAddresses : Exception
+    {
+        public OutOfDepositAddresses() : base("Bot ran out of deposit addresses.") { }
     }
 }

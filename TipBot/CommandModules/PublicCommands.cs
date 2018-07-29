@@ -65,13 +65,27 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("deposit", "TODO")]
+        [CommandWithHelp("deposit", "displays your unique deposit address or assigns you one if it wasn't assigned before")]
         public Task DepositAsync()
         {
             SocketUser user = this.Context.User;
 
-            // TODO generate an address for a user and display it to him
-            throw new NotImplementedException();
+            string depositAddress = null;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    depositAddress = this.CommandsManager.GetDepositAddress(user);
+                }
+                catch (OutOfDepositAddresses)
+                {
+                    return this.ReplyAsync("Bot ran out of deposit addresses. Tell bot admin about it.");
+                }
+            }
+
+            string response = $"Your unique deposit address is `{depositAddress}`";
+            return this.ReplyAsync(response);
         }
 
         [CommandWithHelp("withdraw", "TODO")]

@@ -10,9 +10,9 @@
 
         public double Balance { get; set; }
 
-        //TODO add history of Tips, Withdrawals, Deposits
+        public string DepositAddress { get; set; }
 
-        //TODO add nullable uniques deposit address
+        //TODO add history of Tips, Withdrawals, Deposits
 
         public override string ToString()
         {
