@@ -75,8 +75,6 @@ namespace TipBot.Logic
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<HttpClient>()
-                .AddSingleton<PictureService>()
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
                 .AddSingleton<QuizExpiryChecker>()
@@ -94,7 +92,6 @@ namespace TipBot.Logic
             this.logger.Info("Application is shutting down...");
 
             this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
-            this.services.GetRequiredService<HttpClient>()?.Dispose();
             this.services.GetRequiredService<INodeIntegration>()?.Dispose();
             this.services.GetRequiredService<QuizExpiryChecker>()?.Dispose();
 

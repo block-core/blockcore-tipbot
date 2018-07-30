@@ -16,10 +16,6 @@ namespace TipBot.CommandModules
 {
     public class PublicCommands : ModuleBase<SocketCommandContext>
     {
-        /// <inheritdoc cref="PictureService"/>
-        /// <remarks>Set by DI.</remarks>
-        public PictureService PictureService { get; set; }
-
         /// <inheritdoc cref="CommandsManager"/>
         /// <remarks>
         /// Set by DI.
@@ -270,13 +266,23 @@ namespace TipBot.CommandModules
         [CommandWithHelp("about", "Displays information about the bot.")]
         public async Task AboutAsync()
         {
-            Stream stream = await this.PictureService.GetLogoAsync();
+            Stream stream = this.GetLogo();
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
             string text = "`TipBot`" + Environment.NewLine +
-                $"Version: {version}" + Environment.NewLine + "Github: https://github.com/noescape00/DiscordTipBot";
+                $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/noescape00/DiscordTipBot>";
             await this.Context.Channel.SendFileAsync(stream, "logo.png", text);
+        }
+
+        private Stream GetLogo()
+        {
+            Assembly assembly = this.GetType().GetTypeInfo().Assembly;
+            Stream stream = assembly.GetManifestResourceStream("TipBot.Content.Logo.png");
+
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
         }
     }
 }
