@@ -5,6 +5,7 @@ using Discord;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
+using TipBot.Helpers;
 using TipBot.Logic.NodeIntegrations;
 
 namespace TipBot.Logic
@@ -158,6 +159,7 @@ namespace TipBot.Logic
 
             this.AssertAmountPositive(amount);
 
+            answerSHA256 = answerSHA256.ToLower();
             if (answerSHA256.Length != 64)
             {
                 this.logger.Trace("(-)[INCORRECT_HASH]'");
@@ -229,6 +231,59 @@ namespace TipBot.Logic
                 this.logger.Trace("(-):{0}", quizes.Count);
                 return quizes;
             }
+        }
+
+        public AnswerToQuizResponseModel AnswerToQuiz(IUser user, string answer)
+        {
+            this.logger.Trace("({0}:'{1}')", nameof(answer), answer);
+
+            if (answer.Length > 1024)
+            {
+                // We don't want to hash big strings.
+                this.logger.Trace("(-)[ANSWER_TOO_LONG]");
+                return new AnswerToQuizResponseModel() { Success = false };
+            }
+
+            string answerHash = Cryptography.Hash(answer);
+
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                foreach (QuizModel quiz in context.ActiveQuizes.ToList())
+                {
+                    if (DateTime.Now > (quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)))
+                    {
+                        // Quiz expired but just not deleted yet.
+                        continue;
+                    }
+
+                    if (quiz.AnswerHash == answerHash)
+                    {
+                        DiscordUser winner = this.GetOrCreateUser(context, user);
+
+                        this.logger.Info("User {0} solved quiz with hash {1}.", winner, quiz.AnswerHash);
+
+                        winner.Balance += quiz.Reward;
+                        context.Update(winner);
+
+                        context.ActiveQuizes.Remove(quiz);
+                        context.SaveChanges();
+
+                        var response = new AnswerToQuizResponseModel()
+                        {
+                            Success = true,
+                            Reward = quiz.Reward,
+                            QuizCreatorDiscordUserId = quiz.CreatorDiscordUserId,
+                            QuizQuestion = quiz.Question
+                        };
+
+                        this.logger.Trace("(-)");
+                        return response;
+                    }
+                }
+            }
+
+            this.logger.Trace("(-)[QUIZ_NOT_FOUND]");
+            return new AnswerToQuizResponseModel() { Success = false };
         }
 
         private DiscordUser GetOrCreateUser(BotDbContext context, IUser user)
@@ -321,5 +376,16 @@ namespace TipBot.Logic
     public class OutOfDepositAddressesException : Exception
     {
         public OutOfDepositAddressesException() : base("Bot ran out of deposit addresses.") { }
+    }
+
+    public class AnswerToQuizResponseModel
+    {
+        public bool Success { get; set; }
+
+        public ulong QuizCreatorDiscordUserId { get; set; }
+
+        public string QuizQuestion { get; set; }
+
+        public decimal Reward { get; set; }
     }
 }

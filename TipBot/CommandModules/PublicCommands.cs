@@ -162,14 +162,40 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("answerQuiz", "TODO")]
+        [CommandWithHelp("answerQuiz", "Answer to any active quiz. Answer will be checked against all of them. In case your answer will be correct you'll receive a reward.",
+            "answerQuiz <answer>")]
         public Task AnswerQuizAsync([Remainder]string answer)
         {
-            // support wrong answer
-            // if answered correctly- show original question.
-            // reward of {} goes to {}!
-            // TODO
-            throw new NotImplementedException();
+            IUser user = this.Context.User;
+
+            string response;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    AnswerToQuizResponseModel result = this.CommandsManager.AnswerToQuiz(user, answer);
+
+                    if (!result.Success)
+                    {
+                        response = "Unfortunately you are not correct, that's not the answer to any of the active quizes.";
+                    }
+                    else
+                    {
+                        response = $"{user.Mention} bingo!" + Environment.NewLine +
+                                   $"Question was `{result.QuizQuestion}`" + Environment.NewLine +
+                                   $"And the answer is `{answer}`" + Environment.NewLine +
+                                   $"Your reward of {result.Reward} {this.Settings.Ticker} was deposited to your account!" + Environment.NewLine +
+                                   $"<@!{result.QuizCreatorDiscordUserId}>, your quiz was solved!";
+                    }
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            return this.ReplyAsync(response);
         }
 
         [CommandWithHelp("listActiveQuizes", "Displays all quizes that are active.")]
