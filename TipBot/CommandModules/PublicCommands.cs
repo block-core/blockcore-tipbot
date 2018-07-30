@@ -263,6 +263,15 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(builder.ToString());
         }
 
+        [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin.", "makeItRain <amount>")]
+        public async Task MakeItRainAsync(decimal amount)
+        {
+            IUser user = this.Context.User;
+            List<SocketGuildUser> onlineUsers = this.Context.Guild.Users.Where(x => x.Status != UserStatus.Offline).ToList();
+
+            //TODO implement
+        }
+
         [CommandWithHelp("about", "Displays information about the bot.")]
         public async Task AboutAsync()
         {

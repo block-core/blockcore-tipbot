@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Discord;
+using Discord.WebSocket;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
@@ -22,11 +23,14 @@ namespace TipBot.Logic
 
         private readonly Logger logger;
 
+        private readonly Random random;
+
         public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings)
         {
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;
             this.settings = settings;
+            this.random = new Random();
 
             this.logger = LogManager.GetCurrentClassLogger();
         }
@@ -287,6 +291,42 @@ namespace TipBot.Logic
 
             this.logger.Trace("(-)[QUIZ_NOT_FOUND]");
             return new AnswerToQuizResponseModel() { Success = false };
+        }
+
+        /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
+        public void RandomlyTipUsers(IUser creator, List<SocketGuildUser> onlineUsers, decimal amount)
+        {
+            this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(creator), creator.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(amount), amount);
+
+            this.AssertAmountPositive(amount);
+
+            var coinsToTip = (int)amount;
+
+            if (coinsToTip < 1)
+            {
+                this.logger.Trace("(-)[AMOUNT_TOO_SMALL]'");
+                throw new CommandExecutionException("Amount can't be less 1.");
+            }
+
+            if (onlineUsers.Count == 0)
+            {
+                this.logger.Trace("(-)[NO_USERS_ONLINE]'");
+                throw new CommandExecutionException("There are no users online!");
+            }
+
+            if (coinsToTip > onlineUsers.Count)
+            {
+                this.logger.Trace("Coins to tip was set to amount of users.");
+                coinsToTip = onlineUsers.Count;
+            }
+
+
+
+            // coinsToTip
+
+            //TODO move selected users to a separated list
+
+
         }
 
         private DiscordUserModel GetOrCreateUser(BotDbContext context, IUser user)
