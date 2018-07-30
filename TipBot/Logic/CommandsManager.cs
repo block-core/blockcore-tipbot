@@ -294,7 +294,8 @@ namespace TipBot.Logic
         }
 
         /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
-        public void RandomlyTipUsers(IUser creator, List<SocketGuildUser> onlineUsers, decimal amount)
+        /// <returns>List of users that were tipped.</returns>
+        public List<DiscordUserModel> RandomlyTipUsers(IUser creator, List<SocketGuildUser> onlineUsers, decimal amount)
         {
             this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(creator), creator.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(amount), amount);
 
@@ -320,13 +321,43 @@ namespace TipBot.Logic
                 coinsToTip = onlineUsers.Count;
             }
 
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                DiscordUserModel discordUserCreator = this.GetOrCreateUser(context, creator);
 
+                this.AssertBalanceIsSufficient(discordUserCreator, coinsToTip);
 
-            // coinsToTip
+                var chosenDiscordUsers = new List<DiscordUserModel>(coinsToTip);
 
-            //TODO move selected users to a separated list
+                for (int i = 0; i < coinsToTip; i++)
+                {
+                    int userIndex = this.random.Next(onlineUsers.Count);
 
+                    SocketGuildUser chosenUser = onlineUsers[userIndex];
+                    onlineUsers.Remove(chosenUser);
 
+                    DiscordUserModel chosenDiscordUser = this.GetOrCreateUser(context, chosenUser);
+                    chosenDiscordUsers.Add(chosenDiscordUser);
+                }
+
+                discordUserCreator.Balance -= coinsToTip;
+                context.Update(discordUserCreator);
+
+                foreach (DiscordUserModel discordUser in chosenDiscordUsers)
+                {
+                    discordUser.Balance += 1;
+                    context.Update(discordUser);
+
+                    this.logger.Debug("User '{0}' was randomly tipped.", discordUser);
+                }
+
+                this.logger.Debug("User '{0}' tipped {1} users one coin each.", discordUserCreator, chosenDiscordUsers.Count);
+
+                context.SaveChanges();
+
+                this.logger.Trace("(-)");
+                return chosenDiscordUsers;
+            }
         }
 
         private DiscordUserModel GetOrCreateUser(BotDbContext context, IUser user)
