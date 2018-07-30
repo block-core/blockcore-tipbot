@@ -279,6 +279,8 @@ namespace TipBot.CommandModules
 
             string response = null;
 
+            //TODO maybe weight by activity?
+
             lock (this.lockObject)
             {
                 try

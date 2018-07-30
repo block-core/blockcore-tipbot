@@ -56,6 +56,9 @@ namespace TipBot.Logic
                 discordUserReceiver.Balance += amount;
 
                 context.Update(discordUserReceiver);
+
+                this.AddTipToHistory(context, amount, discordUserReceiver.DiscordUserId, discordUserSender.DiscordUserId);
+
                 context.SaveChanges();
 
                 this.logger.Debug("User '{0}' tipped {1} to '{2}'", discordUserSender, discordUserReceiver, amount);
@@ -348,6 +351,8 @@ namespace TipBot.Logic
                     discordUser.Balance += 1;
                     context.Update(discordUser);
 
+                    this.AddTipToHistory(context, 1, discordUser.DiscordUserId, discordUserCreator.DiscordUserId);
+
                     this.logger.Debug("User '{0}' was randomly tipped.", discordUser);
                 }
 
@@ -400,6 +405,23 @@ namespace TipBot.Logic
 
             this.logger.Trace("(-):{0}", userExists);
             return userExists;
+        }
+
+        private void AddTipToHistory(BotDbContext context, decimal amount, ulong receiverDiscordUserId, ulong senderDiscordUserId)
+        {
+            this.logger.Trace("({0}:{1},{2}:{3},{4}:{5})", nameof(amount), amount, nameof(receiverDiscordUserId), receiverDiscordUserId, nameof(senderDiscordUserId), senderDiscordUserId);
+
+            var tipModel = new TipModel()
+            {
+                Amount = amount,
+                CreationTime = DateTime.Now,
+                ReceiverDiscordUserId = receiverDiscordUserId,
+                SenderDiscordUserId = senderDiscordUserId
+            };
+
+            context.TipsHistory.Add(tipModel);
+
+            this.logger.Trace("(-)");
         }
 
         private void AssertBalanceIsSufficient(DiscordUserModel user, decimal balanceRequired)

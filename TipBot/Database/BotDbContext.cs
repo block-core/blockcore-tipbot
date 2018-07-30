@@ -22,6 +22,8 @@ namespace TipBot.Database
 
         public DbSet<QuizModel> ActiveQuizes { get; set; }
 
+        public DbSet<TipModel> TipsHistory { get; set; }
+
         /// <summary>Pregenerated receiving addresses that will be assigned to users who wish to deposit.</summary>
         public DbSet<AddressModel> UnusedAddresses { get; set; }
     }
