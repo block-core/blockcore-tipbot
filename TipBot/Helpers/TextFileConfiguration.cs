@@ -93,20 +93,6 @@ namespace TipBot.Helpers
         }
 
         /// <summary>
-        /// Retrieves all values of a specific argument name (where the name excludes the dash prefix).
-        /// </summary>
-        /// <param name="key">Name of the argument (excluding the dash prefix).</param>
-        /// <returns>Values for the specified argument.</returns>
-        public string[] GetAll(string key)
-        {
-            // Get the values with the - prefix.
-            if (!this.args.TryGetValue($"-{key}", out List<string> values))
-                values = new List<string>();
-
-            return values.ToArray();
-        }
-
-        /// <summary>
         /// Gets typed value for a specific argument or a default value.
         /// </summary>
         /// <typeparam name="T">Type of the argument value.</typeparam>

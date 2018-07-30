@@ -6,7 +6,7 @@ namespace TipBot.Logic.NodeIntegrations
     public interface INodeIntegration : IDisposable
     {
         /// <summary>Initializes the class.</summary>
-        /// <remarks>Generates addresses and loads them to <see cref="BotDbContext.UnusedAddresses"/> if <see cref="BotDbContext.UnusedAddresses"/>  is empty.</remarks>
+        /// <remarks>Generates addresses and loads them to <see cref="BotDbContext.UnusedAddresses"/> if <see cref="BotDbContext.UnusedAddresses"/> is empty.</remarks>
         void Initialize();
 
         /// <summary>Withdraws specified amount or money to specified address.</summary>

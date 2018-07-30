@@ -52,6 +52,7 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
+        /// <summary>Checks quizes and removes those that are expired.</summary>
         private void CheckQuizesExpired()
         {
             this.logger.Trace("()");
