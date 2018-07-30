@@ -65,7 +65,7 @@ namespace TipBot.Logic
                         // Quiz expired. Return money to creator and remove the quiz.
                         this.logger.Info("Quiz {0} expired.", quiz.Id);
 
-                        DiscordUser quizCreator = context.Users.Single(x => x.DiscordUserId == quiz.CreatorDiscordUserId);
+                        DiscordUserModel quizCreator = context.Users.Single(x => x.DiscordUserId == quiz.CreatorDiscordUserId);
                         quizCreator.Balance += quiz.Reward;
                         context.Update(quizCreator);
 

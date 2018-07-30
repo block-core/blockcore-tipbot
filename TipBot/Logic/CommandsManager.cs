@@ -42,11 +42,11 @@ namespace TipBot.Logic
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
-                DiscordUser discordUserSender = this.GetOrCreateUser(context, sender);
+                DiscordUserModel discordUserSender = this.GetOrCreateUser(context, sender);
 
                 this.AssertBalanceIsSufficient(discordUserSender, amount);
 
-                DiscordUser discordUserReceiver = this.GetOrCreateUser(context, userBeingTipped);
+                DiscordUserModel discordUserReceiver = this.GetOrCreateUser(context, userBeingTipped);
 
                 discordUserSender.Balance -= amount;
                 discordUserReceiver.Balance += amount;
@@ -66,7 +66,7 @@ namespace TipBot.Logic
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
-                DiscordUser discordUser = this.GetOrCreateUser(context, user);
+                DiscordUserModel discordUser = this.GetOrCreateUser(context, user);
 
                 string depositAddress = discordUser.DepositAddress;
 
@@ -107,7 +107,7 @@ namespace TipBot.Logic
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
-                DiscordUser discordUser = this.GetOrCreateUser(context, user);
+                DiscordUserModel discordUser = this.GetOrCreateUser(context, user);
 
                 this.AssertBalanceIsSufficient(discordUser, amount);
 
@@ -142,7 +142,7 @@ namespace TipBot.Logic
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
-                DiscordUser discordUser = this.GetOrCreateUser(context, user);
+                DiscordUserModel discordUser = this.GetOrCreateUser(context, user);
 
                 decimal balance = discordUser.Balance;
 
@@ -187,7 +187,7 @@ namespace TipBot.Logic
                     throw new CommandExecutionException("There is already a quiz with that answer hash!");
                 }
 
-                DiscordUser discordUser = this.GetOrCreateUser(context, user);
+                DiscordUserModel discordUser = this.GetOrCreateUser(context, user);
 
                 this.AssertBalanceIsSufficient(discordUser, amount);
 
@@ -258,7 +258,7 @@ namespace TipBot.Logic
 
                     if (quiz.AnswerHash == answerHash)
                     {
-                        DiscordUser winner = this.GetOrCreateUser(context, user);
+                        DiscordUserModel winner = this.GetOrCreateUser(context, user);
 
                         this.logger.Info("User {0} solved quiz with hash {1}.", winner, quiz.AnswerHash);
 
@@ -286,11 +286,11 @@ namespace TipBot.Logic
             return new AnswerToQuizResponseModel() { Success = false };
         }
 
-        private DiscordUser GetOrCreateUser(BotDbContext context, IUser user)
+        private DiscordUserModel GetOrCreateUser(BotDbContext context, IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
 
-            DiscordUser discordUser = context.Users.SingleOrDefault(x => x.DiscordUserId == user.Id);
+            DiscordUserModel discordUser = context.Users.SingleOrDefault(x => x.DiscordUserId == user.Id);
 
             if (discordUser == null)
                 discordUser = this.CreateUser(context, user);
@@ -299,12 +299,12 @@ namespace TipBot.Logic
             return discordUser;
         }
 
-        private DiscordUser CreateUser(BotDbContext context, IUser user)
+        private DiscordUserModel CreateUser(BotDbContext context, IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
             this.logger.Debug("Creating a new user with id {0} and username '{1}'.", user.Id, user.Username);
 
-            var discordUser = new DiscordUser()
+            var discordUser = new DiscordUserModel()
             {
                 Balance = 0,
                 DiscordUserId = user.Id,
@@ -328,7 +328,7 @@ namespace TipBot.Logic
             return userExists;
         }
 
-        private void AssertBalanceIsSufficient(DiscordUser user, decimal balanceRequired)
+        private void AssertBalanceIsSufficient(DiscordUserModel user, decimal balanceRequired)
         {
             this.logger.Trace("({0}:'{1}',{2}:{3})", nameof(user), user, nameof(balanceRequired), balanceRequired);
 

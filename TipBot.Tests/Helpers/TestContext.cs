@@ -33,7 +33,7 @@ namespace TipBot.Tests.Helpers
         {
             using (BotDbContext dbContext = this.CreateContext())
             {
-                dbContext.Users.Add(new DiscordUser()
+                dbContext.Users.Add(new DiscordUserModel()
                 {
                     DiscordUserId = user.Id,
                     Username = user.Username,

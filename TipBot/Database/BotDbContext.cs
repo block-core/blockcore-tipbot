@@ -18,7 +18,7 @@ namespace TipBot.Database
         {
         }
 
-        public DbSet<DiscordUser> Users { get; set; }
+        public DbSet<DiscordUserModel> Users { get; set; }
 
         public DbSet<QuizModel> ActiveQuizes { get; set; }
 

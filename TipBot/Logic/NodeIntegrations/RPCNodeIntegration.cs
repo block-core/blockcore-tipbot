@@ -191,10 +191,10 @@ namespace TipBot.Logic.NodeIntegrations
         {
             this.logger.Trace("()");
 
-            List<DiscordUser> usersToTrack = context.Users.Where(x => x.DepositAddress != null).ToList();
+            List<DiscordUserModel> usersToTrack = context.Users.Where(x => x.DepositAddress != null).ToList();
             this.logger.Trace("Tracking {0} users.", usersToTrack.Count);
 
-            foreach (DiscordUser user in usersToTrack)
+            foreach (DiscordUserModel user in usersToTrack)
             {
                 decimal receivedByAddress = this.coinService.GetReceivedByAddress(user.DepositAddress, this.settings.MinConfirmationsForDeposit);
 

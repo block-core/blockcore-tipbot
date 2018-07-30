@@ -1,6 +1,6 @@
 ﻿namespace TipBot.Database.Models
 {
-    public class DiscordUser
+    public class DiscordUserModel
     {
         public int Id { get; set; }
 

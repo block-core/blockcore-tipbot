@@ -28,7 +28,7 @@ namespace TipBot.Migrations
                     b.ToTable("UnusedAddresses");
                 });
 
-            modelBuilder.Entity("TipBot.Database.Models.DiscordUser", b =>
+            modelBuilder.Entity("TipBot.Database.Models.DiscordUserModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();

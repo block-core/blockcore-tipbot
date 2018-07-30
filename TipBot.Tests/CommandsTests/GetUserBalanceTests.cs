@@ -29,7 +29,7 @@ namespace TipBot.Tests.CommandsTests
             {
                 Assert.Equal(1, dbContext.Users.Count());
 
-                DiscordUser discordUser = dbContext.Users.First();
+                DiscordUserModel discordUser = dbContext.Users.First();
 
                 Assert.Equal(user.Id, discordUser.DiscordUserId);
                 Assert.Equal(user.Username, discordUser.Username);
