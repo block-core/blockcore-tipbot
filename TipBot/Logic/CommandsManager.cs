@@ -53,6 +53,8 @@ namespace TipBot.Logic
 
                 context.Update(discordUserReceiver);
                 context.SaveChanges();
+
+                this.logger.Debug("User '{0}' tipped {1} to '{2}'", discordUserSender, discordUserReceiver, amount);
             }
 
             this.logger.Trace("(-)");
@@ -120,6 +122,7 @@ namespace TipBot.Logic
                 try
                 {
                     this.nodeIntegration.Withdraw(amount, address);
+                    this.logger.Debug("User '{0}' withdrew {1} to address '{2}'.", discordUser, amount, address);
                 }
                 catch (InvalidAddressException)
                 {
@@ -214,7 +217,7 @@ namespace TipBot.Logic
 
                 context.SaveChanges();
 
-                this.logger.Info("Quiz with reward {0} and answer hash '{1}' was created!", amount, answerSHA256);
+                this.logger.Debug("Quiz with reward {0} and answer hash '{1}' was created by user '{2}'.", amount, answerSHA256, discordUser);
             }
 
             this.logger.Trace("(-)");
@@ -260,13 +263,13 @@ namespace TipBot.Logic
                     {
                         DiscordUserModel winner = this.GetOrCreateUser(context, user);
 
-                        this.logger.Info("User {0} solved quiz with hash {1}.", winner, quiz.AnswerHash);
-
                         winner.Balance += quiz.Reward;
                         context.Update(winner);
 
                         context.ActiveQuizes.Remove(quiz);
                         context.SaveChanges();
+
+                        this.logger.Debug("User {0} solved quiz with hash {1} and received a reward of {2}.", winner, quiz.AnswerHash, quiz.Reward);
 
                         var response = new AnswerToQuizResponseModel()
                         {
