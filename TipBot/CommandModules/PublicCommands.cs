@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using TipBot.Database.Models;
 using TipBot.Logic;
 using TipBot.Services;
 
@@ -131,16 +132,12 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("createQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
+        [CommandWithHelp("startQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
                                        " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
                                        " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
                                         "createQuiz <amount> <SHA256 of an answer> <duration in minures> <question>")]
-        public Task CreateQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
+        public Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
-            // TODO user will be able to start a quiz. First to answer will get a reward.
-            // Quiz creator specifies SHA256 of an answer.
-            // after expiration the owner is refunded
-
             IUser user = this.Context.User;
 
             string response;
@@ -151,8 +148,10 @@ namespace TipBot.CommandModules
                 {
                     this.CommandsManager.StartQuiz(user, amount, answerSHA256, durationMinutes, question);
 
-                    response = "TODO";
-                    //response = $"{user.Mention}, you have {balance} {this.Settings.Ticker}!";
+                    response = $"{user.Mention} started a quiz!" + Environment.NewLine +
+                               $"Question is: `{question}`" + Environment.NewLine +
+                               $"You have {durationMinutes} minutes to answer correctly and claim {amount} {this.Settings.Ticker}!" + Environment.NewLine +
+                               $"If no one answers before time runs out {amount} {this.Settings.Ticker} will be returned to {user.Mention}.";
                 }
                 catch (CommandExecutionException exception)
                 {
@@ -166,8 +165,47 @@ namespace TipBot.CommandModules
         [CommandWithHelp("answerQuiz", "TODO")]
         public Task AnswerQuizAsync([Remainder]string answer)
         {
+            // support wrong answer
+            // if answered correctly- show original question.
+            // reward of {} goes to {}!
             // TODO
             throw new NotImplementedException();
+        }
+
+        [CommandWithHelp("listActiveQuizes", "Displays all quizes that are active.")]
+        public Task ListActiveQuizes()
+        {
+            lock (this.lockObject)
+            {
+                var response = new StringBuilder();
+                List<QuizModel> quizes = this.CommandsManager.GetActiveQuizes();
+
+                if (quizes.Count != 0)
+                {
+                    response.AppendLine("__List of all active quizes:__");
+                    response.AppendLine();
+
+                    foreach (QuizModel quiz in quizes)
+                    {
+                        response.AppendLine($"Question: `{quiz.Question}`");
+                        response.AppendLine($"Reward: {quiz.Reward} {this.Settings.Ticker}");
+
+                        var minutesLeft = (int) ((quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)) - DateTime.Now).TotalMinutes;
+                        if (minutesLeft < 0)
+                            minutesLeft = 0;
+
+                        response.AppendLine($"Expires in {minutesLeft} minutes.");
+                        response.AppendLine();
+                    }
+                }
+                else
+                {
+                    response.AppendLine("There are no active quizes.");
+                    response.AppendLine("Start a new one yourself using `startQuiz` command!");
+                }
+
+                return this.ReplyAsync(response.ToString());
+            }
         }
 
         [Command("help")]

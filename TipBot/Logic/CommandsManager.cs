@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Discord;
 using NLog;
@@ -112,7 +113,7 @@ namespace TipBot.Logic
                 if (amount < this.settings.MinWithdrawAmount)
                 {
                     this.logger.Trace("(-)[MIN_WITHDRAW_AMOUNT]");
-                    throw new CommandExecutionException($"Minimal withdraw amount is {this.settings.MinWithdrawAmount}.");
+                    throw new CommandExecutionException($"Minimal withdraw amount is {this.settings.MinWithdrawAmount} {this.settings.Ticker}.");
                 }
 
                 try
@@ -163,11 +164,36 @@ namespace TipBot.Logic
                 throw new CommandExecutionException("SHA256 hash should contain 64 characters!");
             }
 
+            if (durationMinutes < 1)
+            {
+                this.logger.Trace("(-)[INCORRECT_DURATION]'");
+                throw new CommandExecutionException("Duration in minutes can't be less than 1!");
+            }
+
+            var maxQuestionLenght = 1024;
+            if (question.Length > maxQuestionLenght)
+            {
+                this.logger.Trace("(-)[QUESTION_TOO_LONG]'");
+                throw new CommandExecutionException($"Questions longer than {maxQuestionLenght} characters are not allowed!");
+            }
+
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
+                if (context.ActiveQuizes.Any(x => x.AnswerHash == answerSHA256))
+                {
+                    this.logger.Trace("(-)[HASH_ALREADY_EXISTS]");
+                    throw new CommandExecutionException("There is already a quiz with that answer hash!");
+                }
+
                 DiscordUser discordUser = this.GetOrCreateUser(context, user);
 
                 this.AssertBalanceIsSufficient(discordUser, amount);
+
+                if (amount < this.settings.MinQuizAmount)
+                {
+                    this.logger.Trace("(-)[AMOUNT_TOO_LOW]");
+                    throw new CommandExecutionException($"Minimal quiz reward is {this.settings.MinQuizAmount} {this.settings.Ticker}!");
+                }
 
                 var quiz = new QuizModel()
                 {
@@ -190,6 +216,19 @@ namespace TipBot.Logic
             }
 
             this.logger.Trace("(-)");
+        }
+
+        public List<QuizModel> GetActiveQuizes()
+        {
+            this.logger.Trace("()");
+
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                List<QuizModel> quizes = context.ActiveQuizes.ToList();
+
+                this.logger.Trace("(-):{0}", quizes.Count);
+                return quizes;
+            }
         }
 
         private DiscordUser GetOrCreateUser(BotDbContext context, IUser user)

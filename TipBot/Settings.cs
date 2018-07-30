@@ -24,5 +24,7 @@ namespace TipBot
         public int MinConfirmationsForDeposit { get; } = 5; //TODO set to 16. 5 is for testing
 
         public decimal MinWithdrawAmount { get; } = 0.1m;
+
+        public decimal MinQuizAmount { get; } = 0.1m;
     }
 }
