@@ -20,14 +20,11 @@ namespace TipBot.Logic
 
         private readonly Logger logger;
 
-        private readonly QuizManager quizManager;
-
-        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings, QuizManager quizManager)
+        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings)
         {
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;
             this.settings = settings;
-            this.quizManager = quizManager;
 
             this.logger = LogManager.GetCurrentClassLogger();
         }
@@ -150,6 +147,49 @@ namespace TipBot.Logic
                 this.logger.Trace("(-):{0}", balance);
                 return balance;
             }
+        }
+
+        /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
+        public void StartQuiz(IUser user, decimal amount, string answerSHA256, int durationMinutes, string question)
+        {
+            this.logger.Trace("({0}:{1},{2}:{3},{4}:'{5}',{6}:{7},{8}:'{9}')", nameof(user), user.Id, nameof(amount), amount, nameof(answerSHA256), answerSHA256,
+                nameof(durationMinutes), durationMinutes, nameof(question), question);
+
+            this.AssertAmountPositive(amount);
+
+            if (answerSHA256.Length != 64)
+            {
+                this.logger.Trace("(-)[INCORRECT_HASH]'");
+                throw new CommandExecutionException("SHA256 hash should contain 64 characters!");
+            }
+
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                DiscordUser discordUser = this.GetOrCreateUser(context, user);
+
+                this.AssertBalanceIsSufficient(discordUser, amount);
+
+                var quiz = new QuizModel()
+                {
+                    AnswerHash = answerSHA256,
+                    CreationTime = DateTime.Now,
+                    CreatorDiscordUserId = discordUser.DiscordUserId,
+                    DurationMinutes = durationMinutes,
+                    Question = question,
+                    Reward = amount
+                };
+
+                discordUser.Balance -= amount;
+                context.Update(discordUser);
+
+                context.ActiveQuizes.Add(quiz);
+
+                context.SaveChanges();
+
+                this.logger.Info("Quiz with reward {0} and answer hash '{1}' was created!", amount, answerSHA256);
+            }
+
+            this.logger.Trace("(-)");
         }
 
         private DiscordUser GetOrCreateUser(BotDbContext context, IUser user)

@@ -9,7 +9,7 @@ using TipBot.Database.Models;
 namespace TipBot.Logic
 {
     /// <summary>Checks if quizes are expired and should be canceled.</summary>
-    public class QuizManager : IDisposable
+    public class QuizExpiryChecker : IDisposable
     {
         private readonly IContextFactory contextFactory;
         private readonly CancellationTokenSource cancellation;
@@ -17,7 +17,7 @@ namespace TipBot.Logic
 
         private Task quizCheckingTask;
 
-        public QuizManager(IContextFactory contextFactory)
+        public QuizExpiryChecker(IContextFactory contextFactory)
         {
             this.contextFactory = contextFactory;
             this.logger = LogManager.GetCurrentClassLogger();

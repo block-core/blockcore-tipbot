@@ -39,7 +39,7 @@ namespace TipBot.Logic
                 }
 
                 this.services.GetRequiredService<INodeIntegration>().Initialize();
-                this.services.GetRequiredService<QuizManager>().Initialize();
+                this.services.GetRequiredService<QuizExpiryChecker>().Initialize();
 
                 // Initialize discord API wrapper.
                 var client = this.services.GetRequiredService<DiscordSocketClient>();
@@ -79,7 +79,7 @@ namespace TipBot.Logic
                 .AddSingleton<PictureService>()
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
-                .AddSingleton<QuizManager>()
+                .AddSingleton<QuizExpiryChecker>()
                 .AddSingleton<IContextFactory, ContextFactory>()
                 // Replace implementation to use API instead of RPC.
                 .AddSingleton<INodeIntegration, RPCNodeIntegration>();
@@ -96,7 +96,7 @@ namespace TipBot.Logic
             this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
             this.services.GetRequiredService<HttpClient>()?.Dispose();
             this.services.GetRequiredService<INodeIntegration>()?.Dispose();
-            this.services.GetRequiredService<QuizManager>()?.Dispose();
+            this.services.GetRequiredService<QuizExpiryChecker>()?.Dispose();
 
             this.logger.Info("Shutdown completed.");
             this.logger.Trace("(-)");
