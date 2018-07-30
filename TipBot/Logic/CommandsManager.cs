@@ -295,9 +295,9 @@ namespace TipBot.Logic
 
         /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
         /// <returns>List of users that were tipped.</returns>
-        public List<DiscordUserModel> RandomlyTipUsers(IUser creator, List<SocketGuildUser> onlineUsers, decimal amount)
+        public List<DiscordUserModel> RandomlyTipUsers(IUser caller, List<IUser> onlineUsers, decimal amount)
         {
-            this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(creator), creator.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(amount), amount);
+            this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(caller), caller.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(amount), amount);
 
             this.AssertAmountPositive(amount);
 
@@ -323,7 +323,7 @@ namespace TipBot.Logic
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
-                DiscordUserModel discordUserCreator = this.GetOrCreateUser(context, creator);
+                DiscordUserModel discordUserCreator = this.GetOrCreateUser(context, caller);
 
                 this.AssertBalanceIsSufficient(discordUserCreator, coinsToTip);
 
@@ -333,7 +333,7 @@ namespace TipBot.Logic
                 {
                     int userIndex = this.random.Next(onlineUsers.Count);
 
-                    SocketGuildUser chosenUser = onlineUsers[userIndex];
+                    IUser chosenUser = onlineUsers[userIndex];
                     onlineUsers.Remove(chosenUser);
 
                     DiscordUserModel chosenDiscordUser = this.GetOrCreateUser(context, chosenUser);

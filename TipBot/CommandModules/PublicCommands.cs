@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -266,10 +267,50 @@ namespace TipBot.CommandModules
         [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin.", "makeItRain <amount>")]
         public async Task MakeItRainAsync(decimal amount)
         {
-            IUser user = this.Context.User;
-            List<SocketGuildUser> onlineUsers = this.Context.Guild.Users.Where(x => x.Status != UserStatus.Offline).ToList();
+            IUser caller = this.Context.User;
 
-            //TODO implement
+            var onlineUsers = new List<IUser>();
+            IAsyncEnumerable<IReadOnlyCollection<IUser>> usersCollection = this.Context.Channel.GetUsersAsync();
+
+            await usersCollection.ForEachAsync(delegate(IReadOnlyCollection<IUser> users)
+            {
+                onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline));
+            });
+
+            string response = null;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    List<DiscordUserModel> usersBeingTipped = this.CommandsManager.RandomlyTipUsers(caller, onlineUsers, amount);
+
+                    var builder = new StringBuilder();
+
+                    builder.AppendLine($"{caller.Mention} just tipped {usersBeingTipped.Count} users 1 {this.Settings.Ticker} each!");
+                    builder.AppendLine();
+
+                    foreach (DiscordUserModel tippedUser in usersBeingTipped)
+                    {
+                        builder.Append($"<@!{tippedUser.DiscordUserId}>");
+
+                        if (tippedUser != usersBeingTipped.Last())
+                            builder.Append(", ");
+                    }
+
+                    builder.Append($" - you all received 1 {this.Settings.Ticker}!");
+
+                    response = builder.ToString();
+
+                    // TODO add hoorray smiles and maybe image
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            await this.ReplyAsync(response);
         }
 
         [CommandWithHelp("about", "Displays information about the bot.")]
