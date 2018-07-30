@@ -131,15 +131,36 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("createQuiz", "TODO")]
+        [CommandWithHelp("createQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
+                                       " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
+                                       " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
+                                        "createQuiz <amount> <SHA256 of an answer> <duration in minures> <question>")]
         public Task CreateQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
             // TODO user will be able to start a quiz. First to answer will get a reward.
             // Quiz creator specifies SHA256 of an answer.
             // after expiration the owner is refunded
 
-            // TODO
-            throw new NotImplementedException();
+            IUser user = this.Context.User;
+
+            string response;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    this.CommandsManager.StartQuiz(user, amount, answerSHA256, durationMinutes, question);
+
+                    response = "TODO";
+                    //response = $"{user.Mention}, you have {balance} {this.Settings.Ticker}!";
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            return this.ReplyAsync(response);
         }
 
         [CommandWithHelp("answerQuiz", "TODO")]
@@ -173,6 +194,7 @@ namespace TipBot.CommandModules
                     helpStr += Environment.NewLine + "      " + helpAttr.UsageExample;
 
                 builder.AppendLine(helpStr);
+                builder.AppendLine();
             }
 
             builder.AppendLine("");
