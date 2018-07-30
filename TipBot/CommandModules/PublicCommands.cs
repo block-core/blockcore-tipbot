@@ -287,7 +287,9 @@ namespace TipBot.CommandModules
 
                     var builder = new StringBuilder();
 
-                    builder.AppendLine($"{caller.Mention} just tipped {usersBeingTipped.Count} users 1 {this.Settings.Ticker} each!");
+                    var tadaEmoji = ":tada:";
+
+                    builder.AppendLine($"{tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users 1 {this.Settings.Ticker} each!{tadaEmoji}");
                     builder.AppendLine();
 
                     foreach (DiscordUserModel tippedUser in usersBeingTipped)
