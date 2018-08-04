@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using TipBot.Database.Models;
 using TipBot.Logic;
-using TipBot.Services;
 
 namespace TipBot.CommandModules
 {
@@ -36,6 +34,8 @@ namespace TipBot.CommandModules
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private readonly object lockObject = new object();
 
+        private readonly string tadaEmoji = ":tada:";
+
         [CommandWithHelp("tip", "Transfers specified amount of money to mentioned user.", "tip <user> <amount> <message>*")]
         public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder]string message = null)
         {
@@ -52,7 +52,7 @@ namespace TipBot.CommandModules
                     response = $"{sender.Mention} tipped {userBeingTipped.Mention} {amount} {this.Settings.Ticker}";
 
                     if (message != null)
-                        response += $"with message '{message}'";
+                        response += $" with message '{message}'";
                 }
                 catch (CommandExecutionException exception)
                 {
@@ -231,41 +231,8 @@ namespace TipBot.CommandModules
             }
         }
 
-        [Command("help")]
-        public Task HelpAsync()
-        {
-            var helpAttributes = new List<CommandWithHelpAttribute>();
-
-            foreach (MemberInfo memberInfo in this.GetType().GetMembers())
-            {
-                foreach (CommandWithHelpAttribute attribute in memberInfo.GetCustomAttributes(typeof(CommandWithHelpAttribute), true).ToList())
-                    helpAttributes.Add(attribute);
-            }
-
-            var builder = new StringBuilder();
-
-            builder.AppendLine("__List of bot commands:__");
-            builder.AppendLine("");
-
-            foreach (CommandWithHelpAttribute helpAttr in helpAttributes)
-            {
-                string helpStr = $"`{helpAttr.Text}`- " + helpAttr.HelpInfo;
-
-                if (helpAttr.UsageExample != null)
-                    helpStr += Environment.NewLine + "      " + helpAttr.UsageExample;
-
-                builder.AppendLine(helpStr);
-                builder.AppendLine();
-            }
-
-            builder.AppendLine("");
-            builder.AppendLine("parameters marked with * are optional");
-
-            return this.ReplyAsync(builder.ToString());
-        }
-
         [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin (or another value if specified by caller)." +
-                                       "Amount of users that will be tipped is equal to totalAmount / tipAmount(1 by default)", "makeItRain <totalAmount> <tipAmount>*")]
+                                       "Amount of users that will be tipped is equal to totalAmount / tipAmount", "makeItRain <totalAmount> <tipAmount=1>*")]
         public async Task MakeItRainAsync(decimal amount, decimal tipAmount = 1)
         {
             IUser caller = this.Context.User;
@@ -278,6 +245,8 @@ namespace TipBot.CommandModules
                 onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline));
             });
 
+            onlineUsers.Remove(caller);
+
             string response;
 
             lock (this.lockObject)
@@ -288,9 +257,7 @@ namespace TipBot.CommandModules
 
                     var builder = new StringBuilder();
 
-                    var tadaEmoji = ":tada:";
-
-                    builder.AppendLine($"{tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users {tipAmount} {this.Settings.Ticker} each!{tadaEmoji}");
+                    builder.AppendLine($"{this.tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users {tipAmount} {this.Settings.Ticker} each!{this.tadaEmoji}");
                     builder.AppendLine();
 
                     foreach (DiscordUserModel tippedUser in usersBeingTipped)
@@ -314,7 +281,7 @@ namespace TipBot.CommandModules
             await this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days>*")]
+        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days=7>*")]
         public async Task ChartAsync(int days = 7)
         {
             string response;
@@ -349,6 +316,39 @@ namespace TipBot.CommandModules
             }
 
             await this.ReplyAsync(response);
+        }
+
+        [Command("help")]
+        public Task HelpAsync()
+        {
+            var helpAttributes = new List<CommandWithHelpAttribute>();
+
+            foreach (MemberInfo memberInfo in this.GetType().GetMembers())
+            {
+                foreach (CommandWithHelpAttribute attribute in memberInfo.GetCustomAttributes(typeof(CommandWithHelpAttribute), true).ToList())
+                    helpAttributes.Add(attribute);
+            }
+
+            var builder = new StringBuilder();
+
+            builder.AppendLine("__List of bot commands:__");
+            builder.AppendLine("parameters marked with * are optional");
+            builder.AppendLine("");
+
+            foreach (CommandWithHelpAttribute helpAttr in helpAttributes)
+            {
+                string helpStr = $"**{helpAttr.Text}**- {helpAttr.HelpInfo}";
+
+                if (helpAttr.UsageExample != null)
+                {
+                    helpStr += Environment.NewLine + "`" + helpAttr.UsageExample + "`";
+                }
+
+                builder.AppendLine(helpStr);
+                builder.AppendLine();
+            }
+
+            return this.ReplyAsync(builder.ToString());
         }
 
         [CommandWithHelp("about", "Displays information about the bot.")]
