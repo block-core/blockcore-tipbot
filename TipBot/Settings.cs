@@ -19,7 +19,7 @@ namespace TipBot
 
         public uint PregeneratedAddressesCount { get; } = 8000;
 
-        public int MinConfirmationsForDeposit { get; } = 5; //TODO set to 16. 5 is for testing
+        public int MinConfirmationsForDeposit { get; } = 16;
 
         public decimal MinWithdrawAmount { get; } = 0.1m;
 
