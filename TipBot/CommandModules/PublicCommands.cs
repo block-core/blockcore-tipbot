@@ -129,6 +129,93 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
+        [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin (or another value if specified by caller)." +
+                                       " Amount of users that will be tipped is equal to totalAmount / tipAmount.", "makeItRain <totalAmount> <tipAmount=1>*")]
+        public async Task MakeItRainAsync(decimal amount, decimal tipAmount = 1)
+        {
+            IUser caller = this.Context.User;
+
+            var onlineUsers = new List<IUser>();
+            IAsyncEnumerable<IReadOnlyCollection<IUser>> usersCollection = this.Context.Channel.GetUsersAsync();
+
+            await usersCollection.ForEachAsync(delegate (IReadOnlyCollection<IUser> users)
+            {
+                onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline));
+            });
+
+            onlineUsers.Remove(caller);
+
+            string response;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    List<DiscordUserModel> usersBeingTipped = this.CommandsManager.RandomlyTipUsers(caller, onlineUsers, amount, tipAmount);
+
+                    var builder = new StringBuilder();
+
+                    builder.AppendLine($"{this.tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users {tipAmount} {this.Settings.Ticker} each!{this.tadaEmoji}");
+                    builder.AppendLine();
+
+                    foreach (DiscordUserModel tippedUser in usersBeingTipped)
+                    {
+                        builder.Append($"<@!{tippedUser.DiscordUserId}>");
+
+                        if (tippedUser != usersBeingTipped.Last())
+                            builder.Append(", ");
+                    }
+
+                    builder.Append($" - you all received {tipAmount} {this.Settings.Ticker}!");
+
+                    response = builder.ToString();
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            await this.ReplyAsync(response);
+        }
+
+        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days=7>*")]
+        public async Task ChartAsync(int days = 7)
+        {
+            string response;
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    TippingChartsModel chart = this.CommandsManager.GetTopTippers(days, this.Settings.MaxChartUsersCount);
+
+                    var builder = new StringBuilder();
+
+                    builder.AppendLine($"Top {chart.BestTippers.Count} users who tipped the most in the last {days} days:");
+
+                    foreach (KeyValuePair<ulong, decimal> tipper in chart.BestTippers)
+                        builder.AppendLine($"<@!{tipper.Key}> tipped {tipper.Value} {this.Settings.Ticker}");
+
+                    builder.AppendLine();
+
+                    builder.AppendLine($"Top {chart.BestBeingTipped.Count} users who were tipped the most in the last {days} days:");
+
+                    foreach (KeyValuePair<ulong, decimal> beingTipped in chart.BestBeingTipped)
+                        builder.AppendLine($"<@!{beingTipped.Key}> received {beingTipped.Value} {this.Settings.Ticker}");
+
+
+                    response = builder.ToString();
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            await this.ReplyAsync(response);
+        }
+
         [CommandWithHelp("startQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
                                        " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
                                        " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
@@ -229,93 +316,6 @@ namespace TipBot.CommandModules
 
                 return this.ReplyAsync(response.ToString());
             }
-        }
-
-        [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin (or another value if specified by caller)." +
-                                       "Amount of users that will be tipped is equal to totalAmount / tipAmount", "makeItRain <totalAmount> <tipAmount=1>*")]
-        public async Task MakeItRainAsync(decimal amount, decimal tipAmount = 1)
-        {
-            IUser caller = this.Context.User;
-
-            var onlineUsers = new List<IUser>();
-            IAsyncEnumerable<IReadOnlyCollection<IUser>> usersCollection = this.Context.Channel.GetUsersAsync();
-
-            await usersCollection.ForEachAsync(delegate(IReadOnlyCollection<IUser> users)
-            {
-                onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline));
-            });
-
-            onlineUsers.Remove(caller);
-
-            string response;
-
-            lock (this.lockObject)
-            {
-                try
-                {
-                    List<DiscordUserModel> usersBeingTipped = this.CommandsManager.RandomlyTipUsers(caller, onlineUsers, amount, tipAmount);
-
-                    var builder = new StringBuilder();
-
-                    builder.AppendLine($"{this.tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users {tipAmount} {this.Settings.Ticker} each!{this.tadaEmoji}");
-                    builder.AppendLine();
-
-                    foreach (DiscordUserModel tippedUser in usersBeingTipped)
-                    {
-                        builder.Append($"<@!{tippedUser.DiscordUserId}>");
-
-                        if (tippedUser != usersBeingTipped.Last())
-                            builder.Append(", ");
-                    }
-
-                    builder.Append($" - you all received {tipAmount} {this.Settings.Ticker}!");
-
-                    response = builder.ToString();
-                }
-                catch (CommandExecutionException exception)
-                {
-                    response = "Error: " + exception.Message;
-                }
-            }
-
-            await this.ReplyAsync(response);
-        }
-
-        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days=7>*")]
-        public async Task ChartAsync(int days = 7)
-        {
-            string response;
-
-            lock (this.lockObject)
-            {
-                try
-                {
-                    TippingChartsModel chart = this.CommandsManager.GetTopTippers(days, this.Settings.MaxChartUsersCount);
-
-                    var builder = new StringBuilder();
-
-                    builder.AppendLine($"Top {chart.BestTippers.Count} users who tipped the most in the last {days} days:");
-
-                    foreach (KeyValuePair<ulong, decimal> tipper in chart.BestTippers)
-                        builder.AppendLine($"<@!{tipper.Key}> tipped {tipper.Value} {this.Settings.Ticker}");
-
-                    builder.AppendLine();
-
-                    builder.AppendLine($"Top {chart.BestBeingTipped.Count} users who were tipped the most in the last {days} days:");
-
-                    foreach (KeyValuePair<ulong, decimal> beingTipped in chart.BestBeingTipped)
-                        builder.AppendLine($"<@!{beingTipped.Key}> received {beingTipped.Value} {this.Settings.Ticker}");
-
-
-                    response = builder.ToString();
-                }
-                catch (CommandExecutionException exception)
-                {
-                    response = "Error: " + exception.Message;
-                }
-            }
-
-            await this.ReplyAsync(response);
         }
 
         [Command("help")]

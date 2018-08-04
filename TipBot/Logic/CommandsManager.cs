@@ -386,7 +386,13 @@ namespace TipBot.Logic
             if (periodDays > this.settings.MaxDaysChartCount)
             {
                 this.logger.Trace("(-)[PERIOD_TOO_LONG]");
-                throw new CommandExecutionException($"Tip amount can't be less than {this.settings.MaxDaysChartCount}.");
+                throw new CommandExecutionException($"Period in days can't be longer than {this.settings.MaxDaysChartCount}.");
+            }
+
+            if (periodDays < 1)
+            {
+                this.logger.Trace("(-)[PERIOD_TOO_SHORT]");
+                throw new CommandExecutionException($"Period in days can't be shorter than 1 day.");
             }
 
             var bestTippers = new Dictionary<ulong, decimal>();
