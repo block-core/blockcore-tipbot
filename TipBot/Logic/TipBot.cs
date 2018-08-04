@@ -31,10 +31,13 @@ namespace TipBot.Logic
                 var settings = this.services.GetRequiredService<Settings>();
                 settings.Initialize(new TextFileConfiguration(args));
 
-                // Migrate DB in case there are updates in the db layout.
-                using (BotDbContext db = this.services.GetRequiredService<IContextFactory>().CreateContext())
+                if (settings.EnableMigrations)
                 {
-                    db.Database.Migrate();
+                    // Migrate DB in case there are updates in the db layout.
+                    using (BotDbContext db = this.services.GetRequiredService<IContextFactory>().CreateContext())
+                    {
+                        db.Database.Migrate();
+                    }
                 }
 
                 this.services.GetRequiredService<INodeIntegration>().Initialize();
@@ -54,6 +57,7 @@ namespace TipBot.Logic
             catch (Exception exception)
             {
                 this.logger.Fatal(exception.ToString());
+                throw;
             }
 
             this.logger.Trace("(-)");

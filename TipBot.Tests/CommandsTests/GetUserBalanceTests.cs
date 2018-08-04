@@ -25,7 +25,7 @@ namespace TipBot.Tests.CommandsTests
             Assert.Equal(0, balance);
 
             // Make sure new user was created.
-            using (BotDbContext dbContext = this.testContext.CreateContext())
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
             {
                 Assert.Equal(1, dbContext.Users.Count());
 

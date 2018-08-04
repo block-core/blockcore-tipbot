@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using TipBot.Database;
+using TipBot.Logic.NodeIntegrations;
 
 namespace TipBot.Tests.Helpers
 {
@@ -11,9 +12,9 @@ namespace TipBot.Tests.Helpers
     /// </summary>
     public class TestBot : Logic.TipBot
     {
-        public async Task StartAsync()
+        public new async Task StartAsync(string[] args)
         {
-            await base.StartAsync(new string[0]);
+            await base.StartAsync(args);
         }
 
         protected override IServiceCollection GetServicesCollection()
@@ -21,11 +22,13 @@ namespace TipBot.Tests.Helpers
             // Replace real context factory with the one that serves contexts that are using in-memory database.
             IServiceCollection servicesCollection = base.GetServicesCollection();
 
-            ServiceDescriptor factoryToReplace = servicesCollection.First(x => x.ServiceType == typeof(IContextFactory));
-            servicesCollection.Remove(factoryToReplace);
+            servicesCollection.Remove(servicesCollection.First(x => x.ServiceType == typeof(IContextFactory)));
+            var contextFactoryDescriptor = new ServiceDescriptor(typeof(IContextFactory), typeof(TestContextFactory), ServiceLifetime.Singleton);
+            servicesCollection.Add(contextFactoryDescriptor);
 
-            var descriptor = new ServiceDescriptor(typeof(IContextFactory), typeof(TestContextFactory), ServiceLifetime.Singleton);
-            servicesCollection.Add(descriptor);
+            servicesCollection.Remove(servicesCollection.First(x => x.ServiceType == typeof(INodeIntegration)));
+            var nodeIntegrationDescriptor = new ServiceDescriptor(typeof(INodeIntegration), typeof(TestNodeIntegration), ServiceLifetime.Singleton);
+            servicesCollection.Add(nodeIntegrationDescriptor);
 
             return servicesCollection;
         }

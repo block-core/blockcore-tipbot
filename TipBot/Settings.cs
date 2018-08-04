@@ -9,6 +9,8 @@ namespace TipBot
             this.ConfigReader = configReader;
 
             this.BotToken = configReader.GetOrDefault<string>("token", "NDY4MDI1ODM0NTE5NjU4NDk2.DizKmA.pBifJbNeB0OlIJ5yZxF2kkJSaI8");
+
+            this.EnableMigrations = configReader.GetOrDefault<bool>("enableMigrations", true);
         }
 
         public TextFileConfiguration ConfigReader { get; private set; }
@@ -30,5 +32,8 @@ namespace TipBot
         public int MaxChartUsersCount { get; } = 3;
 
         public int MaxDaysChartCount { get; } = 30;
+
+        /// <summary>Specifies if bit should attempt to update the database on startup.</summary>
+        public bool EnableMigrations { get; private set; }
     }
 }

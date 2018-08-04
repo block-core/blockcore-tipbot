@@ -8,16 +8,16 @@ namespace TipBot.Tests.Helpers
 {
     public class TestContext
     {
-        public readonly TestBot TestBot;
+        private readonly TestBot testBot;
 
         public readonly CommandsManager CommandsManager;
 
         public TestContext()
         {
-            this.TestBot = new TestBot();
-            this.TestBot.StartAsync().GetAwaiter().GetResult();
+            this.testBot = new TestBot();
+            this.testBot.StartAsync(new []{ "-enableMigrations=false" }).GetAwaiter().GetResult();
 
-            this.CommandsManager = this.TestBot.GetService<CommandsManager>();
+            this.CommandsManager = this.testBot.GetService<CommandsManager>();
         }
 
         public IUser SetupUser(ulong id, string username)
@@ -31,7 +31,7 @@ namespace TipBot.Tests.Helpers
 
         public void CreateDiscordUser(IUser user, decimal amount)
         {
-            using (BotDbContext dbContext = this.CreateContext())
+            using (BotDbContext dbContext = this.CreateDbContext())
             {
                 dbContext.Users.Add(new DiscordUserModel()
                 {
@@ -44,9 +44,9 @@ namespace TipBot.Tests.Helpers
             }
         }
 
-        public BotDbContext CreateContext()
+        public BotDbContext CreateDbContext()
         {
-            var factory = this.TestBot.GetService<IContextFactory>();
+            var factory = this.testBot.GetService<IContextFactory>();
 
             return factory.CreateContext();
         }

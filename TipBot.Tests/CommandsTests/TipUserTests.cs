@@ -53,7 +53,7 @@ namespace TipBot.Tests.CommandsTests
 
             this.testContext.CommandsManager.TipUser(this.sender, this.receiver, 10);
 
-            using (BotDbContext dbContext = this.testContext.CreateContext())
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
             {
                 Assert.Equal(2, dbContext.Users.Count());
 
