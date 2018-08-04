@@ -12,12 +12,15 @@ namespace TipBot.Tests.Helpers
 
         public readonly CommandsManager CommandsManager;
 
+        public readonly Settings Settings;
+
         public TestContext()
         {
             this.testBot = new TestBot();
             this.testBot.StartAsync(new []{ "-enableMigrations=false" }).GetAwaiter().GetResult();
 
             this.CommandsManager = this.testBot.GetService<CommandsManager>();
+            this.Settings = this.testBot.GetService<Settings>();
         }
 
         public IUser SetupUser(ulong id, string username)

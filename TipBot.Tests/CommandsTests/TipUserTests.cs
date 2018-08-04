@@ -39,6 +39,14 @@ namespace TipBot.Tests.CommandsTests
         }
 
         [Fact]
+        public void ThrowsIfTipIsTooSmall()
+        {
+            this.testContext.CreateDiscordUser(this.sender, 5);
+
+            Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.TipUser(this.sender, this.receiver, this.testContext.Settings.MinTipAmount / 2));
+        }
+
+        [Fact]
         public void ThrowsIfBalanceIsInsufficient()
         {
             this.testContext.CreateDiscordUser(this.sender, 5);

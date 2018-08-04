@@ -43,6 +43,12 @@ namespace TipBot.Logic
             this.AssertAmountPositive(amount);
             this.AssertUsersNotEqual(sender, userBeingTipped);
 
+            if (amount < this.settings.MinTipAmount)
+            {
+                this.logger.Trace("(-)[TIP TOO SMALL]'");
+                throw new CommandExecutionException($"Minimal tip is {this.settings.MinTipAmount}.");
+            }
+
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
                 DiscordUserModel discordUserSender = this.GetOrCreateUser(context, sender);
