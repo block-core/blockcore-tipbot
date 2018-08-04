@@ -26,5 +26,9 @@ namespace TipBot
         public decimal MinQuizAmount { get; } = 0.1m;
 
         public decimal MinMakeItRainTipAmount { get; } = 0.1m;
+
+        public int MaxChartUsersCount { get; } = 3;
+
+        public int MaxDaysChartCount { get; } = 30;
     }
 }

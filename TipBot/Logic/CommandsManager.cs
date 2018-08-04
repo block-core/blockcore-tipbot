@@ -378,9 +378,16 @@ namespace TipBot.Logic
         /// Gets top users (up to <paramref name="amountOfUsersToReturn"/> for each nomination) who tipped
         /// the most and were tipped the most over the last <paramref name="periodDays"/> days.
         /// </summary>
+        /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
         public TippingChartsModel GetTopTippers(int periodDays, int amountOfUsersToReturn)
         {
-            //TODO logs
+            this.logger.Trace("({0}:{1},{2}:{3})", nameof(periodDays), periodDays, nameof(amountOfUsersToReturn), amountOfUsersToReturn);
+
+            if (periodDays > this.settings.MaxDaysChartCount)
+            {
+                this.logger.Trace("(-)[PERIOD_TOO_LONG]");
+                throw new CommandExecutionException($"Tip amount can't be less than {this.settings.MaxDaysChartCount}.");
+            }
 
             var bestTippers = new Dictionary<ulong, decimal>();
             var bestBeingTipped = new Dictionary<ulong, decimal>();
@@ -408,6 +415,7 @@ namespace TipBot.Logic
                 BestBeingTipped = bestBeingTipped.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
             };
 
+            this.logger.Trace("(-)");
             return model;
         }
 

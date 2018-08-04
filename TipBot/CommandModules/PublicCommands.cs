@@ -314,18 +314,16 @@ namespace TipBot.CommandModules
             await this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("chart", "Displays top tippers and users being tipped over the last N days.", "chart <days>* <maxUsers>*")]
-        public async Task ChartAsync(int days = 7, int maxUsers = 3)
+        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days>*")]
+        public async Task ChartAsync(int days = 7)
         {
             string response;
-
-            // TODO add limitations on days and max users. Maybe make max users not configurable here (move to config)
 
             lock (this.lockObject)
             {
                 try
                 {
-                    TippingChartsModel chart = this.CommandsManager.GetTopTippers(days, maxUsers);
+                    TippingChartsModel chart = this.CommandsManager.GetTopTippers(days, this.Settings.MaxChartUsersCount);
 
                     var builder = new StringBuilder();
 
