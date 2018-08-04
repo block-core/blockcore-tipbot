@@ -4,6 +4,7 @@ using System.Linq;
 using Discord;
 using Discord.WebSocket;
 using NLog;
+using TipBot.CommandModules;
 using TipBot.Database;
 using TipBot.Database.Models;
 using TipBot.Helpers;
@@ -373,6 +374,43 @@ namespace TipBot.Logic
             }
         }
 
+        /// <summary>
+        /// Gets top users (up to <paramref name="amountOfUsersToReturn"/> for each nomination) who tipped
+        /// the most and were tipped the most over the last <paramref name="periodDays"/> days.
+        /// </summary>
+        public TippingChartsModel GetTopTippers(int periodDays, int amountOfUsersToReturn)
+        {
+            //TODO logs
+
+            var bestTippers = new Dictionary<ulong, decimal>();
+            var bestBeingTipped = new Dictionary<ulong, decimal>();
+
+            using (BotDbContext context = this.contextFactory.CreateContext())
+            {
+                DateTime earliestCreationDate = DateTime.Now - TimeSpan.FromDays(periodDays);
+
+                foreach (TipModel tip in context.TipsHistory.Where(x => x.CreationTime > earliestCreationDate))
+                {
+                    if (!bestTippers.ContainsKey(tip.SenderDiscordUserId))
+                        bestTippers.Add(tip.SenderDiscordUserId, 0);
+
+                    if (!bestBeingTipped.ContainsKey(tip.ReceiverDiscordUserId))
+                        bestBeingTipped.Add(tip.ReceiverDiscordUserId, 0);
+
+                    bestTippers[tip.SenderDiscordUserId] += tip.Amount;
+                    bestBeingTipped[tip.ReceiverDiscordUserId] += tip.Amount;
+                }
+            }
+
+            var model = new TippingChartsModel()
+            {
+                BestTippers = bestTippers.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
+                BestBeingTipped = bestBeingTipped.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
+            };
+
+            return model;
+        }
+
         private DiscordUserModel GetOrCreateUser(BotDbContext context, IUser user)
         {
             this.logger.Trace("({0}:{1})", nameof(user), user.Id);
@@ -491,5 +529,11 @@ namespace TipBot.Logic
         public string QuizQuestion { get; set; }
 
         public decimal Reward { get; set; }
+    }
+
+    public class TippingChartsModel
+    {
+        public List<KeyValuePair<ulong, decimal>> BestTippers;
+        public List<KeyValuePair<ulong, decimal>> BestBeingTipped;
     }
 }

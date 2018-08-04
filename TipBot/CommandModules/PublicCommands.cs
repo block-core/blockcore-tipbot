@@ -314,6 +314,45 @@ namespace TipBot.CommandModules
             await this.ReplyAsync(response);
         }
 
+        [CommandWithHelp("chart", "Displays top tippers and users being tipped over the last N days.", "chart <days>* <maxUsers>*")]
+        public async Task ChartAsync(int days = 7, int maxUsers = 3)
+        {
+            string response;
+
+            // TODO add limitations on days and max users. Maybe make max users not configurable here (move to config)
+
+            lock (this.lockObject)
+            {
+                try
+                {
+                    TippingChartsModel chart = this.CommandsManager.GetTopTippers(days, maxUsers);
+
+                    var builder = new StringBuilder();
+
+                    builder.AppendLine($"Top {chart.BestTippers.Count} users who tipped the most in the last {days} days:");
+
+                    foreach (KeyValuePair<ulong, decimal> tipper in chart.BestTippers)
+                        builder.AppendLine($"<@!{tipper.Key}> tipped {tipper.Value} {this.Settings.Ticker}");
+
+                    builder.AppendLine();
+
+                    builder.AppendLine($"Top {chart.BestBeingTipped.Count} users who were tipped the most in the last {days} days:");
+
+                    foreach (KeyValuePair<ulong, decimal> beingTipped in chart.BestBeingTipped)
+                        builder.AppendLine($"<@!{beingTipped.Key}> received {beingTipped.Value} {this.Settings.Ticker}");
+
+
+                    response = builder.ToString();
+                }
+                catch (CommandExecutionException exception)
+                {
+                    response = "Error: " + exception.Message;
+                }
+            }
+
+            await this.ReplyAsync(response);
+        }
+
         [CommandWithHelp("about", "Displays information about the bot.")]
         public async Task AboutAsync()
         {
