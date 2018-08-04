@@ -45,6 +45,7 @@ namespace TipBot.Logic
                 catch (Exception exception)
                 {
                     this.logger.Fatal(exception.ToString);
+                    this.logger.Trace("(-)[EXCEPTION]");
                     throw;
                 }
             });
@@ -81,8 +82,12 @@ namespace TipBot.Logic
 
         public void Dispose()
         {
+            this.logger.Trace("()");
+
             this.cancellation.Cancel();
             this.quizCheckingTask?.GetAwaiter().GetResult();
+
+            this.logger.Trace("(-)");
         }
     }
 }

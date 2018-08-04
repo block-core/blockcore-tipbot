@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Discord;
-using Discord.WebSocket;
 using NLog;
-using TipBot.CommandModules;
 using TipBot.Database;
 using TipBot.Database.Models;
 using TipBot.Helpers;
@@ -115,17 +113,17 @@ namespace TipBot.Logic
 
             this.AssertAmountPositive(amount);
 
+            if (amount < this.settings.MinWithdrawAmount)
+            {
+                this.logger.Trace("(-)[MIN_WITHDRAW_AMOUNT]");
+                throw new CommandExecutionException($"Minimal withdraw amount is {this.settings.MinWithdrawAmount} {this.settings.Ticker}.");
+            }
+
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
                 DiscordUserModel discordUser = this.GetOrCreateUser(context, user);
 
                 this.AssertBalanceIsSufficient(discordUser, amount);
-
-                if (amount < this.settings.MinWithdrawAmount)
-                {
-                    this.logger.Trace("(-)[MIN_WITHDRAW_AMOUNT]");
-                    throw new CommandExecutionException($"Minimal withdraw amount is {this.settings.MinWithdrawAmount} {this.settings.Ticker}.");
-                }
 
                 try
                 {
@@ -455,16 +453,6 @@ namespace TipBot.Logic
 
             this.logger.Trace("(-):'{0}'", discordUser);
             return discordUser;
-        }
-
-        private bool UserExists(BotDbContext context, ulong discordUserId)
-        {
-            this.logger.Trace("({0}:{1})", nameof(discordUserId), discordUserId);
-
-            bool userExists = context.Users.Any(x => x.DiscordUserId == discordUserId);
-
-            this.logger.Trace("(-):{0}", userExists);
-            return userExists;
         }
 
         private void AddTipToHistory(BotDbContext context, decimal amount, ulong receiverDiscordUserId, ulong senderDiscordUserId)
