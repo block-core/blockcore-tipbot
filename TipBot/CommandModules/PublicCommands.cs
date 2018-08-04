@@ -65,7 +65,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
@@ -93,7 +93,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
@@ -120,7 +120,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
@@ -140,7 +140,7 @@ namespace TipBot.CommandModules
                 response = $"{sender.Mention}, you have {balance} {this.Settings.Ticker}!";
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
@@ -193,7 +193,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             await this.ReplyAsync(response);
         }
 
@@ -233,7 +233,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             await this.ReplyAsync(response);
         }
 
@@ -266,7 +266,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
@@ -305,7 +305,7 @@ namespace TipBot.CommandModules
                 }
             }
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
@@ -343,7 +343,7 @@ namespace TipBot.CommandModules
                     response.AppendLine("Start a new one yourself using `startQuiz` command!");
                 }
 
-                this.logger.Trace("(-):{0}", response);
+                this.logger.Trace("(-)");
                 return this.ReplyAsync(response.ToString());
             }
         }
@@ -382,12 +382,12 @@ namespace TipBot.CommandModules
 
             string response = builder.ToString();
 
-            this.logger.Trace("(-):{0}", response);
+            this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
 
         [CommandWithHelp("about", "Displays information about the bot.")]
-        public async Task AboutAsync()
+        public Task AboutAsync()
         {
             this.logger.Trace("()");
 
@@ -397,18 +397,19 @@ namespace TipBot.CommandModules
 
             string text = "`TipBot`" + Environment.NewLine + $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/noescape00/DiscordTipBot>";
 
-            await this.Context.Channel.SendFileAsync(stream, "logo.png", text);
-
             this.logger.Trace("(-)");
+            return this.Context.Channel.SendFileAsync(stream, "logo.png", text);
         }
 
         private Stream GetLogo()
         {
+            this.logger.Trace("()");
             Assembly assembly = this.GetType().GetTypeInfo().Assembly;
             Stream stream = assembly.GetManifestResourceStream("TipBot.Content.Logo.png");
 
             stream.Seek(0, SeekOrigin.Begin);
 
+            this.logger.Trace("(-)");
             return stream;
         }
     }
