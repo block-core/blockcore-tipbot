@@ -298,18 +298,22 @@ namespace TipBot.Logic
 
         /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
         /// <returns>List of users that were tipped.</returns>
-        public List<DiscordUserModel> RandomlyTipUsers(IUser caller, List<IUser> onlineUsers, decimal amount)
+        public List<DiscordUserModel> RandomlyTipUsers(IUser caller, List<IUser> onlineUsers, decimal totalAmount, decimal tipAmount)
         {
-            this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(caller), caller.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(amount), amount);
+            this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(caller), caller.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(totalAmount), totalAmount);
 
-            this.AssertAmountPositive(amount);
+            this.AssertAmountPositive(totalAmount);
 
-            var coinsToTip = (int)amount;
+            if (tipAmount < this.settings.MinMakeItRainTipAmount)
+            {
+                this.logger.Trace("(-)[TIP_SIZE_TOO_SMALL]'");
+                throw new CommandExecutionException($"Tip amount can't be less than {this.settings.MinMakeItRainTipAmount}.");
+            }
 
-            if (coinsToTip < 1)
+            if (totalAmount < tipAmount)
             {
                 this.logger.Trace("(-)[AMOUNT_TOO_SMALL]'");
-                throw new CommandExecutionException("Amount can't be less 1.");
+                throw new CommandExecutionException("Total amount for tipping can't be less than specified tip amount.");
             }
 
             if (onlineUsers.Count == 0)
@@ -318,21 +322,25 @@ namespace TipBot.Logic
                 throw new CommandExecutionException("There are no users online!");
             }
 
-            if (coinsToTip > onlineUsers.Count)
+            var tipsCount = (int)(totalAmount / tipAmount);
+
+            if (tipsCount > onlineUsers.Count)
             {
                 this.logger.Trace("Coins to tip was set to amount of users.");
-                coinsToTip = onlineUsers.Count;
+                tipsCount = onlineUsers.Count;
             }
+
+            decimal amountToSpend = tipAmount * tipsCount;
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
                 DiscordUserModel discordUserCreator = this.GetOrCreateUser(context, caller);
 
-                this.AssertBalanceIsSufficient(discordUserCreator, coinsToTip);
+                this.AssertBalanceIsSufficient(discordUserCreator, amountToSpend);
 
-                var chosenDiscordUsers = new List<DiscordUserModel>(coinsToTip);
+                var chosenDiscordUsers = new List<DiscordUserModel>(tipsCount);
 
-                for (int i = 0; i < coinsToTip; i++)
+                for (int i = 0; i < tipsCount; i++)
                 {
                     int userIndex = this.random.Next(onlineUsers.Count);
 
@@ -343,20 +351,20 @@ namespace TipBot.Logic
                     chosenDiscordUsers.Add(chosenDiscordUser);
                 }
 
-                discordUserCreator.Balance -= coinsToTip;
+                discordUserCreator.Balance -= amountToSpend;
                 context.Update(discordUserCreator);
 
                 foreach (DiscordUserModel discordUser in chosenDiscordUsers)
                 {
-                    discordUser.Balance += 1;
+                    discordUser.Balance += tipAmount;
                     context.Update(discordUser);
 
-                    this.AddTipToHistory(context, 1, discordUser.DiscordUserId, discordUserCreator.DiscordUserId);
+                    this.AddTipToHistory(context, tipAmount, discordUser.DiscordUserId, discordUserCreator.DiscordUserId);
 
                     this.logger.Debug("User '{0}' was randomly tipped.", discordUser);
                 }
 
-                this.logger.Debug("User '{0}' tipped {1} users one coin each.", discordUserCreator, chosenDiscordUsers.Count);
+                this.logger.Debug("User '{0}' tipped {1} users {2} coins each.", discordUserCreator, chosenDiscordUsers.Count, tipAmount);
 
                 context.SaveChanges();
 

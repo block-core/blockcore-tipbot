@@ -24,5 +24,7 @@ namespace TipBot
         public decimal MinWithdrawAmount { get; } = 0.1m;
 
         public decimal MinQuizAmount { get; } = 0.1m;
+
+        public decimal MinMakeItRainTipAmount { get; } = 0.1m;
     }
 }

@@ -264,8 +264,9 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(builder.ToString());
         }
 
-        [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin.", "makeItRain <amount>")]
-        public async Task MakeItRainAsync(decimal amount)
+        [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin (or another value if specified by caller)." +
+                                       "Amount of users that will be tipped is equal to totalAmount / tipAmount(1 by default)", "makeItRain <totalAmount> <tipAmount>*")]
+        public async Task MakeItRainAsync(decimal amount, decimal tipAmount = 1)
         {
             IUser caller = this.Context.User;
 
@@ -277,21 +278,19 @@ namespace TipBot.CommandModules
                 onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline));
             });
 
-            string response = null;
-
-            //TODO maybe weight by activity?
+            string response;
 
             lock (this.lockObject)
             {
                 try
                 {
-                    List<DiscordUserModel> usersBeingTipped = this.CommandsManager.RandomlyTipUsers(caller, onlineUsers, amount);
+                    List<DiscordUserModel> usersBeingTipped = this.CommandsManager.RandomlyTipUsers(caller, onlineUsers, amount, tipAmount);
 
                     var builder = new StringBuilder();
 
                     var tadaEmoji = ":tada:";
 
-                    builder.AppendLine($"{tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users 1 {this.Settings.Ticker} each!{tadaEmoji}");
+                    builder.AppendLine($"{tadaEmoji}{caller.Mention} just tipped {usersBeingTipped.Count} users {tipAmount} {this.Settings.Ticker} each!{tadaEmoji}");
                     builder.AppendLine();
 
                     foreach (DiscordUserModel tippedUser in usersBeingTipped)
@@ -302,11 +301,9 @@ namespace TipBot.CommandModules
                             builder.Append(", ");
                     }
 
-                    builder.Append($" - you all received 1 {this.Settings.Ticker}!");
+                    builder.Append($" - you all received {tipAmount} {this.Settings.Ticker}!");
 
                     response = builder.ToString();
-
-                    // TODO add hoorray smiles and maybe image
                 }
                 catch (CommandExecutionException exception)
                 {
