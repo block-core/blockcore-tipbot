@@ -1,63 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Discord;
+using TipBot.Database;
+using TipBot.Database.Models;
+using TipBot.Logic;
+using TipBot.Tests.Helpers;
+using Xunit;
 
 namespace TipBot.Tests.CommandsTests
 {
     public class TopTippersChartTestscs
     {
-        //TODO
-        /*
-         * /// <summary>
-        /// Gets top users (up to <paramref name="amountOfUsersToReturn"/> for each nomination) who tipped
-        /// the most and were tipped the most over the last <paramref name="periodDays"/> days.
-        /// </summary>
-        /// <exception cref="CommandExecutionException">Thrown when user supplied invalid input data.</exception>
-        public TippingChartsModel GetTopTippers(int periodDays, int amountOfUsersToReturn)
+        private readonly TestContext testContext;
+
+        private readonly IUser caller;
+
+        private readonly List<IUser> onlineUsers;
+
+        public TopTippersChartTestscs()
         {
-            this.logger.Trace("({0}:{1},{2}:{3})", nameof(periodDays), periodDays, nameof(amountOfUsersToReturn), amountOfUsersToReturn);
+            this.testContext = new TestContext();
 
-            if (periodDays > this.settings.MaxDaysChartCount)
+            this.caller = this.testContext.SetupUser(1, "caller");
+
+            // That will create a user in db.
+            this.testContext.CommandsManager.GetUserBalance(this.caller);
+
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
             {
-                this.logger.Trace("(-)[PERIOD_TOO_LONG]");
-                throw new CommandExecutionException($"Period in days can't be longer than {this.settings.MaxDaysChartCount}.");
+                DiscordUserModel user = dbContext.Users.First();
+                user.Balance = 10;
+                dbContext.Update(user);
+                dbContext.SaveChanges();
             }
 
-            if (periodDays < 1)
+            this.onlineUsers = new List<IUser>();
+            for (int i = 0; i < 10; i++)
             {
-                this.logger.Trace("(-)[PERIOD_TOO_SHORT]");
-                throw new CommandExecutionException($"Period in days can't be shorter than 1 day.");
+                IUser user = this.testContext.SetupUser((ulong)(i + 2), i.ToString());
+                this.onlineUsers.Add(user);
             }
-
-            var bestTippers = new Dictionary<ulong, decimal>();
-            var bestBeingTipped = new Dictionary<ulong, decimal>();
-
-            using (BotDbContext context = this.contextFactory.CreateContext())
-            {
-                DateTime earliestCreationDate = DateTime.Now - TimeSpan.FromDays(periodDays);
-
-                foreach (TipModel tip in context.TipsHistory.Where(x => x.CreationTime > earliestCreationDate))
-                {
-                    if (!bestTippers.ContainsKey(tip.SenderDiscordUserId))
-                        bestTippers.Add(tip.SenderDiscordUserId, 0);
-
-                    if (!bestBeingTipped.ContainsKey(tip.ReceiverDiscordUserId))
-                        bestBeingTipped.Add(tip.ReceiverDiscordUserId, 0);
-
-                    bestTippers[tip.SenderDiscordUserId] += tip.Amount;
-                    bestBeingTipped[tip.ReceiverDiscordUserId] += tip.Amount;
-                }
-            }
-
-            var model = new TippingChartsModel()
-            {
-                BestTippers = bestTippers.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
-                BestBeingTipped = bestBeingTipped.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
-            };
-
-            this.logger.Trace("(-)");
-            return model;
         }
-         */
+
+        [Fact]
+        public void ThrowsIfPeriodTooLong()
+        {
+            Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.GetTopTippers(this.testContext.Settings.MaxDaysChartCount * 2, 3));
+        }
+
+        [Fact]
+        public void ThrowsIfPeriodLassThanOne()
+        {
+            Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.GetTopTippers(0, 3));
+        }
+
+        [Fact]
+        public void ReturnsChart()
+        {
+            this.testContext.CommandsManager.TipUser(this.caller, this.onlineUsers[0], 1);
+            this.testContext.CommandsManager.TipUser(this.caller, this.onlineUsers[1], 1);
+            this.testContext.CommandsManager.TipUser(this.caller, this.onlineUsers[2], 1);
+
+            TippingChartsModel chart = this.testContext.CommandsManager.GetTopTippers(1, 3);
+
+            Assert.Single(chart.BestTippers);
+            Assert.Equal(3, chart.BestTippers.First().Value);
+
+            Assert.Equal(3, chart.BestBeingTipped.Count);
+
+            foreach (KeyValuePair<ulong, decimal> tipped in chart.BestBeingTipped)
+                Assert.Equal(1, tipped.Value);
+        }
     }
 }
