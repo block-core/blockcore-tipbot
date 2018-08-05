@@ -49,7 +49,7 @@ namespace TipBot.Helpers
         public TextFileConfiguration(string data)
         {
             this.args = new Dictionary<string, List<string>>();
-            int lineNumber = 0;
+            var lineNumber = 0;
             // Process all lines, even if empty.
             foreach (string l in data.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
             {

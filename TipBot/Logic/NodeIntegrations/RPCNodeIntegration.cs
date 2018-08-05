@@ -122,6 +122,7 @@ namespace TipBot.Logic.NodeIntegrations
                 catch (RpcException e)
                 {
                     this.logger.Info("Too many attempts. Waiting 10 sec.", toGenerateCount);
+                    this.logger.Trace("Exception: {0}", e.ToString());
                     Thread.Sleep(10000);
                     i--;
                 }

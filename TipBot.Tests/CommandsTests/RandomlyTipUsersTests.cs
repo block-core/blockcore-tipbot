@@ -35,7 +35,7 @@ namespace TipBot.Tests.CommandsTests
             }
 
             this.onlineUsers = new List<IUser>();
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 IUser user = this.testContext.SetupUser((ulong)(i + 2), i.ToString());
                 this.onlineUsers.Add(user);

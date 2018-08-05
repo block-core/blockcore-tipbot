@@ -59,7 +59,7 @@ namespace TipBot.Tests.CommandsTests
         public void StartQuiz_AssertsQuestionIsNotTooLong()
         {
             var builder = new StringBuilder();
-            for (int i = 0; i < 5000; i++)
+            for (var i = 0; i < 5000; i++)
                 builder.Append("qwe");
 
             Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.StartQuiz(this.caller, 1, this.hash, 2, builder.ToString()));

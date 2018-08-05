@@ -345,7 +345,7 @@ namespace TipBot.Logic
 
                 var chosenDiscordUsers = new List<DiscordUserModel>(tipsCount);
 
-                for (int i = 0; i < tipsCount; i++)
+                for (var i = 0; i < tipsCount; i++)
                 {
                     int userIndex = this.random.Next(onlineUsers.Count);
 
