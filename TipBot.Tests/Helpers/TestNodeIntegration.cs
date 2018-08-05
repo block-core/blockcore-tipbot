@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TipBot.Logic.NodeIntegrations;
+﻿using TipBot.Logic.NodeIntegrations;
 
 namespace TipBot.Tests.Helpers
 {
