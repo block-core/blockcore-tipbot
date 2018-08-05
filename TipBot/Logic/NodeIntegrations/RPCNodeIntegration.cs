@@ -29,12 +29,11 @@ namespace TipBot.Logic.NodeIntegrations
 
         public RPCNodeIntegration(Settings settings, IContextFactory contextFactory)
         {
-            // To run stratis daemon that supports RPC use "dotnet exec ...\netcoreapp2.1\Stratis.StratisD.dll -rpcuser=user -rpcpassword=4815162342 -rpcport=23521 -server=1"
             var daemonUrl = settings.ConfigReader.GetOrDefault<string>("daemonUrl", "http://127.0.0.1:23521/");
             var rpcUsername = settings.ConfigReader.GetOrDefault<string>("rpcUsername", "user");
-            var rpcPassword = settings.ConfigReader.GetOrDefault<string>("rpcPassword", "4815162342");
+            var rpcPassword = settings.ConfigReader.GetOrDefault<string>("rpcPassword", "pass");
             var rpcRequestTimeoutInSeconds = settings.ConfigReader.GetOrDefault<short>("rpcTimeout", 20);
-            this.walletPassword = settings.ConfigReader.GetOrDefault<string>("walletPassword", "4815162342");
+            this.walletPassword = settings.ConfigReader.GetOrDefault<string>("walletPassword", "walletpass");
 
             this.coinService = new BitcoinService(daemonUrl, rpcUsername, rpcPassword, this.walletPassword, rpcRequestTimeoutInSeconds);
             this.contextFactory = contextFactory;
