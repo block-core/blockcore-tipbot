@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Discord;
 using TipBot.Database;
 using TipBot.Database.Models;
+using TipBot.Helpers;
 using TipBot.Logic;
 using TipBot.Tests.Helpers;
 using Xunit;
@@ -106,75 +106,78 @@ namespace TipBot.Tests.CommandsTests
             }
         }
 
-        //TODO
-        /*
-         *
-
-        public List<QuizModel> GetActiveQuizes()
+        [Fact]
+        public void GetActiveQuizes_ReturnsActiveQuizes()
         {
-            this.logger.Trace("()");
-
-            using (BotDbContext context = this.contextFactory.CreateContext())
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
             {
-                List<QuizModel> quizes = context.ActiveQuizes.ToList();
-
-                this.logger.Trace("(-):{0}", quizes.Count);
-                return quizes;
+                Assert.Equal(0, dbContext.ActiveQuizes.Count());
             }
+
+            Assert.Empty(this.testContext.CommandsManager.GetActiveQuizes());
+
+            this.testContext.CommandsManager.StartQuiz(this.caller, 2, Cryptography.Hash("1"), 2, string.Empty);
+            this.testContext.CommandsManager.StartQuiz(this.caller, 2, Cryptography.Hash("2"), 2, string.Empty);
+
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
+            {
+                Assert.Equal(2, dbContext.ActiveQuizes.Count());
+            }
+
+            Assert.Equal(2, this.testContext.CommandsManager.GetActiveQuizes().Count);
         }
 
-        public AnswerToQuizResponseModel AnswerToQuiz(IUser user, string answer)
+        [Fact]
+        public void AnswerToQuiz_FailsIfAnswerTooLong()
         {
-            this.logger.Trace("({0}:'{1}')", nameof(answer), answer);
-
-            if (answer.Length > 1024)
-            {
-                // We don't want to hash big strings.
-                this.logger.Trace("(-)[ANSWER_TOO_LONG]");
-                return new AnswerToQuizResponseModel() { Success = false };
-            }
-
-            string answerHash = Cryptography.Hash(answer);
-
-            using (BotDbContext context = this.contextFactory.CreateContext())
-            {
-                foreach (QuizModel quiz in context.ActiveQuizes.ToList())
-                {
-                    if (DateTime.Now > (quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)))
-                    {
-                        // Quiz expired but just not deleted yet.
-                        continue;
-                    }
-
-                    if (quiz.AnswerHash == answerHash)
-                    {
-                        DiscordUserModel winner = this.GetOrCreateUser(context, user);
-
-                        winner.Balance += quiz.Reward;
-                        context.Update(winner);
-
-                        context.ActiveQuizes.Remove(quiz);
-                        context.SaveChanges();
-
-                        this.logger.Debug("User {0} solved quiz with hash {1} and received a reward of {2}.", winner, quiz.AnswerHash, quiz.Reward);
-
-                        var response = new AnswerToQuizResponseModel()
-                        {
-                            Success = true,
-                            Reward = quiz.Reward,
-                            QuizCreatorDiscordUserId = quiz.CreatorDiscordUserId,
-                            QuizQuestion = quiz.Question
-                        };
-
-                        this.logger.Trace("(-)");
-                        return response;
-                    }
-                }
-            }
-
-            this.logger.Trace("(-)[QUIZ_NOT_FOUND]");
-            return new AnswerToQuizResponseModel() { Success = false };
+            AnswerToQuizResponseModel answer = this.testContext.CommandsManager.AnswerToQuiz(this.caller, RandomStringGenerator.RandomString(1025));
+            Assert.False(answer.Success);
         }
-         */
+
+        [Fact]
+        public void AnswerToQuiz_FailsIfHashNotCorrect()
+        {
+            this.testContext.CommandsManager.StartQuiz(this.caller, 2, Cryptography.Hash("1"), 2, string.Empty);
+
+            AnswerToQuizResponseModel answer = this.testContext.CommandsManager.AnswerToQuiz(this.caller, "2");
+            Assert.False(answer.Success);
+        }
+
+        [Fact]
+        public void AnswerToQuiz_FailsIfTimeIsCorrectButExpired()
+        {
+            this.testContext.CommandsManager.StartQuiz(this.caller, 2, Cryptography.Hash("1"), 2, string.Empty);
+
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
+            {
+                QuizModel quiz = dbContext.ActiveQuizes.First();
+                quiz.CreationTime = DateTime.Now - TimeSpan.FromMinutes(20);
+                dbContext.Update(quiz);
+                dbContext.SaveChanges();
+            }
+
+            AnswerToQuizResponseModel answer = this.testContext.CommandsManager.AnswerToQuiz(this.caller, "1");
+            Assert.False(answer.Success);
+        }
+
+        [Fact]
+        public void AnswerToQuiz_AnsweredCorrectly()
+        {
+            this.testContext.CommandsManager.StartQuiz(this.caller, 2, Cryptography.Hash("1"), 2, string.Empty);
+            this.testContext.CommandsManager.StartQuiz(this.caller, 2, Cryptography.Hash("2"), 2, string.Empty);
+
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
+            {
+                Assert.Equal(2, dbContext.ActiveQuizes.Count());
+            }
+
+            AnswerToQuizResponseModel answer = this.testContext.CommandsManager.AnswerToQuiz(this.caller, "1");
+            Assert.True(answer.Success);
+
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
+            {
+                Assert.Equal(1, dbContext.ActiveQuizes.Count());
+            }
+        }
     }
 }
