@@ -1,87 +1,98 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Discord;
+using TipBot.Database;
+using TipBot.Database.Models;
+using TipBot.Logic;
+using TipBot.Tests.Helpers;
+using Xunit;
 
 namespace TipBot.Tests.CommandsTests
 {
     public class RandomlyTipUsersTests
     {
-        //TODO
-        /*
-         * public List<DiscordUserModel> RandomlyTipUsers(IUser caller, List<IUser> onlineUsers, decimal totalAmount, decimal tipAmount)
+        private readonly TestContext testContext;
+
+        private readonly IUser caller;
+
+        private readonly List<IUser> onlineUsers;
+
+        public RandomlyTipUsersTests()
         {
-            this.logger.Trace("({0}:{1},{2}.{3}:{4},{5}:{6})", nameof(caller), caller.Id, nameof(onlineUsers), nameof(onlineUsers.Count), onlineUsers.Count, nameof(totalAmount), totalAmount);
+            this.testContext = new TestContext();
 
-            this.AssertAmountPositive(totalAmount);
+            this.caller = this.testContext.SetupUser(1, "caller");
 
-            if (tipAmount < this.settings.MinMakeItRainTipAmount)
+            // That will create a user in db.
+            this.testContext.CommandsManager.GetUserBalance(this.caller);
+
+            using (BotDbContext dbContext = this.testContext.CreateDbContext())
             {
-                this.logger.Trace("(-)[TIP_SIZE_TOO_SMALL]'");
-                throw new CommandExecutionException($"Tip amount can't be less than {this.settings.MinMakeItRainTipAmount}.");
+                DiscordUserModel user = dbContext.Users.First();
+                user.Balance = 10;
+                dbContext.Update(user);
+                dbContext.SaveChanges();
             }
 
-            if (totalAmount < tipAmount)
+            this.onlineUsers = new List<IUser>();
+            for (int i = 0; i < 10; i++)
             {
-                this.logger.Trace("(-)[AMOUNT_TOO_SMALL]'");
-                throw new CommandExecutionException("Total amount for tipping can't be less than specified tip amount.");
-            }
-
-            if (onlineUsers.Count == 0)
-            {
-                this.logger.Trace("(-)[NO_USERS_ONLINE]'");
-                throw new CommandExecutionException("There are no users online!");
-            }
-
-            var tipsCount = (int)(totalAmount / tipAmount);
-
-            if (tipsCount > onlineUsers.Count)
-            {
-                this.logger.Trace("Coins to tip was set to amount of users.");
-                tipsCount = onlineUsers.Count;
-            }
-
-            decimal amountToSpend = tipAmount * tipsCount;
-
-            using (BotDbContext context = this.contextFactory.CreateContext())
-            {
-                DiscordUserModel discordUserCreator = this.GetOrCreateUser(context, caller);
-
-                this.AssertBalanceIsSufficient(discordUserCreator, amountToSpend);
-
-                var chosenDiscordUsers = new List<DiscordUserModel>(tipsCount);
-
-                for (int i = 0; i < tipsCount; i++)
-                {
-                    int userIndex = this.random.Next(onlineUsers.Count);
-
-                    IUser chosenUser = onlineUsers[userIndex];
-                    onlineUsers.Remove(chosenUser);
-
-                    DiscordUserModel chosenDiscordUser = this.GetOrCreateUser(context, chosenUser);
-                    chosenDiscordUsers.Add(chosenDiscordUser);
-                }
-
-                discordUserCreator.Balance -= amountToSpend;
-                context.Update(discordUserCreator);
-
-                foreach (DiscordUserModel discordUser in chosenDiscordUsers)
-                {
-                    discordUser.Balance += tipAmount;
-                    context.Update(discordUser);
-
-                    this.AddTipToHistory(context, tipAmount, discordUser.DiscordUserId, discordUserCreator.DiscordUserId);
-
-                    this.logger.Debug("User '{0}' was randomly tipped.", discordUser);
-                }
-
-                this.logger.Debug("User '{0}' tipped {1} users {2} coins each.", discordUserCreator, chosenDiscordUsers.Count, tipAmount);
-
-                context.SaveChanges();
-
-                this.logger.Trace("(-)");
-                return chosenDiscordUsers;
+                IUser user = this.testContext.SetupUser((ulong)(i + 2), i.ToString());
+                this.onlineUsers.Add(user);
             }
         }
-         */
+
+        [Fact]
+        public void AssertsAmountPositive()
+        {
+            Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.RandomlyTipUsers(this.caller, this.onlineUsers, -1, 1));
+        }
+
+        [Fact]
+        public void ThrowsIfAmountIsLessThanMinimum()
+        {
+            Assert.Throws<CommandExecutionException>(() =>
+                this.testContext.CommandsManager.RandomlyTipUsers(this.caller, this.onlineUsers, this.testContext.Settings.MinMakeItRainTipAmount/2, 1));
+        }
+
+        [Fact]
+        public void ThrowsIfTotalAmountIsLessThanTipAmount()
+        {
+            Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.RandomlyTipUsers(this.caller, this.onlineUsers, 2, 3));
+        }
+
+        [Fact]
+        public void ThrowsIfThereAreNoUsers()
+        {
+            Assert.Throws<CommandExecutionException>(() => this.testContext.CommandsManager.RandomlyTipUsers(this.caller, new List<IUser>(), 2, 1));
+        }
+
+        [Fact]
+        public void TipsSuccessfully()
+        {
+            this.testContext.CommandsManager.RandomlyTipUsers(this.caller, this.onlineUsers, 10, 1);
+
+            Assert.Equal(0, this.testContext.CommandsManager.GetUserBalance(this.caller));
+
+            foreach (IUser user in this.onlineUsers)
+            {
+                Assert.Equal(1, this.testContext.CommandsManager.GetUserBalance(user));
+            }
+        }
+
+        [Fact]
+        public void TipsSuccessfully2()
+        {
+            this.testContext.CommandsManager.RandomlyTipUsers(this.caller, this.onlineUsers, 20, 0.5m);
+
+            Assert.Equal(5, this.testContext.CommandsManager.GetUserBalance(this.caller));
+
+            foreach (IUser user in this.onlineUsers)
+            {
+                Assert.Equal(0.5m, this.testContext.CommandsManager.GetUserBalance(user));
+            }
+        }
     }
 }
