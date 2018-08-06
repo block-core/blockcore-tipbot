@@ -13,15 +13,18 @@ namespace TipBot.Logic
     {
         private readonly IContextFactory contextFactory;
         private readonly CancellationTokenSource cancellation;
+        private readonly FatalErrorNotifier fatalNotifier;
         private readonly Logger logger;
 
         private Task quizCheckingTask;
 
-        public QuizExpiryChecker(IContextFactory contextFactory)
+
+        public QuizExpiryChecker(IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
         {
             this.contextFactory = contextFactory;
             this.logger = LogManager.GetCurrentClassLogger();
             this.cancellation = new CancellationTokenSource();
+            this.fatalNotifier = fatalNotifier;
         }
 
         public void Initialize()
@@ -45,6 +48,8 @@ namespace TipBot.Logic
                 catch (Exception exception)
                 {
                     this.logger.Fatal(exception.ToString);
+                    this.fatalNotifier.NotifySupport(exception.ToString());
+
                     this.logger.Trace("(-)[EXCEPTION]");
                     throw;
                 }

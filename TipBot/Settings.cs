@@ -37,5 +37,9 @@ namespace TipBot
 
         /// <summary>Specifies if bit should attempt to update the database on startup.</summary>
         public bool EnableMigrations { get; private set; }
+
+        /// <summary>Nickname of a user that will receive a message in case of a fatal error.</summary>
+        public string SupportUsername { get; } = "NoEscape0";
+        public string SupportDiscriminator { get; } = "5537";
     }
 }

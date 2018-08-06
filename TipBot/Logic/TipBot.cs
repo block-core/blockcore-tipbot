@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -53,6 +54,7 @@ namespace TipBot.Logic
                 await client.StartAsync();
 
                 await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+                await this.services.GetRequiredService<FatalErrorNotifier>().InitializeAsync(client, settings);
             }
             catch (Exception exception)
             {
@@ -81,6 +83,7 @@ namespace TipBot.Logic
                 .AddSingleton<Settings>()
                 .AddSingleton<CommandsManager>()
                 .AddSingleton<QuizExpiryChecker>()
+                .AddSingleton<FatalErrorNotifier>()
                 .AddSingleton<IContextFactory, ContextFactory>()
                 // Replace implementation to use API instead of RPC.
                 .AddSingleton<INodeIntegration, RPCNodeIntegration>();

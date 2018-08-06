@@ -27,7 +27,9 @@ namespace TipBot.Logic.NodeIntegrations
 
         private readonly string walletPassword;
 
-        public RPCNodeIntegration(Settings settings, IContextFactory contextFactory)
+        private readonly FatalErrorNotifier fatalNotifier;
+
+        public RPCNodeIntegration(Settings settings, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
         {
             var daemonUrl = settings.ConfigReader.GetOrDefault<string>("daemonUrl", "http://127.0.0.1:23521/");
             var rpcUsername = settings.ConfigReader.GetOrDefault<string>("rpcUsername", "user");
@@ -40,6 +42,7 @@ namespace TipBot.Logic.NodeIntegrations
             this.settings = settings;
             this.cancellation = new CancellationTokenSource();
             this.logger = LogManager.GetCurrentClassLogger();
+            this.fatalNotifier = fatalNotifier;
         }
 
         /// <inheritdoc />
@@ -88,7 +91,8 @@ namespace TipBot.Logic.NodeIntegrations
                 if (e.Message == "Insufficient funds")
                 {
                     // This should never happen.
-                    this.logger.Fatal("Insufficient funds!");
+                    this.logger.Fatal(e.Message);
+                    this.fatalNotifier.NotifySupport(e.Message);
                 }
 
                 this.logger.Error(e.ToString);
@@ -176,6 +180,7 @@ namespace TipBot.Logic.NodeIntegrations
                 catch (Exception exception)
                 {
                     this.logger.Fatal(exception.ToString);
+                    this.fatalNotifier.NotifySupport(exception.ToString());
                     throw;
                 }
             });

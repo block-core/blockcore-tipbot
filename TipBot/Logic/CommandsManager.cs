@@ -24,7 +24,9 @@ namespace TipBot.Logic
 
         private readonly Random random;
 
-        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings)
+        private readonly FatalErrorNotifier fatalNotifier;
+
+        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings, FatalErrorNotifier fatalNotifier)
         {
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;
@@ -93,7 +95,10 @@ namespace TipBot.Logic
 
                     if (unusedAddress == null)
                     {
-                        this.logger.Fatal("Bot ran out of deposit addresses!");
+                        var message = "Bot ran out of deposit addresses!";
+                        this.logger.Fatal(message);
+                        this.fatalNotifier.NotifySupport(message);
+
                         this.logger.Trace("(-)[NO_ADDRESSES]");
                         throw new OutOfDepositAddressesException();
                     }
