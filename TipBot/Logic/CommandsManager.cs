@@ -31,6 +31,7 @@ namespace TipBot.Logic
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;
             this.settings = settings;
+            this.fatalNotifier = fatalNotifier;
             this.random = new Random();
 
             this.logger = LogManager.GetCurrentClassLogger();

@@ -35,7 +35,7 @@ namespace TipBot.Logic
             if (message.Length > maxLenght)
                 message = message.Substring(0, maxLenght);
 
-            this.SupportUser.SendMessageAsync(message).GetAwaiter().GetResult();
+            this.SupportUser?.SendMessageAsync(message).GetAwaiter().GetResult();
 
             this.logger.Trace("(-)");
         }

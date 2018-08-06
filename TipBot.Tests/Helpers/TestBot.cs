@@ -1,20 +1,32 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using TipBot.Database;
+using TipBot.Helpers;
+using TipBot.Logic;
 using TipBot.Logic.NodeIntegrations;
+using TipBot.Services;
 
 namespace TipBot.Tests.Helpers
 {
     /// <summary>
-    /// Bot for testing that is exactly the same as <see cref="TipBot.Logic.TipBot"/>
+    /// Bot for testing that is exactly the same as <see cref="TipBot"/>
     /// except for it uses temporary in-memory database.
     /// </summary>
     public class TestBot : Logic.TipBot
     {
-        public new async Task StartAsync(string[] args)
+        public new Task StartAsync(string[] args)
         {
-            await base.StartAsync(args);
+            this.services = this.GetServicesCollection().BuildServiceProvider();
+
+            var settings = this.services.GetRequiredService<Settings>();
+            settings.Initialize(new TextFileConfiguration(args));
+
+            return Task.CompletedTask;
         }
 
         protected override IServiceCollection GetServicesCollection()

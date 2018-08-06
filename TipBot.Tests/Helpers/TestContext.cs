@@ -17,7 +17,7 @@ namespace TipBot.Tests.Helpers
         public TestContext()
         {
             this.testBot = new TestBot();
-            this.testBot.StartAsync(new []{ "-enableMigrations=false" }).GetAwaiter().GetResult();
+            this.testBot.StartAsync(new string[]{  }).GetAwaiter().GetResult();
 
             this.CommandsManager = this.testBot.GetService<CommandsManager>();
             this.Settings = this.testBot.GetService<Settings>();
