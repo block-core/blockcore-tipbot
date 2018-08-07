@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using TipBot.Database.Models;
+using TipBot.Helpers;
 
 namespace TipBot.Database
 {
@@ -32,7 +33,10 @@ namespace TipBot.Database
     {
         public BotDbContext CreateDbContext(string[] args)
         {
-            return new ContextFactory(new Settings()).CreateContext();
+            var settings = new Settings();
+            settings.Initialize(new TextFileConfiguration(args));
+
+            return new ContextFactory(settings).CreateContext();
         }
     }
 }
