@@ -26,6 +26,22 @@ namespace TipBot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TipsHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Amount = table.Column<decimal>(nullable: false),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    SenderDiscordUserId = table.Column<ulong>(nullable: false),
+                    ReceiverDiscordUserId = table.Column<ulong>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TipsHistory", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UnusedAddresses",
                 columns: table => new
                 {
@@ -60,6 +76,9 @@ namespace TipBot.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ActiveQuizes");
+
+            migrationBuilder.DropTable(
+                name: "TipsHistory");
 
             migrationBuilder.DropTable(
                 name: "UnusedAddresses");

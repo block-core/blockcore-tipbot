@@ -9,7 +9,7 @@ using TipBot.Database;
 namespace TipBot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20180730021516_init")]
+    [Migration("20180807132753_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,6 +70,24 @@ namespace TipBot.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ActiveQuizes");
+                });
+
+            modelBuilder.Entity("TipBot.Database.Models.TipModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<decimal>("Amount");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<ulong>("ReceiverDiscordUserId");
+
+                    b.Property<ulong>("SenderDiscordUserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TipsHistory");
                 });
 #pragma warning restore 612, 618
         }
