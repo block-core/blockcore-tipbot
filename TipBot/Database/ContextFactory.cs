@@ -15,12 +15,7 @@ namespace TipBot.Database
         {
             string connectionString = this.settings.ConnectionString;
 
-            DbContextOptions<BotDbContext> options;
-
-            if (connectionString == null)
-                options = new DbContextOptionsBuilder<BotDbContext>().UseSqlite("Data Source=testOnlyDb.db").Options;
-            else
-                options = new DbContextOptionsBuilder<BotDbContext>().UseSqlServer(connectionString).Options;
+            DbContextOptions<BotDbContext> options = new DbContextOptionsBuilder<BotDbContext>().UseSqlServer(connectionString).Options;
 
             return new BotDbContext(options);
         }

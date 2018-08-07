@@ -12,7 +12,7 @@ namespace TipBot
 
             this.EnableMigrations = configReader.GetOrDefault<bool>("enableMigrations", true);
 
-            this.ConnectionString = configReader.GetOrDefault<string>("connectionString", null);
+            this.ConnectionString = configReader.GetOrDefault<string>("connectionString", @"Data Source=(LocalDb)\testDb;Initial Catalog=testBotDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
         }
 
         public TextFileConfiguration ConfigReader { get; private set; }
