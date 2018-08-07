@@ -32,7 +32,7 @@ namespace TipBot.Database
     {
         public BotDbContext CreateDbContext(string[] args)
         {
-            return new ContextFactory().CreateContext();
+            return new ContextFactory(new Settings()).CreateContext();
         }
     }
 }

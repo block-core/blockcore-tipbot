@@ -11,6 +11,8 @@ namespace TipBot
             this.BotToken = configReader.GetOrDefault<string>("token", "NDY4MDI1ODM0NTE5NjU4NDk2.DizKmA.pBifJbNeB0OlIJ5yZxF2kkJSaI8");
 
             this.EnableMigrations = configReader.GetOrDefault<bool>("enableMigrations", true);
+
+            this.ConnectionString = configReader.GetOrDefault<string>("connectionString", null);
         }
 
         public TextFileConfiguration ConfigReader { get; private set; }
@@ -41,5 +43,8 @@ namespace TipBot
         /// <summary>Nickname of a user that will receive a message in case of a fatal error.</summary>
         public string SupportUsername { get; } = "NoEscape0";
         public string SupportDiscriminator { get; } = "5537";
+
+        /// <summary>DB connection string. Local db will be used if it's null.</summary>
+        public string ConnectionString { get; private set; }
     }
 }
