@@ -427,8 +427,8 @@ namespace TipBot.Logic
 
             var model = new TippingChartsModel()
             {
-                BestTippers = bestTippers.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
-                BestBeingTipped = bestBeingTipped.OrderBy(x => x.Value).Take(amountOfUsersToReturn).ToList(),
+                BestTippers = bestTippers.OrderByDescending(x => x.Value).Take(amountOfUsersToReturn).ToList(),
+                BestBeingTipped = bestBeingTipped.OrderByDescending(x => x.Value).Take(amountOfUsersToReturn).ToList(),
             };
 
             this.logger.Trace("(-)");
