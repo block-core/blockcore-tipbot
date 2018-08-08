@@ -8,7 +8,7 @@ namespace TipBot
         {
             this.ConfigReader = configReader;
 
-            this.BotToken = configReader.GetOrDefault<string>("token", "NDY4MDI1ODM0NTE5NjU4NDk2.DizKmA.pBifJbNeB0OlIJ5yZxF2kkJSaI8");
+            this.BotToken = configReader.GetOrDefault<string>("token", "NDc2ODU5MDc1MzM1MDI4NzM4.DkztLQ.lWroAup2WOK8VZAyhGjG_E33ENY");
 
             this.EnableMigrations = configReader.GetOrDefault<bool>("enableMigrations", true);
 
