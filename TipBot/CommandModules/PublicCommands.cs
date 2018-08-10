@@ -157,7 +157,7 @@ namespace TipBot.CommandModules
 
             await usersCollection.ForEachAsync(delegate (IReadOnlyCollection<IUser> users)
             {
-                onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline));
+                onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline && !x.IsBot));
             });
 
             onlineUsers.Remove(caller);
