@@ -176,6 +176,7 @@ namespace TipBot.Logic.NodeIntegrations
                 }
                 catch (OperationCanceledException)
                 {
+                    this.logger.Trace("Operation canceled exception!");
                 }
                 catch (Exception exception)
                 {
@@ -208,14 +209,16 @@ namespace TipBot.Logic.NodeIntegrations
                     this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
 
                     decimal recentlyReceived = receivedByAddress - user.LastCheckedReceivedAmountByAddress;
-                    user.LastCheckedReceivedAmountByAddress = receivedByAddress;
 
+                    user.LastCheckedReceivedAmountByAddress = receivedByAddress;
                     user.Balance += recentlyReceived;
 
-                    this.logger.Info("User '{0}' deposited {1}!", user, recentlyReceived);
-
-                    context.Update(user);
+                    context.Attach(user);
+                    context.Entry(user).Property(x => x.Balance).IsModified = true;
+                    context.Entry(user).Property(x => x.LastCheckedReceivedAmountByAddress).IsModified = true;
                     context.SaveChanges();
+
+                    this.logger.Info("User '{0}' deposited {1}!. New balance is {2}.", user, recentlyReceived, user.Balance);
                 }
             }
 
