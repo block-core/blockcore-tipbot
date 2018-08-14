@@ -65,6 +65,8 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
@@ -93,6 +95,8 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
@@ -120,6 +124,8 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
@@ -139,6 +145,8 @@ namespace TipBot.CommandModules
 
                 response = $"{sender.Mention}, you have {balance} {this.Settings.Ticker}!";
             }
+
+            response = this.TrimMessage(response);
 
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
@@ -193,6 +201,8 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
             this.logger.Trace("(-)");
             await this.ReplyAsync(response);
         }
@@ -233,6 +243,8 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
             this.logger.Trace("(-)");
             await this.ReplyAsync(response);
         }
@@ -240,7 +252,7 @@ namespace TipBot.CommandModules
         [CommandWithHelp("startQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
                                        " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
                                        " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
-                                        "startQuiz <amount> <SHA256 of an answer> <duration in minures> <question>")]
+                                        "startQuiz <amount> <SHA256 of an answer> <duration in minutes> <question>")]
         public Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
             this.logger.Trace("({0}:{1},{2}:'{3}',{4}:{5},{6}:'{7}')", nameof(amount), amount, nameof(answerSHA256), answerSHA256, nameof(durationMinutes), durationMinutes, nameof(question), question);
@@ -265,6 +277,8 @@ namespace TipBot.CommandModules
                     response = "Error: " + exception.Message;
                 }
             }
+
+            response = this.TrimMessage(response);
 
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
@@ -305,6 +319,8 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
@@ -316,35 +332,37 @@ namespace TipBot.CommandModules
 
             lock (this.lockObject)
             {
-                var response = new StringBuilder();
+                var builder = new StringBuilder();
                 List<QuizModel> quizes = this.CommandsManager.GetActiveQuizes();
 
                 if (quizes.Count != 0)
                 {
-                    response.AppendLine("__List of all active quizes:__");
-                    response.AppendLine();
+                    builder.AppendLine("__List of all active quizes:__");
+                    builder.AppendLine();
 
                     foreach (QuizModel quiz in quizes)
                     {
-                        response.AppendLine($"Question: `{quiz.Question}`");
-                        response.AppendLine($"Reward: {quiz.Reward} {this.Settings.Ticker}");
+                        builder.AppendLine($"Question: `{quiz.Question}`");
+                        builder.AppendLine($"Reward: {quiz.Reward} {this.Settings.Ticker}");
 
                         var minutesLeft = (int) ((quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)) - DateTime.Now).TotalMinutes;
                         if (minutesLeft < 0)
                             minutesLeft = 0;
 
-                        response.AppendLine($"Expires in {minutesLeft} minutes.");
-                        response.AppendLine();
+                        builder.AppendLine($"Expires in {minutesLeft} minutes.");
+                        builder.AppendLine();
                     }
                 }
                 else
                 {
-                    response.AppendLine("There are no active quizes.");
-                    response.AppendLine("Start a new one yourself using `startQuiz` command!");
+                    builder.AppendLine("There are no active quizes.");
+                    builder.AppendLine("Start a new one yourself using `startQuiz` command!");
                 }
 
+                string response = this.TrimMessage(builder.ToString());
+
                 this.logger.Trace("(-)");
-                return this.ReplyAsync(response.ToString());
+                return this.ReplyAsync(response);
             }
         }
 
@@ -380,7 +398,7 @@ namespace TipBot.CommandModules
                 builder.AppendLine();
             }
 
-            string response = builder.ToString();
+            string response = this.TrimMessage(builder.ToString());
 
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
@@ -399,6 +417,22 @@ namespace TipBot.CommandModules
 
             this.logger.Trace("(-)");
             return this.Context.Channel.SendFileAsync(stream, "logo.png", text);
+        }
+
+        /// <summary>Trims the message to be shorter than 2000 characters.</summary>
+        private string TrimMessage(string message)
+        {
+            this.logger.Trace("({0}:{1})", nameof(message), message.Length);
+
+            var limit = 2000;
+
+            if (message.Length < limit)
+                return message;
+
+            string trimmed = message.Substring(0, limit - 3) + "...";
+
+            this.logger.Trace("()");
+            return trimmed;
         }
 
         private Stream GetLogo()
