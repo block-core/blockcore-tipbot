@@ -101,7 +101,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount.", "withdraw <address> <amount>")]
+        [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount.", "withdraw <amount> <address>")]
         public Task WithdrawAsync(decimal amount, string address)
         {
             this.logger.Trace("({0}:{1},{2}:{3})", nameof(amount), amount, nameof(address), address);
