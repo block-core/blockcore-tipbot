@@ -206,9 +206,18 @@ namespace TipBot.Logic.NodeIntegrations
 
                 if (receivedByAddress > user.LastCheckedReceivedAmountByAddress)
                 {
-                    this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
-
                     decimal recentlyReceived = receivedByAddress - user.LastCheckedReceivedAmountByAddress;
+
+                    // Prevent users from spamming small amounts of coins.
+                    // Also keep in mind if you'd like to change that- EF needs to be configured to track such changes.
+                    // https://stackoverflow.com/questions/25891795/entityframework-not-detecting-changes-to-decimals-after-a-certain-precision
+                    if (recentlyReceived < 0.01m)
+                    {
+                        this.logger.Trace("Skipping dust {0} for user {1}.", recentlyReceived, user);
+                        continue;
+                    }
+
+                    this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
 
                     user.LastCheckedReceivedAmountByAddress = receivedByAddress;
                     user.Balance += recentlyReceived;
