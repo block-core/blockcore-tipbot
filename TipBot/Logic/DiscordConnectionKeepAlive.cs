@@ -63,7 +63,7 @@ namespace TipBot.Logic
 
                 await this.CheckStateAsync().ConfigureAwait(false);
 
-                this.logger.Debug("State came back okay.");
+                this.logger.Debug("State came back.");
             });
 
             this.logger.Trace("(-)");
@@ -89,9 +89,9 @@ namespace TipBot.Logic
             if (task != timeoutTask || connect.IsFaulted)
             {
                 if (connect.IsFaulted)
-                    this.logger.Fatal("Client reset faulted, killing process. Exception: '{0}'", connect.Exception);
+                    this.logger.Fatal("Client reset faulted. Exception: '{0}'", connect.Exception);
                 else
-                    this.logger.Fatal("Client reset timed out (task deadlocked?), killing process.");
+                    this.logger.Fatal("Client reset timed out.");
 
                 this.CheckStateAsync();
             }
