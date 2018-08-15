@@ -46,5 +46,7 @@ namespace TipBot
 
         /// <summary>DB connection string. Local db will be used if it's null.</summary>
         public string ConnectionString { get; private set; }
+
+        public string BotOptionalPrefix { get; } = "tipbot";
     }
 }

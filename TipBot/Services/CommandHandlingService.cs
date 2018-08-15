@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,14 +16,44 @@ namespace TipBot.Services
         private readonly CommandService commands;
         private readonly DiscordSocketClient discord;
         private readonly IServiceProvider services;
+        private readonly Settings settings;
 
-        public CommandHandlingService(IServiceProvider services)
+        private List<string> prefixes;
+
+        public CommandHandlingService(IServiceProvider services, Settings settings)
         {
             this.commands = services.GetRequiredService<CommandService>();
             this.discord = services.GetRequiredService<DiscordSocketClient>();
             this.services = services;
+            this.settings = settings;
 
             this.discord.MessageReceived += this.MessageReceivedAsync;
+        }
+
+        private List<string> GetPrefixes()
+        {
+            if (this.prefixes != null)
+                return this.prefixes;
+
+            var prefixesRaw = new List<string>();
+
+            SocketSelfUser bot = this.discord.CurrentUser;
+
+            prefixesRaw.Add($"<@{bot.Id}> ");
+            prefixesRaw.Add($"<@!{bot.Id}> ");
+            prefixesRaw.Add($"@{this.discord.CurrentUser.Username}#{this.discord.CurrentUser.Discriminator} ");
+
+            // By optional alias.
+            if (this.settings.BotOptionalPrefix != null)
+                prefixesRaw.Add(this.settings.BotOptionalPrefix + " ");
+
+            // Allow double spaces
+            foreach (string prefix in prefixesRaw.ToList())
+                prefixesRaw.Add(prefix + " ");
+
+            prefixesRaw.Reverse();
+            this.prefixes = prefixesRaw;
+            return this.prefixes;
         }
 
         public async Task InitializeAsync()
@@ -40,7 +72,7 @@ namespace TipBot.Services
 
             // This value holds the offset where the prefix ends.
             var argPos = 0;
-            if (!message.HasMentionPrefix(this.discord.CurrentUser, ref argPos))
+            if (!this.BotPrefixMentioned(message, ref argPos))
                 return;
 
             var context = new SocketCommandContext(this.discord, message);
@@ -57,6 +89,17 @@ namespace TipBot.Services
                     await context.Channel.SendMessageAsync($":no_entry: Error: {result.Error}. {result.ErrorReason}");
                 }
             }
+        }
+
+        private bool BotPrefixMentioned(SocketUserMessage message, ref int argPos)
+        {
+            foreach (string prefix in this.GetPrefixes())
+            {
+                if (message.HasStringPrefix(prefix, ref argPos))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
