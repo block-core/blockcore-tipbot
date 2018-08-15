@@ -53,6 +53,8 @@ namespace TipBot.Logic
                 await client.LoginAsync(TokenType.Bot, settings.BotToken);
                 await client.StartAsync();
 
+                this.services.GetRequiredService<DiscordConnectionKeepAlive>().Initialize();
+
                 await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync();
                 await this.services.GetRequiredService<FatalErrorNotifier>().InitializeAsync(client, settings);
             }
@@ -85,6 +87,7 @@ namespace TipBot.Logic
                 .AddSingleton<QuizExpiryChecker>()
                 .AddSingleton<FatalErrorNotifier>()
                 .AddSingleton<IContextFactory, ContextFactory>()
+                .AddSingleton<DiscordConnectionKeepAlive>()
                 // Replace implementation to use API instead of RPC.
                 .AddSingleton<INodeIntegration, RPCNodeIntegration>();
 
