@@ -18,6 +18,7 @@ namespace TipBot.Services
         private readonly DiscordSocketClient discord;
         private readonly IServiceProvider services;
         private readonly BotPrefixes prefixes;
+        private readonly ErrorMessageCreator errorMessageCreator;
 
         public CommandHandlingService(IServiceProvider services, Settings settings)
         {
@@ -25,6 +26,7 @@ namespace TipBot.Services
             this.discord = services.GetRequiredService<DiscordSocketClient>();
             this.services = services;
             this.prefixes = new BotPrefixes(settings);
+            this.errorMessageCreator = new ErrorMessageCreator();
 
             this.discord.MessageReceived += this.MessageReceivedAsync;
         }
@@ -52,19 +54,13 @@ namespace TipBot.Services
             var context = new SocketCommandContext(this.discord, message);
             IResult result = await this.commands.ExecuteAsync(context, argPos, this.services);
 
+            // Handle errors.
             if (result.Error.HasValue)
             {
-                if (result.Error.Value == CommandError.UnknownCommand)
-                {
-                    await context.Channel.SendMessageAsync(":no_entry: Unknown command. Use `help` command to display all supported commands.");
-                }
-                else
-                {
-                    await context.Channel.SendMessageAsync($":no_entry: Error: {result.Error}. {result.ErrorReason}");
-                }
-            }
+                string errorMessage = this.errorMessageCreator.CreateErrorMessage(result);
 
-            // TODO custom error handler
+                await context.Channel.SendMessageAsync(errorMessage);
+            }
         }
     }
 }
