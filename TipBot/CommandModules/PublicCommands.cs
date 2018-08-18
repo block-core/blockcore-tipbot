@@ -86,7 +86,7 @@ namespace TipBot.CommandModules
                 {
                     string depositAddress = this.CommandsManager.GetDepositAddress(user);
 
-                    response = $"Your unique deposit address is `{depositAddress}`";
+                    response = $"{user.Mention}, your unique deposit address is `{depositAddress}`";
                     response += Environment.NewLine + $"Money are deposited after {this.Settings.MinConfirmationsForDeposit} confirmations.";
                 }
                 catch (OutOfDepositAddressesException)
