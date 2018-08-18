@@ -222,18 +222,29 @@ namespace TipBot.CommandModules
 
                     var builder = new StringBuilder();
 
-                    builder.AppendLine($"Top {chart.BestTippers.Count} users who tipped the most in the last {days} days:");
+                    // Best tippers.
+                    if (chart.BestTippers.Count != 0)
+                    {
+                        builder.AppendLine($"Top {chart.BestTippers.Count} users who tipped the most in the last {days} days:");
 
-                    foreach (KeyValuePair<ulong, decimal> tipper in chart.BestTippers)
-                        builder.AppendLine($"<@!{tipper.Key}> tipped {tipper.Value} {this.Settings.Ticker}");
+                        foreach (KeyValuePair<ulong, decimal> tipper in chart.BestTippers)
+                            builder.AppendLine($"<@!{tipper.Key}> tipped {tipper.Value} {this.Settings.Ticker}");
+                    }
+                    else
+                        builder.AppendLine($"No one tipped anyone in the last {days} days!");
 
                     builder.AppendLine();
 
-                    builder.AppendLine($"Top {chart.BestBeingTipped.Count} users who were tipped the most in the last {days} days:");
+                    // Best being tipped.
+                    if (chart.BestBeingTipped.Count != 0)
+                    {
+                        builder.AppendLine($"Top {chart.BestBeingTipped.Count} users who were tipped the most in the last {days} days:");
 
-                    foreach (KeyValuePair<ulong, decimal> beingTipped in chart.BestBeingTipped)
-                        builder.AppendLine($"<@!{beingTipped.Key}> received {beingTipped.Value} {this.Settings.Ticker}");
-
+                        foreach (KeyValuePair<ulong, decimal> beingTipped in chart.BestBeingTipped)
+                            builder.AppendLine($"<@!{beingTipped.Key}> received {beingTipped.Value} {this.Settings.Ticker}");
+                    }
+                    else
+                        builder.AppendLine($"No one was tipped in the last {days} days!");
 
                     response = builder.ToString();
                 }
