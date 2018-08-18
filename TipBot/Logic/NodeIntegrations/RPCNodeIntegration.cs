@@ -171,7 +171,7 @@ namespace TipBot.Logic.NodeIntegrations
                             }
                         }
 
-                        await Task.Delay(30 * 1000, this.cancellation.Token);
+                        await Task.Delay(30 * 1000, this.cancellation.Token).ConfigureAwait(false);
                     }
                 }
                 catch (OperationCanceledException)

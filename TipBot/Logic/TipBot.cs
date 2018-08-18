@@ -50,13 +50,13 @@ namespace TipBot.Logic
                 client.Log += this.LogAsync;
                 this.services.GetRequiredService<CommandService>().Log += this.LogAsync;
 
-                await client.LoginAsync(TokenType.Bot, settings.BotToken);
-                await client.StartAsync();
+                await client.LoginAsync(TokenType.Bot, settings.BotToken).ConfigureAwait(false);
+                await client.StartAsync().ConfigureAwait(false);
 
                 this.services.GetRequiredService<DiscordConnectionKeepAlive>().Initialize();
 
-                await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync();
-                await this.services.GetRequiredService<FatalErrorNotifier>().InitializeAsync(client, settings);
+                await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync().ConfigureAwait(false);
+                await this.services.GetRequiredService<FatalErrorNotifier>().InitializeAsync(client, settings).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -88,6 +88,7 @@ namespace TipBot.Logic
                 .AddSingleton<FatalErrorNotifier>()
                 .AddSingleton<IContextFactory, ContextFactory>()
                 .AddSingleton<DiscordConnectionKeepAlive>()
+                .AddSingleton<MessagesHelper>()
                 // Replace implementation to use API instead of RPC.
                 .AddSingleton<INodeIntegration, RPCNodeIntegration>();
 

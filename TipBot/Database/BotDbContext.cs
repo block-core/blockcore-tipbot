@@ -7,10 +7,6 @@ namespace TipBot.Database
 {
     public class BotDbContext : DbContext
     {
-        /*
-         * In order to update DB do `Add-Migration [MigrationName]` in Package Manager Console
-         */
-
         public BotDbContext(DbContextOptions options) : base (options)
         {
         }

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
@@ -19,12 +18,15 @@ namespace TipBot.Services
         private readonly IServiceProvider services;
         private readonly BotPrefixes prefixes;
         private readonly ErrorMessageCreator errorMessageCreator;
+        private readonly MessagesHelper messagesHelper;
 
-        public CommandHandlingService(IServiceProvider services, Settings settings)
+        public CommandHandlingService(IServiceProvider services, Settings settings, MessagesHelper messagesHelper)
         {
             this.commands = services.GetRequiredService<CommandService>();
             this.discord = services.GetRequiredService<DiscordSocketClient>();
             this.services = services;
+            this.messagesHelper = messagesHelper;
+
             this.prefixes = new BotPrefixes(settings);
             this.errorMessageCreator = new ErrorMessageCreator();
 
@@ -33,7 +35,7 @@ namespace TipBot.Services
 
         public async Task InitializeAsync()
         {
-            await this.commands.AddModulesAsync(Assembly.GetEntryAssembly());
+            await this.commands.AddModulesAsync(Assembly.GetEntryAssembly()).ConfigureAwait(false);
         }
 
         private async Task MessageReceivedAsync(SocketMessage rawMessage)
@@ -52,14 +54,14 @@ namespace TipBot.Services
                 return;
 
             var context = new SocketCommandContext(this.discord, message);
-            IResult result = await this.commands.ExecuteAsync(context, argPos, this.services);
+            IResult result = await this.commands.ExecuteAsync(context, argPos, this.services).ConfigureAwait(false);
 
             // Handle errors.
             if (result.Error.HasValue)
             {
                 string errorMessage = this.errorMessageCreator.CreateErrorMessage(result);
 
-                await context.Channel.SendMessageAsync(errorMessage);
+                await this.messagesHelper.SendSelfDesctructedMessage(context, errorMessage).ConfigureAwait(false);
             }
         }
     }

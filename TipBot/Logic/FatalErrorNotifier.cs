@@ -17,7 +17,7 @@ namespace TipBot.Logic
         {
             this.logger.Trace("()");
 
-            await Task.Delay(20000);
+            await Task.Delay(20000).ConfigureAwait(false);
 
             this.SupportUser = client.GetUser(settings.SupportUsername, settings.SupportDiscriminator);
 

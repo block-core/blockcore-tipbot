@@ -48,5 +48,8 @@ namespace TipBot
         public string ConnectionString { get; private set; }
 
         public string BotOptionalPrefix { get; } = "tipbot";
+
+        /// <summary>Default time in which self destructed messages are deleted.</summary>
+        public int SelfDestructedMessagesDelaySeconds { get; } = 20;
     }
 }

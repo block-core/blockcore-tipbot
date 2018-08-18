@@ -10,6 +10,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
 using TipBot.Database.Models;
+using TipBot.Helpers;
 using TipBot.Logic;
 
 namespace TipBot.CommandModules
@@ -166,7 +167,7 @@ namespace TipBot.CommandModules
             await usersCollection.ForEachAsync(delegate (IReadOnlyCollection<IUser> users)
             {
                 onlineUsers.AddRange(users.Where(x => x.Status != UserStatus.Offline && !x.IsBot));
-            });
+            }).ConfigureAwait(false);
 
             onlineUsers.Remove(caller);
 
@@ -204,7 +205,7 @@ namespace TipBot.CommandModules
             response = this.TrimMessage(response);
 
             this.logger.Trace("(-)");
-            await this.ReplyAsync(response);
+            await this.ReplyAsync(response).ConfigureAwait(false);
         }
 
         [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days=7>*")]
@@ -257,7 +258,7 @@ namespace TipBot.CommandModules
             response = this.TrimMessage(response);
 
             this.logger.Trace("(-)");
-            await this.ReplyAsync(response);
+            await this.ReplyAsync(response).ConfigureAwait(false);
         }
 
         [CommandWithHelp("startQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
@@ -429,6 +430,14 @@ namespace TipBot.CommandModules
             this.logger.Trace("(-)");
             return this.Context.Channel.SendFileAsync(stream, "logo.png", text);
         }
+
+        //[CommandWithHelp("test", "Test.")]
+        //public async Task TestAsync()
+        //{
+        //    var text = "this is a test message";
+        //
+        //    IUserMessage message = await this.ReplyAsync(text).ConfigureAwait(false);
+        //}
 
         /// <summary>Trims the message to be shorter than 2000 characters.</summary>
         private string TrimMessage(string message)
