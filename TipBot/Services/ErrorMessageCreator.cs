@@ -17,13 +17,13 @@ namespace TipBot.Services
             switch (commandResult.Error.Value)
             {
                 case CommandError.UnknownCommand:
-                    answer += "Unknown command. You've probably command name incorrectly.";
+                    answer += "Unknown command. You've probably typed command name incorrectly.";
                     break;
                 case CommandError.ParseFailed:
                     answer += "Failed to recognize command argument. Most likely argument type is different (for example: bot expected a number but you supplied a string).";
                     break;
                 case CommandError.BadArgCount:
-                    answer += "Bad arguments count. You've supplied more or less arguments that invoked command requires.";
+                    answer += "Bad arguments count. You've supplied more or less arguments than invoked command requires.";
                     break;
                 case CommandError.ObjectNotFound:
                 case CommandError.MultipleMatches:
