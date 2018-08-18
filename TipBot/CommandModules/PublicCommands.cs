@@ -102,7 +102,9 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount.", "withdraw <amount> <address>")]
+        [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount." + "\n" +
+                                     "Keep in mind that withdrawal address will be publicly visible to all users in this channel. " +
+                                     "To avoid exposing your address use withdraw command in private messages with the bot.", "withdraw <amount> <address>")]
         public Task WithdrawAsync(decimal amount, string address)
         {
             this.logger.Trace("({0}:{1},{2}:{3})", nameof(amount), amount, nameof(address), address);
