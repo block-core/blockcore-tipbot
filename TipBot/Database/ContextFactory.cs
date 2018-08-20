@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace TipBot.Database
 {
@@ -15,7 +16,10 @@ namespace TipBot.Database
         {
             string connectionString = this.settings.ConnectionString;
 
-            DbContextOptions<BotDbContext> options = new DbContextOptionsBuilder<BotDbContext>().UseSqlServer(connectionString).Options;
+            DbContextOptions<BotDbContext> options = new DbContextOptionsBuilder<BotDbContext>().UseSqlServer(connectionString, builder =>
+            {
+                builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            }).Options;
 
             return new BotDbContext(options);
         }
