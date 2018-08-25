@@ -267,13 +267,20 @@ namespace TipBot.CommandModules
                                        " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
                                        " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
                                         "startQuiz <amount> <SHA256 of an answer> <duration in minutes> <question>")]
-        public Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
+        public async Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
             this.logger.Trace("({0}:{1},{2}:'{3}',{4}:{5},{6}:'{7}')", nameof(amount), amount, nameof(answerSHA256), answerSHA256, nameof(durationMinutes), durationMinutes, nameof(question), question);
 
             IUser user = this.Context.User;
 
             string response;
+
+            // Don't await because this might throw if bot doesn't have the permission to delete other's messages.
+            Task.Run(async () =>
+            {
+                // Remove original message.
+                await this.Context.Message.DeleteAsync().ConfigureAwait(false);
+            });
 
             lock (this.lockObject)
             {
@@ -295,7 +302,7 @@ namespace TipBot.CommandModules
             response = this.TrimMessage(response);
 
             this.logger.Trace("(-)");
-            return this.ReplyAsync(response);
+            await this.ReplyAsync(response).ConfigureAwait(false);
         }
 
         [CommandWithHelp("answerQuiz", "Answer to any active quiz. Answer will be checked against all of them. In case your answer will be correct you'll receive a reward.",
