@@ -136,6 +136,13 @@ namespace TipBot.Logic
             {
                 DiscordUserModel discordUser = this.GetOrCreateUser(context, user);
 
+                // Don't allow withdrawals to deposit address.
+                if (discordUser.DepositAddress != null && discordUser.DepositAddress == address)
+                {
+                    this.logger.Trace("(-)[WITHDRAWAL_TO_DEPOSIT_ADDR]");
+                    throw new CommandExecutionException("You can't withdraw to your own deposit address!");
+                }
+
                 this.AssertBalanceIsSufficient(discordUser, amount);
 
                 try
