@@ -4,6 +4,8 @@ The bot is added to the [stratis community discord](https://discord.gg/9tDyfZs).
 
 Or you can [add stratis tipbot](https://discordapp.com/oauth2/authorize?client_id=468025834519658496&scope=bot) to your server.
 
+Don't forget to add `Manage Messages ` permission for the bot.
+
 
 
 #### Guide: how to setup your own instance of the bot
