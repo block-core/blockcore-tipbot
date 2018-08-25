@@ -44,7 +44,7 @@ namespace TipBot.CommandModules
 
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        [CommandWithHelp("tip", "Transfers specified amount of money to mentioned user.", "tip <user> <amount> <message>*")]
+        [CommandWithHelp("tip", "Transfers specified amount of money to mentioned user.", "tipbot tip <user> <amount> <message>*")]
         public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder]string message = null)
         {
             this.logger.Trace("({0}:{1},{2}:{3},{4}:'{5}')", nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount, nameof(message), message);
@@ -108,7 +108,7 @@ namespace TipBot.CommandModules
 
         [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount." + "\n" +
                                      "Keep in mind that withdrawal address will be publicly visible to all users in this channel. " +
-                                     "To avoid exposing your address use withdraw command in private messages with the bot.", "withdraw <amount> <address>")]
+                                     "To avoid exposing your address use withdraw command in private messages with the bot.", "tipbot withdraw <amount> <address>")]
         public Task WithdrawAsync(decimal amount, string address)
         {
             this.logger.Trace("({0}:{1},{2}:{3})", nameof(amount), amount, nameof(address), address);
@@ -160,7 +160,7 @@ namespace TipBot.CommandModules
         }
 
         [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin (or another value if specified by caller)." +
-                                       " Amount of users that will be tipped is equal to totalAmount / tipAmount.", "makeItRain <totalAmount> <tipAmount=1>*")]
+                                       " Amount of users that will be tipped is equal to totalAmount / tipAmount.", "tipbot makeItRain <totalAmount> <tipAmount=1>*")]
         public async Task MakeItRainAsync(decimal amount, decimal tipAmount = 1)
         {
             this.logger.Trace("({0}:{1},{2}:{3})", nameof(amount), amount, nameof(tipAmount), tipAmount);
@@ -214,7 +214,7 @@ namespace TipBot.CommandModules
             await this.ReplyAsync(response).ConfigureAwait(false);
         }
 
-        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "chart <days=7>*")]
+        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "tipbot chart <days=7>*")]
         public async Task ChartAsync(int days = 7)
         {
             this.logger.Trace("({0}:{1})", nameof(days), days);
@@ -270,7 +270,7 @@ namespace TipBot.CommandModules
         [CommandWithHelp("startQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
                                        " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
                                        " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
-                                        "startQuiz <amount> <SHA256 of an answer> <duration in minutes> <question>")]
+                                        "tipbot startQuiz <amount> <SHA256 of an answer> <duration in minutes> <question>")]
         public async Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
         {
             this.logger.Trace("({0}:{1},{2}:'{3}',{4}:{5},{6}:'{7}')", nameof(amount), amount, nameof(answerSHA256), answerSHA256, nameof(durationMinutes), durationMinutes, nameof(question), question);
@@ -306,7 +306,7 @@ namespace TipBot.CommandModules
         }
 
         [CommandWithHelp("answerQuiz", "Answer to any active quiz. Answer will be checked against all of them. In case your answer will be correct you'll receive a reward.",
-            "answerQuiz <answer>")]
+            "tipbot answerQuiz <answer>")]
         public async Task AnswerQuizAsync([Remainder]string answer)
         {
             this.logger.Trace("({0}:'{1}')", nameof(answer), answer);
