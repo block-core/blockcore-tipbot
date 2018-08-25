@@ -361,7 +361,7 @@ namespace TipBot.CommandModules
             this.logger.Trace("(-)");
         }
 
-        [CommandWithHelp("listActiveQuizes", "Displays all quizes that are active.")]
+        [CommandWithHelp("quizzes", "Displays all quizzes that are active.")]
         public Task ListActiveQuizes()
         {
             this.logger.Trace("()");
@@ -369,17 +369,18 @@ namespace TipBot.CommandModules
             lock (this.lockObject)
             {
                 var builder = new StringBuilder();
-                List<QuizModel> quizes = this.CommandsManager.GetActiveQuizes();
+                List<QuizViewModel> quizes = this.CommandsManager.GetActiveQuizes();
 
                 if (quizes.Count != 0)
                 {
                     builder.AppendLine("__List of all active quizes:__");
                     builder.AppendLine();
 
-                    foreach (QuizModel quiz in quizes)
+                    foreach (QuizViewModel quiz in quizes)
                     {
                         builder.AppendLine($"Question: `{quiz.Question}`");
-                        builder.AppendLine($"Reward: {quiz.Reward} {this.Settings.Ticker}");
+                        builder.AppendLine($"Reward: **{quiz.Reward}** {this.Settings.Ticker}");
+                        builder.AppendLine($"Created by: **{quiz.DiscordUserName}**");
 
                         var minutesLeft = (int) ((quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)) - DateTime.Now).TotalMinutes;
                         if (minutesLeft < 0)

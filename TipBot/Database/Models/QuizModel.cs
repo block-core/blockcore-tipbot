@@ -18,4 +18,20 @@ namespace TipBot.Database.Models
 
         public int DurationMinutes { get; set; }
     }
+
+    public class QuizViewModel : QuizModel
+    {
+        public QuizViewModel(QuizModel from)
+        {
+            this.Id = from.Id;
+            this.CreatorDiscordUserId = from.CreatorDiscordUserId;
+            this.AnswerHash = from.AnswerHash;
+            this.Question = from.Question;
+            this.Reward = from.Reward;
+            this.CreationTime = from.CreationTime;
+            this.DurationMinutes = from.DurationMinutes;
+        }
+
+        public string DiscordUserName { get; set; }
+    }
 }

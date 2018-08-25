@@ -242,7 +242,7 @@ namespace TipBot.Logic
             this.logger.Trace("(-)");
         }
 
-        public List<QuizModel> GetActiveQuizes()
+        public List<QuizViewModel> GetActiveQuizes()
         {
             this.logger.Trace("()");
 
@@ -250,8 +250,18 @@ namespace TipBot.Logic
             {
                 List<QuizModel> quizes = context.ActiveQuizes.ToList();
 
-                this.logger.Trace("(-):{0}", quizes.Count);
-                return quizes;
+                var models = new List<QuizViewModel>(quizes.Count);
+
+                foreach (QuizModel quiz in quizes)
+                {
+                    var model = new QuizViewModel(quiz);
+
+                    model.DiscordUserName = context.Users.Single(x => x.DiscordUserId == quiz.CreatorDiscordUserId).Username;
+                    models.Add(model);
+                }
+
+                this.logger.Trace("(-):{0}", models.Count);
+                return models;
             }
         }
 
