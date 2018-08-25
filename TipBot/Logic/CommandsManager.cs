@@ -65,7 +65,8 @@ namespace TipBot.Logic
 
                 context.Update(discordUserReceiver);
 
-                this.AddTipToHistory(context, amount, discordUserReceiver.DiscordUserId, discordUserSender.DiscordUserId);
+                this.AddTipToHistory(context, amount, discordUserReceiver.DiscordUserId, discordUserReceiver.Username,
+                    discordUserSender.DiscordUserId, discordUserSender.Username);
 
                 context.SaveChanges();
 
@@ -370,7 +371,8 @@ namespace TipBot.Logic
                     discordUser.Balance += tipAmount;
                     context.Update(discordUser);
 
-                    this.AddTipToHistory(context, tipAmount, discordUser.DiscordUserId, discordUserCreator.DiscordUserId);
+                    this.AddTipToHistory(context, tipAmount, discordUser.DiscordUserId, discordUser.Username,
+                        discordUserCreator.DiscordUserId, discordUserCreator.Username);
 
                     this.logger.Debug("User '{0}' was randomly tipped.", discordUser);
                 }
@@ -405,8 +407,8 @@ namespace TipBot.Logic
                 throw new CommandExecutionException($"Period in days can't be shorter than 1 day.");
             }
 
-            var bestTippers = new Dictionary<ulong, decimal>();
-            var bestBeingTipped = new Dictionary<ulong, decimal>();
+            var bestTippers = new List<UserViewModel>();
+            var bestBeingTipped = new List<UserViewModel>();
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
@@ -414,21 +416,42 @@ namespace TipBot.Logic
 
                 foreach (TipModel tip in context.TipsHistory.Where(x => x.CreationTime > earliestCreationDate))
                 {
-                    if (!bestTippers.ContainsKey(tip.SenderDiscordUserId))
-                        bestTippers.Add(tip.SenderDiscordUserId, 0);
+                    UserViewModel tipper = bestTippers.SingleOrDefault(x => x.DiscordUserId == tip.SenderDiscordUserId);
+                    UserViewModel beignTipped = bestBeingTipped.SingleOrDefault(x => x.DiscordUserId == tip.ReceiverDiscordUserId);
 
-                    if (!bestBeingTipped.ContainsKey(tip.ReceiverDiscordUserId))
-                        bestBeingTipped.Add(tip.ReceiverDiscordUserId, 0);
+                    if (tipper == null)
+                    {
+                        tipper = new UserViewModel
+                        {
+                            Amount = 0,
+                            DiscordUserId = tip.SenderDiscordUserId,
+                            UserName = tip.SenderDiscordUserName
+                        };
 
-                    bestTippers[tip.SenderDiscordUserId] += tip.Amount;
-                    bestBeingTipped[tip.ReceiverDiscordUserId] += tip.Amount;
+                        bestTippers.Add(tipper);
+                    }
+
+                    if (beignTipped == null)
+                    {
+                        beignTipped = new UserViewModel
+                        {
+                            Amount = 0,
+                            DiscordUserId = tip.ReceiverDiscordUserId,
+                            UserName = tip.ReceiverDiscordUserName
+                        };
+
+                        bestBeingTipped.Add(beignTipped);
+                    }
+
+                    tipper.Amount += tip.Amount;
+                    beignTipped.Amount += tip.Amount;
                 }
             }
 
             var model = new TippingChartsModel()
             {
-                BestTippers = bestTippers.OrderByDescending(x => x.Value).Take(amountOfUsersToReturn).ToList(),
-                BestBeingTipped = bestBeingTipped.OrderByDescending(x => x.Value).Take(amountOfUsersToReturn).ToList(),
+                BestTippers = bestTippers.OrderByDescending(x => x.Amount).Take(amountOfUsersToReturn).ToList(),
+                BestBeingTipped = bestBeingTipped.OrderByDescending(x => x.Amount).Take(amountOfUsersToReturn).ToList(),
             };
 
             this.logger.Trace("(-)");
@@ -467,16 +490,21 @@ namespace TipBot.Logic
             return discordUser;
         }
 
-        private void AddTipToHistory(BotDbContext context, decimal amount, ulong receiverDiscordUserId, ulong senderDiscordUserId)
+        private void AddTipToHistory(BotDbContext context, decimal amount, ulong receiverDiscordUserId, string receiverDiscordUserName,
+            ulong senderDiscordUserId, string senderDiscordUserName)
         {
-            this.logger.Trace("({0}:{1},{2}:{3},{4}:{5})", nameof(amount), amount, nameof(receiverDiscordUserId), receiverDiscordUserId, nameof(senderDiscordUserId), senderDiscordUserId);
+            this.logger.Trace("({0}:{1},{2}:{3},{4}:{5},{6}:{7},{8}:{9})",
+                nameof(amount), amount, nameof(receiverDiscordUserId), receiverDiscordUserId, nameof(receiverDiscordUserName), receiverDiscordUserName,
+                nameof(senderDiscordUserId), senderDiscordUserId, nameof(senderDiscordUserName), senderDiscordUserName);
 
             var tipModel = new TipModel()
             {
                 Amount = amount,
                 CreationTime = DateTime.Now,
                 ReceiverDiscordUserId = receiverDiscordUserId,
-                SenderDiscordUserId = senderDiscordUserId
+                ReceiverDiscordUserName = receiverDiscordUserName,
+                SenderDiscordUserId = senderDiscordUserId,
+                SenderDiscordUserName = senderDiscordUserName
             };
 
             context.TipsHistory.Add(tipModel);
@@ -547,7 +575,14 @@ namespace TipBot.Logic
 
     public class TippingChartsModel
     {
-        public List<KeyValuePair<ulong, decimal>> BestTippers;
-        public List<KeyValuePair<ulong, decimal>> BestBeingTipped;
+        public List<UserViewModel> BestTippers;
+        public List<UserViewModel> BestBeingTipped;
+    }
+
+    public class UserViewModel
+    {
+        public ulong DiscordUserId;
+        public string UserName;
+        public Decimal Amount;
     }
 }

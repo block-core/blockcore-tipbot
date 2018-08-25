@@ -12,6 +12,10 @@ namespace TipBot.Database.Models
 
         public ulong SenderDiscordUserId { get; set; }
 
+        public string SenderDiscordUserName { get; set; }
+
         public ulong ReceiverDiscordUserId { get; set; }
+
+        public string ReceiverDiscordUserName { get; set; }
     }
 }

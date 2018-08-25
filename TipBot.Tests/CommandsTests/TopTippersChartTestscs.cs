@@ -64,12 +64,12 @@ namespace TipBot.Tests.CommandsTests
             TippingChartsModel chart = this.testContext.CommandsManager.GetTopTippers(1, 3);
 
             Assert.Single(chart.BestTippers);
-            Assert.Equal(3, chart.BestTippers.First().Value);
+            Assert.Equal(3, chart.BestTippers.First().Amount);
 
             Assert.Equal(3, chart.BestBeingTipped.Count);
 
-            foreach (KeyValuePair<ulong, decimal> tipped in chart.BestBeingTipped)
-                Assert.Equal(1, tipped.Value);
+            foreach (var tipped in chart.BestBeingTipped)
+                Assert.Equal(1, tipped.Amount);
         }
     }
 }

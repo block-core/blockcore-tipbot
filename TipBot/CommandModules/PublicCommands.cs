@@ -230,8 +230,8 @@ namespace TipBot.CommandModules
                     {
                         builder.AppendLine($"Top {chart.BestTippers.Count} users who tipped the most in the last {days} days:");
 
-                        foreach (KeyValuePair<ulong, decimal> tipper in chart.BestTippers)
-                            builder.AppendLine($"<@!{tipper.Key}> tipped {tipper.Value} {this.Settings.Ticker}");
+                        foreach (UserViewModel tipper in chart.BestTippers)
+                            builder.AppendLine($"**{tipper.UserName}** tipped {tipper.Amount} {this.Settings.Ticker}");
                     }
                     else
                         builder.AppendLine($"No one tipped anyone in the last {days} days!");
@@ -243,8 +243,8 @@ namespace TipBot.CommandModules
                     {
                         builder.AppendLine($"Top {chart.BestBeingTipped.Count} users who were tipped the most in the last {days} days:");
 
-                        foreach (KeyValuePair<ulong, decimal> beingTipped in chart.BestBeingTipped)
-                            builder.AppendLine($"<@!{beingTipped.Key}> received {beingTipped.Value} {this.Settings.Ticker}");
+                        foreach (UserViewModel beingTipped in chart.BestBeingTipped)
+                            builder.AppendLine($"**{beingTipped.UserName}** received {beingTipped.Amount} {this.Settings.Ticker}");
                     }
                     else
                         builder.AppendLine($"No one was tipped in the last {days} days!");

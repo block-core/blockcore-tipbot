@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using TipBot.Database;
+using TipBot.Database.Models;
 using TipBot.Helpers;
 using TipBot.Logic.NodeIntegrations;
 using TipBot.Services;
@@ -39,6 +40,23 @@ namespace TipBot.Logic
                     {
                         db.Database.Migrate();
                     }
+                }
+
+                // TODO this is needed to update db to introduce nicknames to TipModel
+                using (BotDbContext db = this.services.GetRequiredService<IContextFactory>().CreateContext())
+                {
+                    foreach (TipModel tipModel in db.TipsHistory)
+                    {
+                        if (tipModel.SenderDiscordUserName == null || tipModel.ReceiverDiscordUserName == null)
+                        {
+                            tipModel.SenderDiscordUserName = db.Users.Single(x => x.DiscordUserId == tipModel.SenderDiscordUserId).Username;
+                            tipModel.ReceiverDiscordUserName = db.Users.Single(x => x.DiscordUserId == tipModel.ReceiverDiscordUserId).Username;
+
+                            db.Update(tipModel);
+                        }
+                    }
+
+                    db.SaveChanges();
                 }
 
                 this.services.GetRequiredService<INodeIntegration>().Initialize();
