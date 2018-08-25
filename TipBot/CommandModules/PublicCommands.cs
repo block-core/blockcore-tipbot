@@ -33,6 +33,10 @@ namespace TipBot.CommandModules
         /// <remarks>Set by DI.</remarks>
         public Settings Settings { get; set; }
 
+        /// <inheritdoc cref="MessagesHelper"/>
+        /// <remarks>Set by DI.</remarks>
+        public MessagesHelper MessagesHelper { get; set; }
+
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private readonly object lockObject = new object();
 
@@ -275,13 +279,6 @@ namespace TipBot.CommandModules
 
             string response;
 
-            // Don't await because this might throw if bot doesn't have the permission to delete other's messages.
-            Task.Run(async () =>
-            {
-                // Remove original message.
-                await this.Context.Message.DeleteAsync().ConfigureAwait(false);
-            });
-
             lock (this.lockObject)
             {
                 try
@@ -292,6 +289,9 @@ namespace TipBot.CommandModules
                                $"Question is: `{question}`" + Environment.NewLine +
                                $"You have {durationMinutes} minutes to answer correctly and claim {amount} {this.Settings.Ticker}!" + Environment.NewLine +
                                $"If no one answers before time runs out {amount} {this.Settings.Ticker} will be returned to {user.Mention}.";
+
+                    // Remove original message to hide hash.
+                    this.MessagesHelper.SelfDestruct(this.Context.Message, 0);
                 }
                 catch (CommandExecutionException exception)
                 {
@@ -307,13 +307,14 @@ namespace TipBot.CommandModules
 
         [CommandWithHelp("answerQuiz", "Answer to any active quiz. Answer will be checked against all of them. In case your answer will be correct you'll receive a reward.",
             "answerQuiz <answer>")]
-        public Task AnswerQuizAsync([Remainder]string answer)
+        public async Task AnswerQuizAsync([Remainder]string answer)
         {
             this.logger.Trace("({0}:'{1}')", nameof(answer), answer);
 
             IUser user = this.Context.User;
 
             string response;
+            bool deleteMessage = false;
 
             lock (this.lockObject)
             {
@@ -323,7 +324,13 @@ namespace TipBot.CommandModules
 
                     if (!result.Success)
                     {
-                        response = "Unfortunately you are not correct, that's not the answer to any of the active quizes.";
+                        response = "Unfortunately you are not correct, that's not the answer to any of the active quizes." +
+                                    Environment.NewLine + Environment.NewLine +
+                                   $"_`This and your message will be removed in {this.Settings.SelfDestructedMessagesDelaySeconds} seconds to avoid bloating the channel.`_";
+
+                        this.MessagesHelper.SelfDestruct(this.Context.Message, this.Settings.SelfDestructedMessagesDelaySeconds);
+
+                        deleteMessage = true;
                     }
                     else
                     {
@@ -342,8 +349,16 @@ namespace TipBot.CommandModules
 
             response = this.TrimMessage(response);
 
+            if (deleteMessage)
+            {
+                await this.MessagesHelper.SendSelfDesctructedMessage(this.Context, response, false).ConfigureAwait(false);
+            }
+            else
+            {
+                await this.ReplyAsync(response).ConfigureAwait(false);
+            }
+
             this.logger.Trace("(-)");
-            return this.ReplyAsync(response);
         }
 
         [CommandWithHelp("listActiveQuizes", "Displays all quizes that are active.")]
@@ -439,14 +454,6 @@ namespace TipBot.CommandModules
             this.logger.Trace("(-)");
             return this.Context.Channel.SendFileAsync(stream, "logo.png", text);
         }
-
-        //[CommandWithHelp("test", "Test.")]
-        //public async Task TestAsync()
-        //{
-        //    var text = "this is a test message";
-        //
-        //    IUserMessage message = await this.ReplyAsync(text).ConfigureAwait(false);
-        //}
 
         /// <summary>Trims the message to be shorter than 2000 characters.</summary>
         private string TrimMessage(string message)

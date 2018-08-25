@@ -21,26 +21,26 @@ namespace TipBot.Helpers
         }
 
         /// <summary>Sends a message that will be removed after <see cref="Settings.SelfDestructedMessagesDelaySeconds"/> seconds.</summary>
-        public async Task SendSelfDesctructedMessage(SocketCommandContext context, string text)
+        public async Task SendSelfDesctructedMessage(SocketCommandContext context, string text, bool addPostfix = true)
         {
             this.logger.Trace("({0}.{1}:{2})", nameof(text), nameof(text.Length), text.Length);
 
-            int delay = this.settings.SelfDestructedMessagesDelaySeconds;
-            string messageToSend = text + this.GetSelfDesctructionPostfix(delay);
+            int delaySeconds = this.settings.SelfDestructedMessagesDelaySeconds;
+            string messageToSend = text + (addPostfix ? this.GetSelfDesctructionPostfix(delaySeconds) : string.Empty);
 
             RestUserMessage message = await context.Channel.SendMessageAsync(messageToSend).ConfigureAwait(false);
 
-            this.SelfDestruct(message, delay);
+            this.SelfDestruct(message, delaySeconds);
 
             this.logger.Trace("(-)");
         }
 
         /// <summary>Sends a message that will be removed after <paramref name="delaySeconds"/> seconds.</summary>
-        public async Task SendSelfDesctructedMessage(SocketCommandContext context, string text, int delaySeconds)
+        public async Task SendSelfDesctructedMessage(SocketCommandContext context, string text, int delaySeconds, bool addPostfix = true)
         {
             this.logger.Trace("({0}.{1}:{2},{3}:{4})", nameof(text), nameof(text.Length), text.Length, nameof(delaySeconds), delaySeconds);
 
-            string messageToSend = text + this.GetSelfDesctructionPostfix(delaySeconds);
+            string messageToSend = text + (addPostfix ? this.GetSelfDesctructionPostfix(delaySeconds) : string.Empty);
 
             RestUserMessage message = await context.Channel.SendMessageAsync(messageToSend).ConfigureAwait(false);
 
@@ -56,7 +56,8 @@ namespace TipBot.Helpers
 
             Task.Run(async () =>
             {
-                await Task.Delay(delaySeconds * 1000).ConfigureAwait(false);
+                if (delaySeconds != 0)
+                    await Task.Delay(delaySeconds * 1000).ConfigureAwait(false);
                 await message.DeleteAsync().ConfigureAwait(false);
             });
 
