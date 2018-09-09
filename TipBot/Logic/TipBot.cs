@@ -105,6 +105,7 @@ namespace TipBot.Logic
             this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
             this.services.GetRequiredService<INodeIntegration>()?.Dispose();
             this.services.GetRequiredService<QuizExpiryChecker>()?.Dispose();
+            this.services.GetRequiredService<DiscordConnectionKeepAlive>()?.Dispose();
 
             this.logger.Info("Shutdown completed.");
             this.logger.Trace("(-)");
