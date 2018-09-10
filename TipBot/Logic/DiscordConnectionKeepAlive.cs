@@ -13,17 +13,21 @@ namespace TipBot.Logic
         private readonly TimeSpan timeout = TimeSpan.FromSeconds(80);
 
         private readonly DiscordSocketClient discord;
+        private readonly Settings settings;
+
         private readonly Logger logger;
 
         private readonly CancellationTokenSource cancellation;
 
         private Task keepAliveTask;
 
-        public DiscordConnectionKeepAlive(DiscordSocketClient discord)
+        public DiscordConnectionKeepAlive(DiscordSocketClient discord, Settings settings)
         {
             this.cancellation = new CancellationTokenSource();
 
             this.discord = discord;
+            this.settings = settings;
+
             this.logger = LogManager.GetCurrentClassLogger();
         }
 
@@ -51,7 +55,12 @@ namespace TipBot.Logic
                         continue;
 
                     Task timeoutTask = Task.Delay(this.timeout, this.cancellation.Token);
-                    Task connect = this.discord.StartAsync();
+
+                    Task connect = Task.Run(async () =>
+                    {
+                        await this.discord.LoginAsync(TokenType.Bot, this.settings.BotToken).ConfigureAwait(false);
+                        await this.discord.StartAsync().ConfigureAwait(false);
+                    });
 
                     Task task = await Task.WhenAny(timeoutTask, connect).ConfigureAwait(false);
 
