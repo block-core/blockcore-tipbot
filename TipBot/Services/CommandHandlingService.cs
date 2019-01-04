@@ -33,9 +33,9 @@ namespace TipBot.Services
             this.discord.MessageReceived += this.MessageReceivedAsync;
         }
 
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(IServiceProvider services)
         {
-            await this.commands.AddModulesAsync(Assembly.GetEntryAssembly()).ConfigureAwait(false);
+            await this.commands.AddModulesAsync(Assembly.GetEntryAssembly(), services).ConfigureAwait(false);
         }
 
         private async Task MessageReceivedAsync(SocketMessage rawMessage)

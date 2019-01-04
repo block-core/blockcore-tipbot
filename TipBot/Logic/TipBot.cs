@@ -56,7 +56,7 @@ namespace TipBot.Logic
 
                 this.services.GetRequiredService<DiscordConnectionKeepAlive>().Initialize();
 
-                await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync().ConfigureAwait(false);
+                await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync(this.services).ConfigureAwait(false);
                 await this.services.GetRequiredService<FatalErrorNotifier>().InitializeAsync(client, settings).ConfigureAwait(false);
             }
             catch (Exception exception)
