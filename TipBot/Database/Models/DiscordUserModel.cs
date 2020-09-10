@@ -1,4 +1,6 @@
-﻿namespace TipBot.Database.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TipBot.Database.Models
 {
     public class DiscordUserModel
     {
@@ -8,11 +10,13 @@
 
         public ulong DiscordUserId { get; set; }
 
+        [Column(TypeName = "decimal(18,8)")]
         public decimal Balance { get; set; }
 
         public string DepositAddress { get; set; } = null;
 
         /// <summary>How much money was received in total by <see cref="DepositAddress"/> by the time last check happened.</summary>
+        [Column(TypeName = "decimal(18,8)")]
         public decimal LastCheckedReceivedAmountByAddress { get; set; } = 0;
 
         public override string ToString()
