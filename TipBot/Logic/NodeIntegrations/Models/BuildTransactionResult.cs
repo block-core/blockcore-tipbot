@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace TipBot.Logic.NodeIntegrations.Modals
+namespace TipBot.Logic.NodeIntegrations.Models
 {
     public class BuildTransactionResult
     {

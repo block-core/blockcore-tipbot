@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TipBot.Logic.NodeIntegrations.Modals
+namespace TipBot.Logic.NodeIntegrations.Models
 {
     public class Balance
     {
@@ -13,6 +13,4 @@ namespace TipBot.Logic.NodeIntegrations.Modals
         public List<Balance> balances { get; set; }
         public string reason { get; set; }
     }
-
-
 }
