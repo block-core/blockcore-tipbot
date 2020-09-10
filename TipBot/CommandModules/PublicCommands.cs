@@ -96,7 +96,7 @@ namespace TipBot.CommandModules
                 }
                 catch (OutOfDepositAddressesException)
                 {
-                    response = "Bot ran out of deposit addresses. Tell bot admin about it.";
+                    response = $"Bot ran out of deposit addresses. Tell bot admin ({this.Settings.SupportUsername}:{this.Settings.SupportDiscriminator}) about it.";
                 }
             }
 
@@ -131,6 +131,16 @@ namespace TipBot.CommandModules
                 }
             }
 
+            response = this.TrimMessage(response);
+
+            this.logger.Trace("(-)");
+            return this.ReplyAsync(response);
+        }
+
+        [CommandWithHelp("fee", "The network fee that is subtracted from each withdraw", "tipbot fee")]
+        public Task Fee()
+        {
+            string response = $"The network fee is: {this.Settings.NetworkFee}";
             response = this.TrimMessage(response);
 
             this.logger.Trace("(-)");
@@ -450,7 +460,7 @@ namespace TipBot.CommandModules
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
-            string text = "`TipBot`" + Environment.NewLine + $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/noescape00/DiscordTipBot>";
+            string text = "`TipBot`" + Environment.NewLine + $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/MudDev/DiscordTipBot>";
 
             this.logger.Trace("(-)");
             return this.Context.Channel.SendFileAsync(stream, "logo.png", text);

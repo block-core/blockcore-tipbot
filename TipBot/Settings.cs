@@ -8,18 +8,24 @@ namespace TipBot
         {
             this.ConfigReader = configReader;
 
-            this.BotToken = configReader.GetOrDefault<string>("token", "NDc2ODU5MDc1MzM1MDI4NzM4.DkztLQ.lWroAup2WOK8VZAyhGjG_E33ENY");
+            this.BotToken = configReader.GetOrDefault<string>("token", "BOTTOKENKEYHERE");
 
             this.EnableMigrations = configReader.GetOrDefault<bool>("enableMigrations", true);
 
-            this.ConnectionString = configReader.GetOrDefault<string>("connectionString", @"Data Source=(LocalDb)\testDb;Initial Catalog=testBotDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+            this.ConnectionString = configReader.GetOrDefault<string>("connectionString", @"Data Source=127.0.0.1;Initial Catalog=TipBot;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+
+            this.Ticker = configReader.GetOrDefault<string>("ticker", "STRAT");
+
+            this.NetworkFee = configReader.GetOrDefault<decimal>("networkFee", 0.01m);
         }
 
         public TextFileConfiguration ConfigReader { get; private set; }
 
         public string BotToken { get; private set; }
 
-        public string Ticker { get; } = "STRAT";
+        public string Ticker { get; private set; }
+
+        public decimal NetworkFee { get; private set; }
 
         public uint PregeneratedAddressesCount { get; } = 8000;
 
@@ -41,8 +47,9 @@ namespace TipBot
         public bool EnableMigrations { get; private set; }
 
         /// <summary>Nickname of a user that will receive a message in case of a fatal error.</summary>
-        public string SupportUsername { get; } = "NoEscape0";
-        public string SupportDiscriminator { get; } = "5537";
+        public string SupportUsername { get; } = "Mud";
+        public string SupportDiscriminator { get; } = "5277";
+        public ulong SupportUserId { get; } = 268792651250139137;
 
         /// <summary>DB connection string. Local db will be used if it's null.</summary>
         public string ConnectionString { get; private set; }

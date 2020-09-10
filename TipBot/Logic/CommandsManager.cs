@@ -143,12 +143,15 @@ namespace TipBot.Logic
                     throw new CommandExecutionException("You can't withdraw to your own deposit address!");
                 }
 
-                this.AssertBalanceIsSufficient(discordUser, amount);
+                decimal amountToSend = amount - this.settings.NetworkFee;
+                this.logger.Trace("(The amount after fee: {0})", amountToSend);
+
+                this.AssertBalanceIsSufficient(discordUser, amountToSend);
 
                 try
                 {
-                    this.nodeIntegration.Withdraw(amount, address);
-                    this.logger.Debug("User '{0}' withdrew {1} to address '{2}'.", discordUser, amount, address);
+                    this.nodeIntegration.Withdraw(amountToSend, address);
+                    this.logger.Debug("User '{0}' withdrew {1} to address '{2}'. After fee subtracted '{3}'", discordUser, amount, address, amountToSend);
                 }
                 catch (InvalidAddressException)
                 {
@@ -431,7 +434,7 @@ namespace TipBot.Logic
             {
                 DateTime earliestCreationDate = DateTime.Now - TimeSpan.FromDays(periodDays);
 
-                foreach (TipModel tip in context.TipsHistory.Where(x => x.CreationTime > earliestCreationDate))
+                foreach (TipModel tip in context.TipsHistory.AsQueryable().Where(x => x.CreationTime > earliestCreationDate))
                 {
                     UserViewModel tipper = bestTippers.SingleOrDefault(x => x.DiscordUserId == tip.SenderDiscordUserId);
                     UserViewModel beignTipped = bestBeingTipped.SingleOrDefault(x => x.DiscordUserId == tip.ReceiverDiscordUserId);

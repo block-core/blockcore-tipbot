@@ -90,8 +90,7 @@ namespace TipBot.Logic
                 .AddSingleton<IContextFactory, ContextFactory>()
                 .AddSingleton<DiscordConnectionKeepAlive>()
                 .AddSingleton<MessagesHelper>()
-                // Replace implementation to use API instead of RPC.
-                .AddSingleton<INodeIntegration, RPCNodeIntegration>();
+                .AddSingleton<INodeIntegration, BlockCoreNodeIntegration>();
 
             this.logger.Trace("(-)");
             return collection;

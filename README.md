@@ -1,8 +1,8 @@
-### Tipbot for Discord that works with Stratis
+### Tipbot for Discord that works with Blockcore
 
-The bot is added to the [stratis community discord](https://discord.gg/9tDyfZs). You can check it out there.
+The bot is added to the [Blockcore community discord](hhttps://discord.gg/5aJk8Vv). You can check it out there.
 
-Or you can [add stratis tipbot](https://discordapp.com/oauth2/authorize?client_id=468025834519658496&scope=bot) to your server.
+Or you can [add Blockcore tipbot](https://discord.com/api/oauth2/authorize?client_id=753386755721265282&permissions=2048&scope=bot) to your server.
 
 Don't forget to add `Manage Messages ` permission for the bot.
 
@@ -10,24 +10,23 @@ Don't forget to add `Manage Messages ` permission for the bot.
 
 #### Guide: how to setup your own instance of the bot
 
-A Stratis node (you can get latest release [here](https://github.com/stratisproject/stratisX/releases)) with RPC turned on needs to be running.
+A Blockcore node (you can get latest release [here](https://github.com/block-core/blockcore)) with the address indexer turned on, it needs to be running. (addressindex=1)
 
 ```
-stratis-qt.exe -rpcuser=<username> -rpcpassword=<password> -rpcport=<port> -server=1
+blockcore-desired-chain.exe -addressindex=1
 ```
-
 
 
 You will also need [.NET Core SDK](https://www.microsoft.com/net/download) installed.
 
 
 
-Clone the repository, open powershell in the repo folder and run `dotnet publish` from it. That will compile the project and produce `..\TipBot\bin\Debug\netcoreapp2.1\publish` folder with `TipBot.dll` and other files in it. 
+Clone the repository, open powershell in the repo folder and run `dotnet publish` from it. That will compile the project and produce `..\TipBot\bin\Debug\netcoreapp3.1\publish` folder with `TipBot.dll` and other files in it. 
 
 Now you can run the bot using powershell or cmd:
 
 ```
-dotnet exec TipBot.dll -daemonUrl=http://127.0.0.1:23521/ -rpcUsername=USRNAME -rpcPassword=RPCPASS -walletPassword=WALLETPASS -token=BOTTOKEN
+dotnet exec TipBot.dll -apiUrl=http://127.0.0.1:PORT/ -walletName=WALLETNAME -walletPassword=WALLETPASSWORD -networkFee=0.01 -useSegwit=true -token=DISCORDBOTTOKEN
 ```
 
 
@@ -35,11 +34,13 @@ dotnet exec TipBot.dll -daemonUrl=http://127.0.0.1:23521/ -rpcUsername=USRNAME -
 Bot configuration parameters: 
 
 ```
-daemonUrl - URL of RPC server. Usually http://127.0.0.1:<RPC port>/
-rpcUsername - rpc user name
-rpcPassword - rpc password
-walletPassword - wallet's password. Dont specify if wallet is not encrypted
-token - discord bot token
+apiUrl - URL of API server. Usually http://127.0.0.1:<API port>/
+walletName - the wallet name
+walletPassword - the wallet password
+networkFee - The network fee for withdraws
+useSegwit - To use segwit addresses, or not. true/fase
+token - The applications token given to you from Discord
+connectionString - To configure the databse For example, MSSQL: "Data Source=COMPUTERNAME/IP;Initial Catalog=DATABASENAME;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"
 ```
 
 
@@ -77,4 +78,4 @@ other options!**
 
 When you see the bot in the online status on your discord server, you are ready to test it. 
 
-Type: `@tipbot help`
+Type: `tipbot help`

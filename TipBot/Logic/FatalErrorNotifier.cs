@@ -19,7 +19,14 @@ namespace TipBot.Logic
 
             await Task.Delay(20000).ConfigureAwait(false);
 
-            this.SupportUser = client.GetUser(settings.SupportUsername, settings.SupportDiscriminator);
+            if (settings.SupportUserId > 0)
+            {
+                this.SupportUser = client.GetUser(settings.SupportUserId);
+            }
+            else
+            {
+                this.SupportUser = client.GetUser(settings.SupportUsername, settings.SupportDiscriminator);
+            }
 
             if (this.SupportUser == null)
                 throw new Exception("Support user is null!");

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TipBot", "TipBot\TipBot.csproj", "{83547242-EFAE-451B-9232-0E121A7FA1AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TipBot.Tests", "TipBot.Tests\TipBot.Tests.csproj", "{B59016DA-3D83-4006-8188-43BB8568FF1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TipBot.Tests", "TipBot.Tests\TipBot.Tests.csproj", "{B59016DA-3D83-4006-8188-43BB8568FF1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
