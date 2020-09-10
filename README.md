@@ -2,7 +2,7 @@
 
 The bot is added to the [Blockcore community discord](hhttps://discord.gg/5aJk8Vv). You can check it out there.
 
-Or you can [add Blockcore tipbot](https://discord.com/api/oauth2/authorize?client_id=753386755721265282&permissions=2048&scope=bot) to your server.
+Or you can [add Blockcore tipbot](https://discord.com/api/oauth2/authorize?client_id=<CLIENT ID>&permissions=2048&scope=bot) to your server.
 
 Don't forget to add `Manage Messages ` permission for the bot.
 
@@ -10,10 +10,10 @@ Don't forget to add `Manage Messages ` permission for the bot.
 
 #### Guide: how to setup your own instance of the bot
 
-A Blockcore node (you can get latest release [here](https://github.com/block-core/blockcore)) with the address indexer turned on, it needs to be running. (addressindex=1)
+A Blockcore node (you can get latest release [here](https://github.com/block-core/blockcore))
 
 ```
-blockcore-desired-chain.exe -addressindex=1
+blockcore-desired-chain.exe
 ```
 
 

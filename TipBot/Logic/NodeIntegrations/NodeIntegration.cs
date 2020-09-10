@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using TipBot.Database;
-using TipBot.Logic.NodeIntegrations.Modals;
+using TipBot.Logic.NodeIntegrations.Models;
 
 namespace TipBot.Logic.NodeIntegrations
 {
@@ -178,6 +178,23 @@ namespace TipBot.Logic.NodeIntegrations
             request.AddParameter("minConfirmations", minConfirmations);
 
             var response = await client.ExecuteAsync<GetAddressBalanceResult>(request);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                result = response.Data;
+            }
+            return result;
+        }
+
+        public async Task<GetAddressesHistory> GetAddressesHistory(string addresses)
+        {
+            var result = new GetAddressesHistory();
+            var client = new RestClient($"{ApiUrl}");
+            var request = new RestRequest("/api/Wallet/history", Method.GET);
+            request.AddParameter("WalletName", WalletName);
+            request.AddParameter("AccountName", AccountName);
+            request.AddParameter("Address", addresses);
+
+            var response = await client.ExecuteAsync<GetAddressesHistory>(request);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 result = response.Data;

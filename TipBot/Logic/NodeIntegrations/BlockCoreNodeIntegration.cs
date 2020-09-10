@@ -7,7 +7,7 @@ using NLog;
 using NBitcoin;
 using TipBot.Database;
 using TipBot.Database.Models;
-using TipBot.Logic.NodeIntegrations.Modals;
+using TipBot.Logic.NodeIntegrations.Models;
 
 namespace TipBot.Logic.NodeIntegrations
 {
@@ -186,23 +186,19 @@ namespace TipBot.Logic.NodeIntegrations
             {
                 foreach (DiscordUserModel user in usersToTrack)
                 {
-                    var receivedByAddress = blockCoreNodeAPI.GetAddressesBalances(user.DepositAddress, this.settings.MinConfirmationsForDeposit).Result;
+                    var addressHistory = blockCoreNodeAPI.GetAddressesHistory(user.DepositAddress).Result;
 
-                    if (receivedByAddress.reason != null && receivedByAddress.reason.Contains("Address indexer is not synced."))
+                    var transactionHistory = addressHistory.history.Where(x => x.accountName == AccountName).SelectMany(x => x.transactionsHistory);
+
+                    var receivedByAddress = transactionHistory.Where(x => x.type == "received");
+
+                    if (receivedByAddress.Count() > 0)
                     {
-                        this.logger.Trace("Address indexer is not synced.");
-                        break;
-                    }
+                        decimal totalRecivedByAddress = receivedByAddress.Sum(x => x.amount);
 
-                    if (receivedByAddress.balances != null)
-                    {
-                        decimal balance = 0;
-                        if (receivedByAddress.balances.Count > 0)
-                        {
-                            balance = Money.FromUnit(receivedByAddress.balances[0].balance, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
-                        }
-
-                        if (receivedByAddress.balances[0].balance > user.LastCheckedReceivedAmountByAddress)
+                        decimal balance = Money.FromUnit(totalRecivedByAddress, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
+                        
+                        if (balance > user.LastCheckedReceivedAmountByAddress)
                         {
                             decimal recentlyReceived = balance - user.LastCheckedReceivedAmountByAddress;
 
