@@ -15,7 +15,7 @@ namespace TipBot.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.1-rtm-30846")
+                .HasAnnotation("ProductVersion", "3.1.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -23,9 +23,11 @@ namespace TipBot.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Address");
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -36,18 +38,23 @@ namespace TipBot.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<decimal>("Balance");
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,8)");
 
-                    b.Property<string>("DepositAddress");
+                    b.Property<string>("DepositAddress")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscordUserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<decimal>("LastCheckedReceivedAmountByAddress");
+                    b.Property<decimal>("LastCheckedReceivedAmountByAddress")
+                        .HasColumnType("decimal(18,8)");
 
-                    b.Property<string>("Username");
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -58,20 +65,26 @@ namespace TipBot.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AnswerHash");
+                    b.Property<string>("AnswerHash")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreationTime");
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("CreatorDiscordUserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<int>("DurationMinutes");
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Question");
+                    b.Property<string>("Question")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Reward");
+                    b.Property<decimal>("Reward")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -82,21 +95,26 @@ namespace TipBot.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<decimal>("Amount");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("CreationTime");
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("ReceiverDiscordUserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<string>("ReceiverDiscordUserName");
+                    b.Property<string>("ReceiverDiscordUserName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("SenderDiscordUserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                        .HasColumnType("decimal(20,0)");
 
-                    b.Property<string>("SenderDiscordUserName");
+                    b.Property<string>("SenderDiscordUserName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

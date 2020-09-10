@@ -1,10 +1,9 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TipBot.Migrations
 {
-    public partial class init : Migration
+    public partial class IntDataStruct : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +12,7 @@ namespace TipBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     CreatorDiscordUserId = table.Column<decimal>(nullable: false),
                     AnswerHash = table.Column<string>(nullable: true),
                     Question = table.Column<string>(nullable: true),
@@ -31,11 +30,13 @@ namespace TipBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Amount = table.Column<decimal>(nullable: false),
                     CreationTime = table.Column<DateTime>(nullable: false),
                     SenderDiscordUserId = table.Column<decimal>(nullable: false),
-                    ReceiverDiscordUserId = table.Column<decimal>(nullable: false)
+                    SenderDiscordUserName = table.Column<string>(nullable: true),
+                    ReceiverDiscordUserId = table.Column<decimal>(nullable: false),
+                    ReceiverDiscordUserName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -47,7 +48,7 @@ namespace TipBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Address = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -60,12 +61,12 @@ namespace TipBot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(nullable: true),
                     DiscordUserId = table.Column<decimal>(nullable: false),
-                    Balance = table.Column<decimal>(nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,8)", nullable: false),
                     DepositAddress = table.Column<string>(nullable: true),
-                    LastCheckedReceivedAmountByAddress = table.Column<decimal>(nullable: false)
+                    LastCheckedReceivedAmountByAddress = table.Column<decimal>(type: "decimal(18,8)", nullable: false)
                 },
                 constraints: table =>
                 {
