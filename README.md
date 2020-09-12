@@ -1,11 +1,24 @@
-### Tipbot for Discord that works with Blockcore
+
+<p align="center">
+  <p align="center">
+    <img src="https://user-images.githubusercontent.com/5221349/72841405-93c2ce80-3c96-11ea-844b-3e1ff782b1ae.png" height="100" alt="Blockcore" />
+  </p>
+  <h3 align="center">
+    About Blockcore TipBot
+  </h3>
+  <p align="center">
+    Tipbot for Discord that works with Blockcore based blockchains
+  </p>
+</p>
+
+
+# Introduction
 
 The bot is added to the [Blockcore community discord](hhttps://discord.gg/5aJk8Vv). You can check it out there.
 
 Or you can [add Blockcore tipbot](https://discord.com/api/oauth2/authorize?client_id=<CLIENT ID>&permissions=2048&scope=bot) to your server.
 
 Don't forget to add `Manage Messages ` permission for the bot.
-
 
 
 #### Guide: how to setup your own instance of the bot
@@ -44,7 +57,6 @@ connectionString - To configure the databse For example, MSSQL: "Data Source=COM
 ```
 
 
-
 #### Creating a Discord Bot
 
 Before you can begin writing your bot, it is necessary to create a bot
@@ -61,7 +73,6 @@ username).
 other options!**
 
 
-
 #### Adding your bot to a server
 
 1. Open your bot's application on the Discord Applications Portal.
@@ -71,7 +82,6 @@ other options!**
 4. Open the authorization URL in your browser.
 5. Select a server.
 6. Click on authorize.
-
 
 
 #### Testing the bot is responsive
