@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CITY": {
+      "commandName": "Project",
+      "commandLineArgs": "-apiUrl=http://127.0.0.1:4335/ -walletName=WALLETNAME -walletPassword=WALLETPASSWORD -networkFee=0.01 -useSegwit=false -token=DISCORDBOTTOKEN"
+    }
+  }
+}
