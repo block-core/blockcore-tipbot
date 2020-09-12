@@ -1,1 +1,0 @@
-dotnet exec *\TipBot.dll -daemonUrl=http://127.0.0.1:23521/ -rpcUsername=USRNAME -rpcPassword=RPCPASS -walletPassword=WALLETPASS -token=BOTTOKEN
