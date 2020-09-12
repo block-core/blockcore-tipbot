@@ -460,7 +460,7 @@ namespace TipBot.CommandModules
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
-            string text = "`TipBot`" + Environment.NewLine + $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/MudDev/DiscordTipBot>";
+            string text = "`TipBot`" + Environment.NewLine + $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/block-core/blockcore-tipbot>";
 
             this.logger.Trace("(-)");
             return this.Context.Channel.SendFileAsync(stream, "logo.png", text);
