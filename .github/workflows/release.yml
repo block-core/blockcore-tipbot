@@ -41,5 +41,5 @@ jobs:
 
       - name: Login and Push to Docker Registry
         run: |
-          docker login -u "sondreb" -p "${{secrets.DockerHubSecret}}"
+          docker login -u "sondreb" -p "${{secrets.DOCKER_KEY}}"
           docker push blockcore/tipbot
