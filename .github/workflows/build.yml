@@ -31,7 +31,7 @@ jobs:
     env:
       PROJECT_NAME: 'Blockcore.TipBot'
       SOLUTION_PATH: 'Blockcore.TipBot.sln'
-      PROJECT_PATH: 'src/TipBot/Blockcore.TipBot.csproj'
+      PROJECT_PATH: 'TipBot/Blockcore.TipBot.csproj'
       BUILD_CONFIGURATION: 'Release'
 
     steps:
@@ -60,7 +60,7 @@ jobs:
       run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -r ${{env.RELEASE_CONFIGURATION}} /p:Version=${{ env.VERSION }} -v m ${{env.SOLUTION_PATH}}
 
     - name: Publish
-      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{env.RELEASE_CONFIGURATION}} /p:Version=${{ env.VERSION }} -v m -o ./src/${{ env.PROJECT_NAME }}/bin/publish ${{env.PROJECT_PATH}}
+      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{env.RELEASE_CONFIGURATION}} /p:Version=${{ env.VERSION }} -v m -o ./${{ env.PROJECT_NAME }}/bin/publish ${{env.PROJECT_PATH}}
 
     - name: Package Name
       run: |
