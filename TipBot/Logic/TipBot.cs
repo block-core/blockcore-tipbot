@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
@@ -19,19 +22,68 @@ namespace TipBot.Logic
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        protected IServiceProvider services;
+        private Settings settings;
 
-        public async Task StartAsync(string[] args)
+        protected readonly IServiceProvider services;
+
+        private readonly DiscordSocketClient client;
+
+        private readonly INodeIntegration nodeIntegration;
+
+        private readonly QuizExpiryChecker quizExpiryChecker;
+
+        private readonly CommandService commandService;
+
+        private readonly DiscordConnectionKeepAlive discordConnectionKeepAlive;
+
+        private readonly CommandHandlingService commandHandlingService;
+
+        private readonly FatalErrorNotifier fatalErrorNotifier;
+
+        public TipBot(
+            IOptionsMonitor<Settings> options, 
+            IServiceProvider services,
+            DiscordSocketClient client,
+            INodeIntegration nodeIntegration,
+            QuizExpiryChecker quizExpiryChecker,
+            CommandService commandService,
+            DiscordConnectionKeepAlive discordConnectionKeepAlive,
+            CommandHandlingService commandHandlingService,
+            FatalErrorNotifier fatalErrorNotifier
+            )
         {
-            this.logger.Trace("({0}.{1}:{2})", nameof(args), nameof(args.Length), args.Length);
+            this.settings = options.CurrentValue;
+            this.services = services;
+            this.client = client;
+            this.nodeIntegration = nodeIntegration;
+            this.quizExpiryChecker = quizExpiryChecker;
+            this.commandService = commandService;
+            this.discordConnectionKeepAlive = discordConnectionKeepAlive;
+            this.commandHandlingService = commandHandlingService;
+            this.fatalErrorNotifier = fatalErrorNotifier;
+
+            options.OnChange(config =>
+            {
+                this.settings = config;
+            });
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            // this.logger.Trace("({0}.{1}:{2})", nameof(args), nameof(args.Length), args.Length);
             this.logger.Info("Starting the bot.");
 
             try
             {
-                this.services = this.GetServicesCollection().BuildServiceProvider();
+                //IConfiguration Configuration = new ConfigurationBuilder()
+                //    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                //    .AddEnvironmentVariables()
+                //    .AddCommandLine(args)
+                //    .Build();
 
-                var settings = this.services.GetRequiredService<Settings>();
-                settings.Initialize(new TextFileConfiguration(args));
+                // this.services = this.GetServicesCollection().BuildServiceProvider();
+
+                //settings.Initialize(new TextFileConfiguration(args));
 
                 if (settings.EnableMigrations)
                 {
@@ -42,22 +94,19 @@ namespace TipBot.Logic
                     }
                 }
 
-                this.services.GetRequiredService<INodeIntegration>().Initialize();
-                this.services.GetRequiredService<QuizExpiryChecker>().Initialize();
-
-                // Initialize discord API wrapper.
-                var client = this.services.GetRequiredService<DiscordSocketClient>();
+                this.nodeIntegration.Initialize();
+                this.quizExpiryChecker.Initialize();
 
                 client.Log += this.LogAsync;
-                this.services.GetRequiredService<CommandService>().Log += this.LogAsync;
+                this.commandService.Log += this.LogAsync;
 
                 await client.LoginAsync(TokenType.Bot, settings.BotToken).ConfigureAwait(false);
                 await client.StartAsync().ConfigureAwait(false);
 
-                this.services.GetRequiredService<DiscordConnectionKeepAlive>().Initialize();
+                this.discordConnectionKeepAlive.Initialize();
 
-                await this.services.GetRequiredService<CommandHandlingService>().InitializeAsync(this.services).ConfigureAwait(false);
-                await this.services.GetRequiredService<FatalErrorNotifier>().InitializeAsync(client, settings).ConfigureAwait(false);
+                await this.commandHandlingService.InitializeAsync(this.services).ConfigureAwait(false);
+                await this.fatalErrorNotifier.InitializeAsync(client, settings).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -75,36 +124,36 @@ namespace TipBot.Logic
             return Task.CompletedTask;
         }
 
-        protected virtual IServiceCollection GetServicesCollection()
-        {
-            this.logger.Trace("()");
+        //protected virtual IServiceCollection GetServicesCollection()
+        //{
+        //    this.logger.Trace("()");
 
-            IServiceCollection collection = new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandlingService>()
-                .AddSingleton<Settings>()
-                .AddSingleton<CommandsManager>()
-                .AddSingleton<QuizExpiryChecker>()
-                .AddSingleton<FatalErrorNotifier>()
-                .AddSingleton<IContextFactory, ContextFactory>()
-                .AddSingleton<DiscordConnectionKeepAlive>()
-                .AddSingleton<MessagesHelper>()
-                .AddSingleton<INodeIntegration, BlockCoreNodeIntegration>();
+        //    IServiceCollection collection = new ServiceCollection()
+        //        .AddSingleton<DiscordSocketClient>()
+        //        .AddSingleton<CommandService>()
+        //        .AddSingleton<CommandHandlingService>()
+        //        .AddSingleton<Settings>()
+        //        .AddSingleton<CommandsManager>()
+        //        .AddSingleton<QuizExpiryChecker>()
+        //        .AddSingleton<FatalErrorNotifier>()
+        //        .AddSingleton<IContextFactory, ContextFactory>()
+        //        .AddSingleton<DiscordConnectionKeepAlive>()
+        //        .AddSingleton<MessagesHelper>()
+        //        .AddSingleton<INodeIntegration, BlockCoreNodeIntegration>();
 
-            this.logger.Trace("(-)");
-            return collection;
-        }
+        //    this.logger.Trace("(-)");
+        //    return collection;
+        //}
 
         public void Dispose()
         {
             this.logger.Trace("()");
             this.logger.Info("Application is shutting down...");
 
-            this.services.GetRequiredService<DiscordSocketClient>()?.Dispose();
-            this.services.GetRequiredService<INodeIntegration>()?.Dispose();
-            this.services.GetRequiredService<QuizExpiryChecker>()?.Dispose();
-            this.services.GetRequiredService<DiscordConnectionKeepAlive>()?.Dispose();
+            this.client?.Dispose();
+            this.nodeIntegration?.Dispose();
+            this.quizExpiryChecker?.Dispose();
+            this.discordConnectionKeepAlive?.Dispose();
 
             this.logger.Info("Shutdown completed.");
             this.logger.Trace("(-)");

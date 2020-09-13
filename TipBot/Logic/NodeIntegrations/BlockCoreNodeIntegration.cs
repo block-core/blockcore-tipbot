@@ -8,6 +8,7 @@ using NBitcoin;
 using TipBot.Database;
 using TipBot.Database.Models;
 using TipBot.Logic.NodeIntegrations.Models;
+using Microsoft.Extensions.Options;
 
 namespace TipBot.Logic.NodeIntegrations
 {
@@ -26,25 +27,29 @@ namespace TipBot.Logic.NodeIntegrations
 
         private readonly BlockCoreNodeAPI blockCoreNodeAPI;
 
-        public BlockCoreNodeIntegration(Settings settings, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
+        public BlockCoreNodeIntegration(IOptionsMonitor<Settings> options, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
         {
-            var apiUrl = settings.ConfigReader.GetOrDefault<string>("apiUrl", "http://127.0.0.1:48334/");
-            var walletName = settings.ConfigReader.GetOrDefault<string>("walletName", "walletName");
-            var walletPassword = settings.ConfigReader.GetOrDefault<string>("walletPassword", "walletPassword");
-            var useSegwit = settings.ConfigReader.GetOrDefault<bool>("useSegwit", true);
+            this.settings = options.CurrentValue;
+
+            //var apiUrl = settings.ApiUrl; // settings.ConfigReader.GetOrDefault<string>("apiUrl", "http://127.0.0.1:48334/");
+            //var walletName = settings.WalletName; // .ConfigReader.GetOrDefault<string>("walletName", "walletName");
+            //var walletPassword = settings.WalletPassword; // .ConfigReader.GetOrDefault<string>("walletPassword", "walletPassword");
+            //var useSegwit = settings.UseSegwit; // .ConfigReader.GetOrDefault<bool>("useSegwit", true);
 
             this.contextFactory = contextFactory;
-            this.settings = settings;
             this.cancellation = new CancellationTokenSource();
             this.logger = LogManager.GetCurrentClassLogger();
             this.fatalNotifier = fatalNotifier;
-            this.blockCoreNodeAPI = new BlockCoreNodeAPI(apiUrl, walletName, walletPassword, AccountName, this.settings.NetworkFee, useSegwit);
+            this.blockCoreNodeAPI = new BlockCoreNodeAPI(this.settings, AccountName);
         }
 
         /// <inheritdoc />
         public void Initialize()
         {
             this.logger.Trace("()");
+
+            // Make sure that the wallet exists.
+            this.VerifyWallet();
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
@@ -111,6 +116,30 @@ namespace TipBot.Logic.NodeIntegrations
 
                 context.SaveChanges();
                 this.logger.Info("Addresses generated.");
+            }
+            catch (Exception ex)
+            {
+                this.logger.Error(ex.ToString);
+            }
+            this.logger.Trace("(-)");
+        }
+
+        private void VerifyWallet()
+        {
+            this.logger.Trace("()");
+            this.logger.Info("Verifying the the wallet exists.");
+
+
+            if (string.IsNullOrWhiteSpace(settings.WalletRecoveryPhrase))
+            {
+                this.logger.Info("Wallet Recovery Phrase is not specified, will not be able to create wallet if not exists already.");
+            }
+
+            try
+            {
+                var unusedAddressResult = blockCoreNodeAPI.CreateWallet().Result;
+
+                this.logger.Info("Wallet created.");
             }
             catch (Exception ex)
             {

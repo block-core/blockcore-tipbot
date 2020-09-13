@@ -81,3 +81,24 @@ username).
 When you see the bot in the online status on your discord server, you are ready to test it. 
 
 Type: `tipbot help`
+
+
+## User Secrets
+
+The Blockcore TipBot utilizes the latest configuration APIs in .NET Core, and allows you to securely configure 
+user secrets with the token for your Discord bot and SQL Connection string. Right-click on the project in Visual Studio 2019 
+and choose "Manage User Secrets".
+
+## Microsoft SQL Server
+
+You can utilize the container for Microsoft SQL Server to quickly run an instance of MSSQL used by the TipBot.
+
+```sh
+sudo docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=MyVeryOwnPassword!23" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+```
+
+Connection string can then be set to:
+
+```
+Server=127.0.0.1,1433;Database=TipBot;User Id=SA;Password=MyVeryOwnPassword!23
+```

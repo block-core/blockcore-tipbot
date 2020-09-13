@@ -35,14 +35,18 @@ namespace TipBot.Logic.NodeIntegrations
         private decimal MinFee { get; set; }
         private bool UseSegwit { get; set; }
 
-        public BlockCoreNodeAPI(string apiUrl, string walletName, string walletPassword, string accountName, decimal minFee, bool useSegwit)
+        private readonly Settings settings;
+
+        public BlockCoreNodeAPI(Settings settings, string accountName)
         {
-            ApiUrl = apiUrl;
-            WalletName = walletName;
-            WalletPassword = walletPassword;
+            this.settings = settings;
+
+            ApiUrl = settings.ApiUrl;
+            WalletName = settings.WalletName;
+            WalletPassword = settings.WalletPassword;
             AccountName = accountName;
-            MinFee = minFee;
-            UseSegwit = useSegwit;
+            MinFee = settings.NetworkFee;
+            UseSegwit = settings.UseSegwit;
         }
 
         public async Task<ValidateAddressResult> ValidateAddress(string address)
@@ -146,6 +150,42 @@ namespace TipBot.Logic.NodeIntegrations
             request.AddParameter("Segwit", UseSegwit);
             request.AddParameter("WalletName", WalletName);
             request.AddParameter("AccountName", AccountName);
+
+            var response = await client.ExecuteAsync<List<string>>(request);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                result = response.Data;
+            }
+            return result;
+        }
+
+        public class CreateWalletModel
+        { 
+            public string mnemonic { get; set; }
+
+            public string password { get; set; }
+
+            public string passphrase { get; set; } = string.Empty;
+
+            public string name { get; set; }
+
+            public DateTime creationDate { get; set; }
+        }
+
+        public async Task<List<string>> CreateWallet()
+        {
+            var result = new List<string>();
+            var client = new RestClient($"{ApiUrl}");
+            var request = new RestRequest("/api/Wallet/recover", Method.POST);
+
+            var body = new CreateWalletModel { 
+                name = settings.WalletName,
+                password = settings.WalletPassword,
+                mnemonic = settings.WalletRecoveryPhrase,
+                creationDate = DateTime.UtcNow
+            };
+
+            request.AddJsonBody(body);
 
             var response = await client.ExecuteAsync<List<string>>(request);
             if (response.StatusCode == HttpStatusCode.OK)

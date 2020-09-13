@@ -1,34 +1,82 @@
-﻿using System;
+﻿using Discord.Commands;
+using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
 using System.Threading.Tasks;
+using TipBot.Database;
+using TipBot.Helpers;
+using TipBot.Logic;
+using TipBot.Logic.NodeIntegrations;
+using TipBot.Services;
 
 namespace TipBot
 {
     internal class Program
     {
-        private Logic.TipBot bot;
-
         private static void Main(string[] args)
         {
-            new Program().MainAsync(args).GetAwaiter().GetResult();
+            CreateHostBuilder(args).Build().Run();
+
+            // new Program().MainAsync(args).GetAwaiter().GetResult();
         }
 
-        private async Task MainAsync(string[] args)
-        {
-            Console.CancelKeyPress += this.ShutdownHandler;
+        internal static IConfiguration Configuration2 { get; set; }
 
-            this.bot = new Logic.TipBot();
-            await this.bot.StartAsync(args);
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                //.ConfigureHostConfiguration(config =>
+                //{
+                //    config.AddCommandLine(args);
+                //    config.AddEnvironmentVariables();
+                //})
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    //if (hostContext.HostingEnvironment.IsDevelopment())
+                    //{
 
-            await Task.Delay(-1);
-        }
+                    // User Secrets is not added by default to the generic host builder.
+                    config.AddUserSecrets<Program>();
 
-        /// <summary>Shutdown the handler. Executed when user presses CTRL+C on console.</summary>
-        private void ShutdownHandler(object sender, ConsoleCancelEventArgs args)
-        {
-            this.bot.Dispose();
+                    //}
+                })
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.AddSingleton<Logic.TipBot>();
+                    services.AddSingleton<DiscordSocketClient>();
+                    services.AddSingleton<CommandService>();
+                    services.AddSingleton<CommandHandlingService>();
+                    services.AddSingleton<Settings>();
+                    services.AddSingleton<CommandsManager>();
+                    services.AddSingleton<QuizExpiryChecker>();
+                    services.AddSingleton<FatalErrorNotifier>();
+                    services.AddSingleton<IContextFactory, ContextFactory>();
+                    services.AddSingleton<DiscordConnectionKeepAlive>();
+                    services.AddSingleton<MessagesHelper>();
+                    services.AddSingleton<INodeIntegration, BlockCoreNodeIntegration>();
 
-            args.Cancel = true;
-            Environment.Exit(0);
-        }
+                    services.AddHostedService<Worker>();
+                    services.Configure<Settings>(hostContext.Configuration.GetSection("Blockcore:TipBot"));
+                });
+
+        //private async Task MainAsync(string[] args)
+        //{
+        //    Console.CancelKeyPress += this.ShutdownHandler;
+
+        //    this.bot = new Logic.TipBot();
+        //    await this.bot.StartAsync(args);
+
+        //    await Task.Delay(-1);
+        //}
+
+        ///// <summary>Shutdown the handler. Executed when user presses CTRL+C on console.</summary>
+        //private void ShutdownHandler(object sender, ConsoleCancelEventArgs args)
+        //{
+        //    this.bot.Dispose();
+
+        //    args.Cancel = true;
+        //    Environment.Exit(0);
+        //}
     }
 }
