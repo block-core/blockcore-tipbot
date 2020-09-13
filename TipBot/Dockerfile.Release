@@ -3,4 +3,4 @@
 WORKDIR /app
 COPY ./release ./
 
-ENTRYPOINT ["dotnet", "City.TipBot.dll"]
+ENTRYPOINT ["dotnet", "Blockcore.TipBot.dll"]
