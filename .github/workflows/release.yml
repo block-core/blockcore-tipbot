@@ -2,7 +2,7 @@ name: Build and Release Docker Image
 
 on:
   release:
-    types: [published, prereleased]
+    types: [published]
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
           tar -xvf release.tar.gz -C release
 
       - name: Build the Docker container image
-        run: docker build -f "./src/TipBot/Dockerfile.Release" -t blockcore/tipbot:latest -t blockcore/tipbot:${{ github.event.release.tag_name }} "."
+        run: docker build -f "./TipBot/Dockerfile.Release" -t blockcore/tipbot:latest -t blockcore/tipbot:${{ github.event.release.tag_name }} "."
 
       - name: Login and Push to Docker Registry
         run: |
