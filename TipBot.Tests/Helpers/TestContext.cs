@@ -8,7 +8,7 @@ namespace TipBot.Tests.Helpers
 {
     public class TestContext
     {
-        private readonly TestBot testBot;
+        private readonly Logic.TipBot testBot;
 
         public readonly CommandsManager CommandsManager;
 
@@ -16,7 +16,7 @@ namespace TipBot.Tests.Helpers
 
         public TestContext()
         {
-            this.testBot = new TestBot();
+            this.testBot = new Logic.TipBot();
             this.testBot.StartAsync(new string[]{  }).GetAwaiter().GetResult();
 
             this.CommandsManager = this.testBot.GetService<CommandsManager>();

@@ -1,62 +1,64 @@
-﻿using TipBot.Helpers;
+﻿using NBitcoin;
+using TipBot.Helpers;
 
 namespace TipBot
 {
     public class Settings
     {
-        public void Initialize(TextFileConfiguration configReader)
-        {
-            this.ConfigReader = configReader;
+        public string ApiUrl { get; set; } = "http://127.0.0.1:48334/";
 
-            this.BotToken = configReader.GetOrDefault<string>("token", "BOTTOKENKEYHERE");
+        /// <summary>
+        /// The recovery phrase (mnemonic) used to create the initial wallet. This is only needed on first startup.
+        /// </summary>
+        public string WalletRecoveryPhrase { get; set; }
 
-            this.EnableMigrations = configReader.GetOrDefault<bool>("enableMigrations", true);
+        /// <summary>
+        /// Name of the tipbot wallet, default value is "tipbot".
+        /// </summary>
+        public string WalletName { get; set; } = "tipbot";
 
-            this.ConnectionString = configReader.GetOrDefault<string>("connectionString", @"Data Source=127.0.0.1;Initial Catalog=TipBot;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+        public string WalletPassword { get; set; }
 
-            this.Ticker = configReader.GetOrDefault<string>("ticker", "STRAT");
+        public bool UseSegwit { get; set; } = true;
 
-            this.NetworkFee = configReader.GetOrDefault<decimal>("networkFee", 0.01m);
-        }
+        public string BotToken { get; set; }
 
-        public TextFileConfiguration ConfigReader { get; private set; }
+        public string Ticker { get; set; } = "BTC";
 
-        public string BotToken { get; private set; }
+        public Money NetworkFee { get; set; } = Money.FromUnit(0.01m, MoneyUnit.BTC);
 
-        public string Ticker { get; private set; }
+        public uint PregeneratedAddressesCount { get; set; } = 8000;
 
-        public decimal NetworkFee { get; private set; }
+        public int MinConfirmationsForDeposit { get; set; } = 16;
 
-        public uint PregeneratedAddressesCount { get; } = 8000;
+        public Money MinWithdrawAmount { get; set; } = Money.FromUnit(0.1m, MoneyUnit.BTC);
 
-        public int MinConfirmationsForDeposit { get; } = 16;
+        public Money MinQuizAmount { get; set; } = Money.FromUnit(0.1m, MoneyUnit.BTC);
 
-        public decimal MinWithdrawAmount { get; } = 0.1m;
+        public Money MinMakeItRainTipAmount { get; set; } = Money.FromUnit(0.1m, MoneyUnit.BTC);
 
-        public decimal MinQuizAmount { get; } = 0.1m;
+        public Money MinTipAmount { get; set; } = Money.FromUnit(0.001m, MoneyUnit.BTC);
 
-        public decimal MinMakeItRainTipAmount { get; } = 0.1m;
+        public int MaxChartUsersCount { get; set; } = 3;
 
-        public decimal MinTipAmount { get; } = 0.001m;
-
-        public int MaxChartUsersCount { get; } = 3;
-
-        public int MaxDaysChartCount { get; } = 30;
+        public int MaxDaysChartCount { get; set; } = 30;
 
         /// <summary>Specifies if bit should attempt to update the database on startup.</summary>
-        public bool EnableMigrations { get; private set; }
+        public bool EnableMigrations { get; set; } = true;
 
         /// <summary>Nickname of a user that will receive a message in case of a fatal error.</summary>
-        public string SupportUsername { get; } = "Mud";
-        public string SupportDiscriminator { get; } = "5277";
-        public ulong SupportUserId { get; } = 268792651250139137;
+        public string SupportUsername { get; set; } = "";
+
+        public string SupportDiscriminator { get; set; } = "";
+
+        public ulong SupportUserId { get; set; } = 0;
 
         /// <summary>DB connection string. Local db will be used if it's null.</summary>
-        public string ConnectionString { get; private set; }
+        public string ConnectionString { get; set; } = @"Data Source=127.0.0.1;Initial Catalog=TipBot;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
-        public string BotOptionalPrefix { get; } = "tipbot";
+        public string BotOptionalPrefix { get; set; } = "tipbot";
 
         /// <summary>Default time in which self destructed messages are deleted.</summary>
-        public int SelfDestructedMessagesDelaySeconds { get; } = 20;
+        public int SelfDestructedMessagesDelaySeconds { get; set; } = 20;
     }
 }

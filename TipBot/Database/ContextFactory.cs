@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace TipBot.Database
 {
@@ -7,9 +8,9 @@ namespace TipBot.Database
     {
         private readonly Settings settings;
 
-        public ContextFactory(Settings settings)
+        public ContextFactory(IOptionsMonitor<Settings> options)
         {
-            this.settings = settings;
+            this.settings = options.CurrentValue;
         }
 
         public BotDbContext CreateContext()

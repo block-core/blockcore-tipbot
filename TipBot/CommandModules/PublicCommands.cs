@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using NLog;
 using TipBot.Database.Models;
 using TipBot.Helpers;
@@ -17,6 +18,13 @@ namespace TipBot.CommandModules
 {
     public class PublicCommands : ModuleBase<SocketCommandContext>
     {
+        public PublicCommands(CommandsManager commandsManager, IOptionsMonitor<Settings> options, MessagesHelper messagesHelper)
+        {
+            this.CommandsManager = commandsManager;
+            this.Settings = options.CurrentValue;
+            this.MessagesHelper = messagesHelper;
+        }
+
         /// <inheritdoc cref="CommandsManager"/>
         /// <remarks>
         /// Set by DI.
@@ -27,15 +35,13 @@ namespace TipBot.CommandModules
         /// lead to funds being lost.
         /// </para>
         /// </remarks>
-        public CommandsManager CommandsManager { get; set; }
+        public CommandsManager CommandsManager { get; private set; }
 
         /// <inheritdoc cref="Settings"/>
-        /// <remarks>Set by DI.</remarks>
-        public Settings Settings { get; set; }
+        public Settings Settings { get; private set; }
 
         /// <inheritdoc cref="MessagesHelper"/>
-        /// <remarks>Set by DI.</remarks>
-        public MessagesHelper MessagesHelper { get; set; }
+        public MessagesHelper MessagesHelper { get; private set; }
 
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private readonly object lockObject = new object();

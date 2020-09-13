@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
+using Microsoft.Extensions.Options;
 using NLog;
 
 namespace TipBot.Helpers
@@ -13,9 +14,9 @@ namespace TipBot.Helpers
 
         private readonly Logger logger;
 
-        public MessagesHelper(Settings settings)
+        public MessagesHelper(IOptionsMonitor<Settings> options)
         {
-            this.settings = settings;
+            this.settings = options.CurrentValue;
 
             this.logger = LogManager.GetCurrentClassLogger();
         }
