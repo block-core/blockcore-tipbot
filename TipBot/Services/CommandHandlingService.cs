@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using TipBot.Helpers;
+using Microsoft.Extensions.Options;
 
 namespace TipBot.Services
 {
@@ -20,14 +21,14 @@ namespace TipBot.Services
         private readonly ErrorMessageCreator errorMessageCreator;
         private readonly MessagesHelper messagesHelper;
 
-        public CommandHandlingService(IServiceProvider services, Settings settings, MessagesHelper messagesHelper)
+        public CommandHandlingService(IServiceProvider services, IOptionsMonitor<Settings> options, MessagesHelper messagesHelper)
         {
             this.commands = services.GetRequiredService<CommandService>();
             this.discord = services.GetRequiredService<DiscordSocketClient>();
             this.services = services;
             this.messagesHelper = messagesHelper;
 
-            this.prefixes = new BotPrefixes(settings);
+            this.prefixes = new BotPrefixes(options);
             this.errorMessageCreator = new ErrorMessageCreator();
 
             this.discord.MessageReceived += this.MessageReceivedAsync;

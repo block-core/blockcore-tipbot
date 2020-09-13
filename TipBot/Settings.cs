@@ -1,4 +1,5 @@
-﻿using TipBot.Helpers;
+﻿using NBitcoin;
+using TipBot.Helpers;
 
 namespace TipBot
 {
@@ -24,19 +25,19 @@ namespace TipBot
 
         public string Ticker { get; set; } = "BTC";
 
-        public decimal NetworkFee { get; set; } = 0.01m;
+        public Money NetworkFee { get; set; } = Money.FromUnit(0.01m, MoneyUnit.BTC);
 
         public uint PregeneratedAddressesCount { get; set; } = 8000;
 
         public int MinConfirmationsForDeposit { get; set; } = 16;
 
-        public decimal MinWithdrawAmount { get; set; } = 0.1m;
+        public Money MinWithdrawAmount { get; set; } = Money.FromUnit(0.1m, MoneyUnit.BTC);
 
-        public decimal MinQuizAmount { get; set; } = 0.1m;
+        public Money MinQuizAmount { get; set; } = Money.FromUnit(0.1m, MoneyUnit.BTC);
 
-        public decimal MinMakeItRainTipAmount { get; set; } = 0.1m;
+        public Money MinMakeItRainTipAmount { get; set; } = Money.FromUnit(0.1m, MoneyUnit.BTC);
 
-        public decimal MinTipAmount { get; set; } = 0.001m;
+        public Money MinTipAmount { get; set; } = Money.FromUnit(0.001m, MoneyUnit.BTC);
 
         public int MaxChartUsersCount { get; set; } = 3;
 

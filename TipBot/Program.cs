@@ -47,7 +47,6 @@ namespace TipBot
                     services.AddSingleton<DiscordSocketClient>();
                     services.AddSingleton<CommandService>();
                     services.AddSingleton<CommandHandlingService>();
-                    services.AddSingleton<Settings>();
                     services.AddSingleton<CommandsManager>();
                     services.AddSingleton<QuizExpiryChecker>();
                     services.AddSingleton<FatalErrorNotifier>();

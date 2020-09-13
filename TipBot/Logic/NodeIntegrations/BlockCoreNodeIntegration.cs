@@ -129,7 +129,6 @@ namespace TipBot.Logic.NodeIntegrations
             this.logger.Trace("()");
             this.logger.Info("Verifying the the wallet exists.");
 
-
             if (string.IsNullOrWhiteSpace(settings.WalletRecoveryPhrase))
             {
                 this.logger.Info("Wallet Recovery Phrase is not specified, will not be able to create wallet if not exists already.");
@@ -137,9 +136,17 @@ namespace TipBot.Logic.NodeIntegrations
 
             try
             {
-                var unusedAddressResult = blockCoreNodeAPI.CreateWallet().Result;
+                var existingWallet = blockCoreNodeAPI.LoadWallet().Result;
 
-                this.logger.Info("Wallet created.");
+                if (!existingWallet)
+                {
+                    var unusedAddressResult = blockCoreNodeAPI.CreateWallet().Result;
+                    this.logger.Info("Wallet created.");
+                }
+                else
+                {
+                    this.logger.Info("Wallet already exists.");
+                }
             }
             catch (Exception ex)
             {

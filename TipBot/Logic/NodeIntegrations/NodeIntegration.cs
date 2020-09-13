@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using NBitcoin;
+using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -26,13 +27,26 @@ namespace TipBot.Logic.NodeIntegrations
         public InvalidAddressException() : base("Address specified is invalid.") { }
     }
 
+    public class WalletModel
+    {
+        public string Mnemonic { get; set; }
+
+        public string Password { get; set; }
+
+        public string Passphrase { get; set; } = string.Empty;
+
+        public string Name { get; set; }
+
+        public DateTime CreationDate { get; set; }
+    }
+
     public class BlockCoreNodeAPI
     {
         private string ApiUrl { get; set; }
         private string WalletName { get; set; }
         private string WalletPassword { get; set; }
         private string AccountName { get; set; }
-        private decimal MinFee { get; set; }
+        private Money MinFee { get; set; }
         private bool UseSegwit { get; set; }
 
         private readonly Settings settings;
@@ -66,7 +80,7 @@ namespace TipBot.Logic.NodeIntegrations
 
         public async Task SendTo(string address, decimal amount)
         {
-            var transaction = await BuildTransaction(address, amount);
+            var transaction = await BuildTransaction(address, Money.FromUnit(amount, MoneyUnit.BTC));
             if (transaction == null)
             {
                 throw new Exception("There was an issue building a transaction.");
@@ -77,7 +91,7 @@ namespace TipBot.Logic.NodeIntegrations
             }
         }
 
-        public async Task<BuildTransactionResult> BuildTransaction(string address, decimal amount)
+        public async Task<BuildTransactionResult> BuildTransaction(string address, Money amount)
         {
             var result = new BuildTransactionResult();
             var recipient = new Recipient()
@@ -159,40 +173,41 @@ namespace TipBot.Logic.NodeIntegrations
             return result;
         }
 
-        public class CreateWalletModel
-        { 
-            public string mnemonic { get; set; }
-
-            public string password { get; set; }
-
-            public string passphrase { get; set; } = string.Empty;
-
-            public string name { get; set; }
-
-            public DateTime creationDate { get; set; }
-        }
-
-        public async Task<List<string>> CreateWallet()
+        public async Task<bool> CreateWallet()
         {
-            var result = new List<string>();
             var client = new RestClient($"{ApiUrl}");
             var request = new RestRequest("/api/Wallet/recover", Method.POST);
 
-            var body = new CreateWalletModel { 
-                name = settings.WalletName,
-                password = settings.WalletPassword,
-                mnemonic = settings.WalletRecoveryPhrase,
-                creationDate = DateTime.UtcNow
+            var body = new WalletModel { 
+                Name = settings.WalletName,
+                Password = settings.WalletPassword,
+                Mnemonic = settings.WalletRecoveryPhrase,
+                CreationDate = DateTime.UtcNow
             };
 
             request.AddJsonBody(body);
 
-            var response = await client.ExecuteAsync<List<string>>(request);
-            if (response.StatusCode == HttpStatusCode.OK)
+            var response = await client.ExecuteAsync(request);
+
+            return (response.StatusCode == HttpStatusCode.OK);
+        }
+
+        public async Task<bool> LoadWallet()
+        {
+            var client = new RestClient($"{ApiUrl}");
+            var request = new RestRequest("/api/Wallet/load", Method.POST);
+
+            var body = new WalletModel
             {
-                result = response.Data;
-            }
-            return result;
+                Name = settings.WalletName,
+                Password = settings.WalletPassword
+            };
+
+            request.AddJsonBody(body);
+
+            var response = await client.ExecuteAsync(request);
+
+            return (response.StatusCode == HttpStatusCode.OK);
         }
 
         public async Task<GetNodeStatusResult> GetNodeStatus()

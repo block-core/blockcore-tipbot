@@ -94,11 +94,25 @@ and choose "Manage User Secrets".
 You can utilize the container for Microsoft SQL Server to quickly run an instance of MSSQL used by the TipBot.
 
 ```sh
-sudo docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=MyVeryOwnPassword!23" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+sudo docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=MyVeryOwnPassword!23" -p 14330:1433 -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 
 Connection string can then be set to:
 
 ```
-Server=127.0.0.1,1433;Database=TipBot;User Id=SA;Password=MyVeryOwnPassword!23
+Server=127.0.0.1,14330;Database=TipBot;User Id=SA;Password=MyVeryOwnPassword!23
+```
+
+## Docker Cleanup
+
+Docker provides a single command that will clean up any resources — images, containers, volumes, and networks — that are dangling (not associated with a container):
+
+```
+docker system prune
+```
+
+To additionally remove any stopped containers and all unused images (not just dangling images), add the -a flag to the command:
+
+```
+docker system prune -a
 ```
