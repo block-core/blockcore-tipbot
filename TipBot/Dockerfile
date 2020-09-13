@@ -17,4 +17,4 @@ RUN dotnet publish "TipBot.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TipBot.dll"]
+ENTRYPOINT ["dotnet", "Blockcore.TipBot.dll"]

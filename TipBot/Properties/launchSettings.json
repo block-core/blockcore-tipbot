@@ -5,7 +5,8 @@
       "commandLineArgs": "--chain=CITY"
     },
     "Docker": {
-      "commandName": "Docker"
+      "commandName": "Docker",
+      "commandLineArgs": "--chain=CITY"
     }
   }
 }

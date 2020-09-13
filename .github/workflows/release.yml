@@ -39,7 +39,7 @@ jobs:
       - name: Build the Docker container image
         run: docker build -f "./src/TipBot/Dockerfile.Release" -t blockcore/tipbot:latest -t blockcore/tipbot:${{ github.event.release.tag_name }} "."
 
-#      - name: Login and Push to Docker Registry
-#        run: |
-#          docker login -u "sondreb" -p "${{secrets.DockerHubSecret}}"
-#          docker push blockcore/tipbot
+      - name: Login and Push to Docker Registry
+        run: |
+          docker login -u "sondreb" -p "${{secrets.DockerHubSecret}}"
+          docker push blockcore/tipbot
