@@ -49,9 +49,9 @@ namespace TipBot.Logic.NodeIntegrations
         private Money MinFee { get; set; }
         private bool UseSegwit { get; set; }
 
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
-        public BlockCoreNodeAPI(Settings settings, string accountName)
+        public BlockCoreNodeAPI(TipBotSettings settings, string accountName)
         {
             this.settings = settings;
 

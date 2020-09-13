@@ -12,9 +12,9 @@ namespace TipBot
     {
         private Logic.TipBot bot;
 
-        private Settings settings;
+        private TipBotSettings settings;
 
-        public Worker(IOptionsMonitor<Settings> options, Logic.TipBot bot)
+        public Worker(IOptionsMonitor<TipBotSettings> options, Logic.TipBot bot)
         {
             this.settings = options.CurrentValue;
             this.bot = bot;

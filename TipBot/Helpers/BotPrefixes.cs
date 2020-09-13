@@ -12,12 +12,12 @@ namespace TipBot.Helpers
     {
         private List<string> prefixes;
 
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
         /// <summary>Allow 2 spaces after bot name before the commands starts.</summary>
         private const bool AllowDoubleSpaces = true;
 
-        public BotPrefixes(IOptionsMonitor<Settings> options)
+        public BotPrefixes(IOptionsMonitor<TipBotSettings> options)
         {
             this.settings = options.CurrentValue;
         }

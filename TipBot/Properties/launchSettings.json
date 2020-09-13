@@ -2,19 +2,7 @@
   "profiles": {
     "CITY": {
       "commandName": "Project",
-      "commandLineArgs": "--apiUrl=http://127.0.0.1:4335/ --walletName=WALLETNAME --walletPassword=WALLETPASSWORD --networkFee=0.01",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "WebApplication14": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "weatherforecast",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:5000"
+      "commandLineArgs": "--chain=CITY"
     },
     "Docker": {
       "commandName": "Docker"

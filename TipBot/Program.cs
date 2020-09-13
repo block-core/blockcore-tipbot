@@ -10,6 +10,8 @@ using TipBot.Helpers;
 using TipBot.Logic;
 using TipBot.Logic.NodeIntegrations;
 using TipBot.Services;
+using Blockcore;
+using Blockcore.Settings;
 
 namespace TipBot
 {
@@ -33,6 +35,8 @@ namespace TipBot
                 //})
                 .ConfigureAppConfiguration((hostContext, config) =>
                 {
+                    config.AddBlockcore("Blockore TipBot", args);
+
                     //if (hostContext.HostingEnvironment.IsDevelopment())
                     //{
 
@@ -56,7 +60,11 @@ namespace TipBot
                     services.AddSingleton<INodeIntegration, BlockCoreNodeIntegration>();
 
                     services.AddHostedService<Worker>();
-                    services.Configure<Settings>(hostContext.Configuration.GetSection("Blockcore:TipBot"));
+
+                    services.Configure<TipBotSettings>(hostContext.Configuration.GetSection("TipBot"));
+                    services.Configure<ChainSettings>(hostContext.Configuration.GetSection("Chain"));
+                    services.Configure<NetworkSettings>(hostContext.Configuration.GetSection("Network"));
+                    services.Configure<IndexerSettings>(hostContext.Configuration.GetSection("Indexer"));
                 });
 
         //private async Task MainAsync(string[] args)

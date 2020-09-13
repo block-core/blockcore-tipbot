@@ -19,7 +19,7 @@ namespace TipBot.Logic
 
         private readonly INodeIntegration nodeIntegration;
 
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
         private readonly Logger logger;
 
@@ -27,7 +27,7 @@ namespace TipBot.Logic
 
         private readonly FatalErrorNotifier fatalNotifier;
 
-        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, IOptionsMonitor<Settings> options, FatalErrorNotifier fatalNotifier)
+        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, IOptionsMonitor<TipBotSettings> options, FatalErrorNotifier fatalNotifier)
         {
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;

@@ -3,7 +3,7 @@ using TipBot.Helpers;
 
 namespace TipBot
 {
-    public class Settings
+    public class TipBotSettings
     {
         public string ApiUrl { get; set; } = "http://127.0.0.1:48334/";
 

@@ -48,7 +48,6 @@
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-	<EmbeddedResource Include="Content\*.png" />
   </ItemGroup>
 
 </Project>

@@ -22,7 +22,7 @@ namespace TipBot.Logic
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private Settings settings;
+        private TipBotSettings settings;
 
         protected readonly IServiceProvider services;
 
@@ -41,7 +41,7 @@ namespace TipBot.Logic
         private readonly FatalErrorNotifier fatalErrorNotifier;
 
         public TipBot(
-            IOptionsMonitor<Settings> options, 
+            IOptionsMonitor<TipBotSettings> options, 
             IServiceProvider services,
             DiscordSocketClient client,
             INodeIntegration nodeIntegration,

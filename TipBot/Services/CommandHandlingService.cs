@@ -21,7 +21,7 @@ namespace TipBot.Services
         private readonly ErrorMessageCreator errorMessageCreator;
         private readonly MessagesHelper messagesHelper;
 
-        public CommandHandlingService(IServiceProvider services, IOptionsMonitor<Settings> options, MessagesHelper messagesHelper)
+        public CommandHandlingService(IServiceProvider services, IOptionsMonitor<TipBotSettings> options, MessagesHelper messagesHelper)
         {
             this.commands = services.GetRequiredService<CommandService>();
             this.discord = services.GetRequiredService<DiscordSocketClient>();

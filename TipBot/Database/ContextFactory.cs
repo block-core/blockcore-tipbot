@@ -6,9 +6,9 @@ namespace TipBot.Database
 {
     public class ContextFactory : IContextFactory
     {
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
-        public ContextFactory(IOptionsMonitor<Settings> options)
+        public ContextFactory(IOptionsMonitor<TipBotSettings> options)
         {
             this.settings = options.CurrentValue;
         }

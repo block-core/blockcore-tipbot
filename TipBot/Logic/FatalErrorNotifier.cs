@@ -13,7 +13,7 @@ namespace TipBot.Logic
 
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        public async Task InitializeAsync(DiscordSocketClient client, Settings settings)
+        public async Task InitializeAsync(DiscordSocketClient client, TipBotSettings settings)
         {
             this.logger.Trace("()");
 

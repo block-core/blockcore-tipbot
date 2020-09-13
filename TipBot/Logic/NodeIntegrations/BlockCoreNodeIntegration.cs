@@ -17,7 +17,7 @@ namespace TipBot.Logic.NodeIntegrations
         private const string AccountName = "account 0";
 
         private readonly IContextFactory contextFactory;
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
         private readonly Logger logger;
 
         private Task depositsCheckingTask;
@@ -27,7 +27,7 @@ namespace TipBot.Logic.NodeIntegrations
 
         private readonly BlockCoreNodeAPI blockCoreNodeAPI;
 
-        public BlockCoreNodeIntegration(IOptionsMonitor<Settings> options, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
+        public BlockCoreNodeIntegration(IOptionsMonitor<TipBotSettings> options, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
         {
             this.settings = options.CurrentValue;
 
