@@ -11,7 +11,6 @@
     <Description>A Discord bot for all chains running Blockcore.</Description>
     <UserSecretsId>11a18cdb-33ba-4593-be5d-88d0343ac580</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..</DockerfileContext>
     <IsPackable>false</IsPackable>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>

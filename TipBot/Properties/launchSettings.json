@@ -1,12 +1,19 @@
 {
+  "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "CITY": {
       "commandName": "Project",
-      "commandLineArgs": "--chain=CITY"
+      "commandLineArgs": "--chain=CITY",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     },
     "Docker": {
       "commandName": "Docker",
-      "commandLineArgs": "--chain=CITY"
+      "commandLineArgs": "--chain=CITY",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/weatherforecast",
+      "publishAllPorts": true
     }
   }
 }
