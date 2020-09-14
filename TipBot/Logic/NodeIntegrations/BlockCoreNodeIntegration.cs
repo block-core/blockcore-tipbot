@@ -140,8 +140,16 @@ namespace TipBot.Logic.NodeIntegrations
 
                 if (!existingWallet)
                 {
-                    var unusedAddressResult = blockCoreNodeAPI.CreateWallet().Result;
-                    this.logger.Info("Wallet created.");
+                    var creationResult = blockCoreNodeAPI.CreateWallet().Result;
+
+                    if (creationResult)
+                    {
+                        this.logger.Info("Wallet created.");
+                    }
+                    else
+                    {
+                        this.logger.Info("Wallet creation failed.");
+                    }
                 }
                 else
                 {

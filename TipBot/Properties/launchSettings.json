@@ -11,8 +11,6 @@
     "Docker": {
       "commandName": "Docker",
       "commandLineArgs": "--chain=CITY",
-      "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/weatherforecast",
       "publishAllPorts": true
     }
   }
