@@ -189,7 +189,7 @@ namespace TipBot.Logic.NodeIntegrations
 
                                 using (BotDbContext context = this.contextFactory.CreateContext())
                                 {
-                                    this.CheckDeposits(context);
+                                    this.CheckDeposits(context, currentBlock);
                                 }
                             }
                         }
@@ -220,7 +220,7 @@ namespace TipBot.Logic.NodeIntegrations
         /// Checks if money were deposited to an address associated with any user who has a deposit address.
         /// When money are deposited user's balance is updated.
         /// </summary>
-        private void CheckDeposits(BotDbContext context)
+        private void CheckDeposits(BotDbContext context, uint currentBlock)
         {
             this.logger.Trace("()");
 
@@ -232,15 +232,23 @@ namespace TipBot.Logic.NodeIntegrations
                 {
                     var addressHistory = blockCoreNodeAPI.GetAddressesHistory(user.DepositAddress).Result;
 
+                    if (addressHistory.history == null)
+                    {
+                        continue;
+                    }
+
                     var transactionHistory = addressHistory.history.Where(x => x.accountName == AccountName).SelectMany(x => x.transactionsHistory);
 
-                    var receivedByAddress = transactionHistory.Where(x => x.type == "received");
+                    // Verify that there is enough confirmations before we approve this payment.
+                    var receivedByAddressConfirmed = transactionHistory.Where(x => x.type == "received").Where(r => (r.confirmedInBlock + settings.MinConfirmationsForDeposit - 1) <= currentBlock);
+                    
+                    // var receivedByAddressAll = transactionHistory.Where(x => x.type == "received");
+                    // this.logger.Trace($"There are {receivedByAddressAll.Count()} deposits and {receivedByAddressConfirmed.Count()} with {settings.MinConfirmationsForDeposit} minimum confirmations.");
 
-                    if (receivedByAddress.Count() > 0)
+                    if (receivedByAddressConfirmed.Count() > 0)
                     {
-                        decimal totalRecivedByAddress = receivedByAddress.Sum(x => x.amount);
-
-                        decimal balance = Money.FromUnit(totalRecivedByAddress, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
+                        decimal totalReceivedByAddress = receivedByAddressConfirmed.Sum(x => x.amount);
+                        decimal balance = Money.FromUnit(totalReceivedByAddress, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
                         
                         if (balance > user.LastCheckedReceivedAmountByAddress)
                         {
@@ -255,7 +263,7 @@ namespace TipBot.Logic.NodeIntegrations
                                 continue;
                             }
 
-                            this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
+                            this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddressConfirmed, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
 
                             user.LastCheckedReceivedAmountByAddress = balance;
                             user.Balance += recentlyReceived;

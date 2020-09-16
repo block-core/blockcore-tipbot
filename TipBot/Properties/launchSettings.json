@@ -8,6 +8,10 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "XDS": {
+      "commandName": "Project",
+      "commandLineArgs": "--chain=XDS"
+    },
     "Docker": {
       "commandName": "Docker",
       "commandLineArgs": "--chain=CITY",
