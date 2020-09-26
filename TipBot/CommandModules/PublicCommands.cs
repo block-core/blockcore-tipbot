@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Blockcore.Settings;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using NLog;
 using TipBot.Database.Models;
 using TipBot.Helpers;
@@ -17,6 +20,17 @@ namespace TipBot.CommandModules
 {
     public class PublicCommands : ModuleBase<SocketCommandContext>
     {
+        public PublicCommands(CommandsManager commandsManager,
+            IOptionsMonitor<TipBotSettings> options,
+            IOptionsMonitor<ChainSettings> chainOptions,
+            MessagesHelper messagesHelper)
+        {
+            this.CommandsManager = commandsManager;
+            this.Settings = options.CurrentValue;
+            this.ChainSettings = chainOptions.CurrentValue;
+            this.MessagesHelper = messagesHelper;
+        }
+
         /// <inheritdoc cref="CommandsManager"/>
         /// <remarks>
         /// Set by DI.
@@ -27,15 +41,15 @@ namespace TipBot.CommandModules
         /// lead to funds being lost.
         /// </para>
         /// </remarks>
-        public CommandsManager CommandsManager { get; set; }
+        public CommandsManager CommandsManager { get; private set; }
 
         /// <inheritdoc cref="Settings"/>
-        /// <remarks>Set by DI.</remarks>
-        public Settings Settings { get; set; }
+        public TipBotSettings Settings { get; private set; }
+
+        public ChainSettings ChainSettings { get; private set; }
 
         /// <inheritdoc cref="MessagesHelper"/>
-        /// <remarks>Set by DI.</remarks>
-        public MessagesHelper MessagesHelper { get; set; }
+        public MessagesHelper MessagesHelper { get; private set; }
 
         /// <summary>Protects access to <see cref="CommandsManager"/>.</summary>
         private readonly object lockObject = new object();
@@ -44,8 +58,10 @@ namespace TipBot.CommandModules
 
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        [CommandWithHelp("tip", "Transfers specified amount of money to mentioned user.", "tipbot tip <user> <amount> <message>*")]
-        public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder]string message = null)
+        byte[] logo = null;
+
+        [CommandWithHelp("tip", "Transfers specified amount of money to mentioned user.", "{tipbot} tip <user> <amount> <message>*")]
+        public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder] string message = null)
         {
             this.logger.Trace("({0}:{1},{2}:{3},{4}:'{5}')", nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount, nameof(message), message);
 
@@ -62,7 +78,7 @@ namespace TipBot.CommandModules
                     response = $"{sender.Mention} tipped {userBeingTipped.Mention} {amount} {this.Settings.Ticker}";
 
                     if (message != null)
-                        response += $" with message `{message.Replace("`","")}`";
+                        response += $" with message `{message.Replace("`", "")}`";
                 }
                 catch (CommandExecutionException exception)
                 {
@@ -76,7 +92,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("deposit", "Displays your unique deposit address or assigns you one if it wasn't assigned before.")]
+        [CommandWithHelp("deposit", "Displays your unique deposit address or assigns you one if it wasn't assigned before.", "{tipbot} deposit")]
         public Task DepositAsync()
         {
             this.logger.Trace("()");
@@ -108,7 +124,7 @@ namespace TipBot.CommandModules
 
         [CommandWithHelp("withdraw", "Withdraws given amount to specified address. Fee will be subtracted from given amount." + "\n" +
                                      "Keep in mind that withdrawal address will be publicly visible to all users in this channel. " +
-                                     "To avoid exposing your address use withdraw command in private messages with the bot.", "tipbot withdraw <amount> <address>")]
+                                     "To avoid exposing your address use withdraw command in private messages with the bot.", "{tipbot} withdraw <amount> <address>")]
         public Task WithdrawAsync(decimal amount, string address)
         {
             this.logger.Trace("({0}:{1},{2}:{3})", nameof(amount), amount, nameof(address), address);
@@ -137,7 +153,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("fee", "The network fee that is subtracted from each withdraw", "tipbot fee")]
+        [CommandWithHelp("fee", "The network fee that is subtracted from each withdraw", "{tipbot} fee")]
         public Task Fee()
         {
             string response = $"The network fee is: {this.Settings.NetworkFee}";
@@ -147,7 +163,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("balance", "Displays your current balance.")]
+        [CommandWithHelp("balance", "Displays your current balance.", "{tipbot} balance")]
         public Task BalanceAsync()
         {
             this.logger.Trace("()");
@@ -170,7 +186,7 @@ namespace TipBot.CommandModules
         }
 
         [CommandWithHelp("makeItRain", "Randomly selects online users from the current server and tips them 1 coin (or another value if specified by caller)." +
-                                       " Amount of users that will be tipped is equal to totalAmount / tipAmount.", "tipbot makeItRain <totalAmount> <tipAmount=1>*")]
+                                       " Amount of users that will be tipped is equal to totalAmount / tipAmount.", "{tipbot} makeItRain <totalAmount> <tipAmount=1>*")]
         public async Task MakeItRainAsync(decimal amount, decimal tipAmount = 1)
         {
             this.logger.Trace("({0}:{1},{2}:{3})", nameof(amount), amount, nameof(tipAmount), tipAmount);
@@ -224,7 +240,7 @@ namespace TipBot.CommandModules
             await this.ReplyAsync(response).ConfigureAwait(false);
         }
 
-        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "tipbot chart <days=7>*")]
+        [CommandWithHelp("chart", "Displays top 3 tippers and users being tipped over the last 7 days.", "{tipbot} chart <days=7>*")]
         public async Task ChartAsync(int days = 7)
         {
             this.logger.Trace("({0}:{1})", nameof(days), days);
@@ -280,8 +296,8 @@ namespace TipBot.CommandModules
         [CommandWithHelp("startQuiz", "You ask a question, supply hash of an answer and for how long the quiz will be running." +
                                        " First user to provide correct answer gets the prize! In case no one answers money will return back to you after quiz expiry." +
                                        " For hash generation use <https://passwordsgenerator.net/sha256-hash-generator/>",
-                                        "tipbot startQuiz <amount> <SHA256 of an answer> <duration in minutes> <question>")]
-        public async Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder]string question)
+                                        "{tipbot} startQuiz <amount> <SHA256 of an answer> <duration in minutes> <question>")]
+        public async Task StartQuizAsync(decimal amount, string answerSHA256, int durationMinutes, [Remainder] string question)
         {
             this.logger.Trace("({0}:{1},{2}:'{3}',{4}:{5},{6}:'{7}')", nameof(amount), amount, nameof(answerSHA256), answerSHA256, nameof(durationMinutes), durationMinutes, nameof(question), question);
 
@@ -316,8 +332,8 @@ namespace TipBot.CommandModules
         }
 
         [CommandWithHelp("answerQuiz", "Answer to any active quiz. Answer will be checked against all of them. In case your answer will be correct you'll receive a reward.",
-            "tipbot answerQuiz <answer>")]
-        public async Task AnswerQuizAsync([Remainder]string answer)
+            "{tipbot} answerQuiz <answer>")]
+        public async Task AnswerQuizAsync([Remainder] string answer)
         {
             this.logger.Trace("({0}:'{1}')", nameof(answer), answer);
 
@@ -371,7 +387,7 @@ namespace TipBot.CommandModules
             this.logger.Trace("(-)");
         }
 
-        [CommandWithHelp("quizzes", "Displays all quizzes that are active.")]
+        [CommandWithHelp("quizzes", "Displays all quizzes that are active.", "{tipbot} quizzes")]
         public Task ListActiveQuizes()
         {
             this.logger.Trace("()");
@@ -392,7 +408,7 @@ namespace TipBot.CommandModules
                         builder.AppendLine($"Reward: **{quiz.Reward}** {this.Settings.Ticker}");
                         builder.AppendLine($"Created by: **{quiz.DiscordUserName}**");
 
-                        var minutesLeft = (int) ((quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)) - DateTime.Now).TotalMinutes;
+                        var minutesLeft = (int)((quiz.CreationTime + TimeSpan.FromMinutes(quiz.DurationMinutes)) - DateTime.Now).TotalMinutes;
                         if (minutesLeft < 0)
                             minutesLeft = 0;
 
@@ -413,7 +429,7 @@ namespace TipBot.CommandModules
             }
         }
 
-        [Command("help")]
+        [CommandWithHelp("help", "Show the help instructions with command examples.", "{tipbot} help")]
         public Task HelpAsync()
         {
             this.logger.Trace("()");
@@ -438,7 +454,7 @@ namespace TipBot.CommandModules
 
                 if (helpAttr.UsageExample != null)
                 {
-                    helpStr += Environment.NewLine + "`" + helpAttr.UsageExample + "`";
+                    helpStr += Environment.NewLine + "`" + helpAttr.UsageExample.Replace("{tipbot}", Settings.BotOptionalPrefix) + "`";
                 }
 
                 builder.AppendLine(helpStr);
@@ -451,7 +467,7 @@ namespace TipBot.CommandModules
             return this.ReplyAsync(response);
         }
 
-        [CommandWithHelp("about", "Displays information about the bot.")]
+        [CommandWithHelp("about", "Displays information about the bot.", "{tipbot} about")]
         public Task AboutAsync()
         {
             this.logger.Trace("()");
@@ -460,9 +476,20 @@ namespace TipBot.CommandModules
 
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
-            string text = "`TipBot`" + Environment.NewLine + $"Version: {version}" + Environment.NewLine + "Github: <https://github.com/block-core/Blockcore-DiscordTipBot>";
+            StringBuilder str = new StringBuilder();
+
+            str.AppendLine("`TipBot`");
+            str.AppendLine($"Chain: {ChainSettings.Name}");
+            str.AppendLine($"Symbol: {ChainSettings.Symbol}");
+            str.AppendLine($"About: {ChainSettings.Description}");
+            str.AppendLine($"Web: <{ChainSettings.Url}>");
+            str.AppendLine($"Version: {version}");
+            str.AppendLine("GitHub: <https://github.com/block-core/blockcore-tipbot>");
+
+            string text = str.ToString();
 
             this.logger.Trace("(-)");
+
             return this.Context.Channel.SendFileAsync(stream, "logo.png", text);
         }
 
@@ -485,10 +512,14 @@ namespace TipBot.CommandModules
         private Stream GetLogo()
         {
             this.logger.Trace("()");
-            Assembly assembly = this.GetType().GetTypeInfo().Assembly;
-            Stream stream = assembly.GetManifestResourceStream("TipBot.Content.Logo.png");
 
-            stream.Seek(0, SeekOrigin.Begin);
+            if (logo == null)
+            {
+                var client = new WebClient();
+                logo = client.DownloadData(ChainSettings.Icon);
+            }
+            
+            var stream = new MemoryStream(logo);
 
             this.logger.Trace("(-)");
             return stream;

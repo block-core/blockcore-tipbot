@@ -3,24 +3,25 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
+using Microsoft.Extensions.Options;
 using NLog;
 
 namespace TipBot.Helpers
 {
     public class MessagesHelper
     {
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
         private readonly Logger logger;
 
-        public MessagesHelper(Settings settings)
+        public MessagesHelper(IOptionsMonitor<TipBotSettings> options)
         {
-            this.settings = settings;
+            this.settings = options.CurrentValue;
 
             this.logger = LogManager.GetCurrentClassLogger();
         }
 
-        /// <summary>Sends a message that will be removed after <see cref="Settings.SelfDestructedMessagesDelaySeconds"/> seconds.</summary>
+        /// <summary>Sends a message that will be removed after <see cref="TipBotSettings.SelfDestructedMessagesDelaySeconds"/> seconds.</summary>
         public async Task SendSelfDesctructedMessage(SocketCommandContext context, string text, bool addPostfix = true)
         {
             this.logger.Trace("({0}.{1}:{2})", nameof(text), nameof(text.Length), text.Length);

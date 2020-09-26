@@ -8,6 +8,7 @@ using NBitcoin;
 using TipBot.Database;
 using TipBot.Database.Models;
 using TipBot.Logic.NodeIntegrations.Models;
+using Microsoft.Extensions.Options;
 
 namespace TipBot.Logic.NodeIntegrations
 {
@@ -16,7 +17,7 @@ namespace TipBot.Logic.NodeIntegrations
         private const string AccountName = "account 0";
 
         private readonly IContextFactory contextFactory;
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
         private readonly Logger logger;
 
         private Task depositsCheckingTask;
@@ -26,25 +27,29 @@ namespace TipBot.Logic.NodeIntegrations
 
         private readonly BlockCoreNodeAPI blockCoreNodeAPI;
 
-        public BlockCoreNodeIntegration(Settings settings, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
+        public BlockCoreNodeIntegration(IOptionsMonitor<TipBotSettings> options, IContextFactory contextFactory, FatalErrorNotifier fatalNotifier)
         {
-            var apiUrl = settings.ConfigReader.GetOrDefault<string>("apiUrl", "http://127.0.0.1:48334/");
-            var walletName = settings.ConfigReader.GetOrDefault<string>("walletName", "walletName");
-            var walletPassword = settings.ConfigReader.GetOrDefault<string>("walletPassword", "walletPassword");
-            var useSegwit = settings.ConfigReader.GetOrDefault<bool>("useSegwit", true);
+            this.settings = options.CurrentValue;
+
+            //var apiUrl = settings.ApiUrl; // settings.ConfigReader.GetOrDefault<string>("apiUrl", "http://127.0.0.1:48334/");
+            //var walletName = settings.WalletName; // .ConfigReader.GetOrDefault<string>("walletName", "walletName");
+            //var walletPassword = settings.WalletPassword; // .ConfigReader.GetOrDefault<string>("walletPassword", "walletPassword");
+            //var useSegwit = settings.UseSegwit; // .ConfigReader.GetOrDefault<bool>("useSegwit", true);
 
             this.contextFactory = contextFactory;
-            this.settings = settings;
             this.cancellation = new CancellationTokenSource();
             this.logger = LogManager.GetCurrentClassLogger();
             this.fatalNotifier = fatalNotifier;
-            this.blockCoreNodeAPI = new BlockCoreNodeAPI(apiUrl, walletName, walletPassword, AccountName, this.settings.NetworkFee, useSegwit);
+            this.blockCoreNodeAPI = new BlockCoreNodeAPI(this.settings, AccountName);
         }
 
         /// <inheritdoc />
         public void Initialize()
         {
             this.logger.Trace("()");
+
+            // Make sure that the wallet exists.
+            this.VerifyWallet();
 
             using (BotDbContext context = this.contextFactory.CreateContext())
             {
@@ -119,6 +124,45 @@ namespace TipBot.Logic.NodeIntegrations
             this.logger.Trace("(-)");
         }
 
+        private void VerifyWallet()
+        {
+            this.logger.Trace("()");
+            this.logger.Info("Verifying the the wallet exists.");
+
+            if (string.IsNullOrWhiteSpace(settings.WalletRecoveryPhrase))
+            {
+                this.logger.Info("Wallet Recovery Phrase is not specified, will not be able to create wallet if not exists already.");
+            }
+
+            try
+            {
+                var existingWallet = blockCoreNodeAPI.LoadWallet().Result;
+
+                if (!existingWallet)
+                {
+                    var creationResult = blockCoreNodeAPI.CreateWallet().Result;
+
+                    if (creationResult)
+                    {
+                        this.logger.Info("Wallet created.");
+                    }
+                    else
+                    {
+                        this.logger.Info("Wallet creation failed.");
+                    }
+                }
+                else
+                {
+                    this.logger.Info("Wallet already exists.");
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.Error(ex.ToString);
+            }
+            this.logger.Trace("(-)");
+        }
+
         /// <summary>Starts process of continuously checking if a new deposit happened.</summary>
         private void StartCheckingDepositsContinously()
         {
@@ -145,7 +189,7 @@ namespace TipBot.Logic.NodeIntegrations
 
                                 using (BotDbContext context = this.contextFactory.CreateContext())
                                 {
-                                    this.CheckDeposits(context);
+                                    this.CheckDeposits(context, currentBlock);
                                 }
                             }
                         }
@@ -176,7 +220,7 @@ namespace TipBot.Logic.NodeIntegrations
         /// Checks if money were deposited to an address associated with any user who has a deposit address.
         /// When money are deposited user's balance is updated.
         /// </summary>
-        private void CheckDeposits(BotDbContext context)
+        private void CheckDeposits(BotDbContext context, uint currentBlock)
         {
             this.logger.Trace("()");
 
@@ -188,15 +232,23 @@ namespace TipBot.Logic.NodeIntegrations
                 {
                     var addressHistory = blockCoreNodeAPI.GetAddressesHistory(user.DepositAddress).Result;
 
+                    if (addressHistory.history == null)
+                    {
+                        continue;
+                    }
+
                     var transactionHistory = addressHistory.history.Where(x => x.accountName == AccountName).SelectMany(x => x.transactionsHistory);
 
-                    var receivedByAddress = transactionHistory.Where(x => x.type == "received");
+                    // Verify that there is enough confirmations before we approve this payment.
+                    var receivedByAddressConfirmed = transactionHistory.Where(x => x.type == "received").Where(r => (r.confirmedInBlock + settings.MinConfirmationsForDeposit - 1) <= currentBlock);
+                    
+                    // var receivedByAddressAll = transactionHistory.Where(x => x.type == "received");
+                    // this.logger.Trace($"There are {receivedByAddressAll.Count()} deposits and {receivedByAddressConfirmed.Count()} with {settings.MinConfirmationsForDeposit} minimum confirmations.");
 
-                    if (receivedByAddress.Count() > 0)
+                    if (receivedByAddressConfirmed.Count() > 0)
                     {
-                        decimal totalRecivedByAddress = receivedByAddress.Sum(x => x.amount);
-
-                        decimal balance = Money.FromUnit(totalRecivedByAddress, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
+                        decimal totalReceivedByAddress = receivedByAddressConfirmed.Sum(x => x.amount);
+                        decimal balance = Money.FromUnit(totalReceivedByAddress, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
                         
                         if (balance > user.LastCheckedReceivedAmountByAddress)
                         {
@@ -211,7 +263,7 @@ namespace TipBot.Logic.NodeIntegrations
                                 continue;
                             }
 
-                            this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddress, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
+                            this.logger.Debug("New value for received by address is {0}. Old was {1}. Address is {2}.", receivedByAddressConfirmed, user.LastCheckedReceivedAmountByAddress, user.DepositAddress);
 
                             user.LastCheckedReceivedAmountByAddress = balance;
                             user.Balance += recentlyReceived;

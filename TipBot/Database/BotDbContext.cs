@@ -25,14 +25,14 @@ namespace TipBot.Database
         public DbSet<AddressModel> UnusedAddresses { get; set; }
     }
 
-    public class DesignTimeBotDbContextContextFactory : IDesignTimeDbContextFactory<BotDbContext>
-    {
-        public BotDbContext CreateDbContext(string[] args)
-        {
-            var settings = new Settings();
-            settings.Initialize(new TextFileConfiguration(args));
+    //public class DesignTimeBotDbContextContextFactory : IDesignTimeDbContextFactory<BotDbContext>
+    //{
+    //    public BotDbContext CreateDbContext(string[] args)
+    //    {
+    //        //var settings = new Settings();
+    //        //settings.Initialize(new TextFileConfiguration(args));
 
-            return new ContextFactory(settings).CreateContext();
-        }
-    }
+    //        return new ContextFactory(settings).CreateContext();
+    //    }
+    //}
 }

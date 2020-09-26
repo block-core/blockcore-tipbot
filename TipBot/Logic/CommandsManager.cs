@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Discord;
+using Microsoft.Extensions.Options;
 using NLog;
 using TipBot.Database;
 using TipBot.Database.Models;
@@ -18,7 +19,7 @@ namespace TipBot.Logic
 
         private readonly INodeIntegration nodeIntegration;
 
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
         private readonly Logger logger;
 
@@ -26,11 +27,11 @@ namespace TipBot.Logic
 
         private readonly FatalErrorNotifier fatalNotifier;
 
-        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, Settings settings, FatalErrorNotifier fatalNotifier)
+        public CommandsManager(IContextFactory contextFactory, INodeIntegration nodeIntegration, IOptionsMonitor<TipBotSettings> options, FatalErrorNotifier fatalNotifier)
         {
             this.contextFactory = contextFactory;
             this.nodeIntegration = nodeIntegration;
-            this.settings = settings;
+            this.settings = options.CurrentValue;
             this.fatalNotifier = fatalNotifier;
             this.random = new Random();
 
@@ -46,7 +47,7 @@ namespace TipBot.Logic
             this.AssertAmountPositive(amount);
             this.AssertUsersNotEqual(sender, userBeingTipped);
 
-            if (amount < this.settings.MinTipAmount)
+            if (amount < this.settings.MinTipAmount.ToDecimal(NBitcoin.MoneyUnit.BTC))
             {
                 this.logger.Trace("(-)[TIP TOO SMALL]'");
                 throw new CommandExecutionException($"Minimal tip is {this.settings.MinTipAmount}.");
@@ -126,7 +127,7 @@ namespace TipBot.Logic
 
             this.AssertAmountPositive(amount);
 
-            if (amount < this.settings.MinWithdrawAmount)
+            if (amount < this.settings.MinWithdrawAmount.ToDecimal(NBitcoin.MoneyUnit.BTC))
             {
                 this.logger.Trace("(-)[MIN_WITHDRAW_AMOUNT]");
                 throw new CommandExecutionException($"Minimal withdraw amount is {this.settings.MinWithdrawAmount} {this.settings.Ticker}.");
@@ -143,7 +144,7 @@ namespace TipBot.Logic
                     throw new CommandExecutionException("You can't withdraw to your own deposit address!");
                 }
 
-                decimal amountToSend = amount - this.settings.NetworkFee;
+                decimal amountToSend = amount - this.settings.NetworkFee.ToDecimal(NBitcoin.MoneyUnit.BTC);
                 this.logger.Trace("(The amount after fee: {0})", amountToSend);
 
                 this.AssertBalanceIsSufficient(discordUser, amountToSend);
@@ -223,7 +224,7 @@ namespace TipBot.Logic
 
                 this.AssertBalanceIsSufficient(discordUser, amount);
 
-                if (amount < this.settings.MinQuizAmount)
+                if (amount < this.settings.MinQuizAmount.ToDecimal(NBitcoin.MoneyUnit.BTC))
                 {
                     this.logger.Trace("(-)[AMOUNT_TOO_LOW]");
                     throw new CommandExecutionException($"Minimal quiz reward is {this.settings.MinQuizAmount} {this.settings.Ticker}!");
@@ -336,7 +337,7 @@ namespace TipBot.Logic
 
             this.AssertAmountPositive(totalAmount);
 
-            if (tipAmount < this.settings.MinMakeItRainTipAmount)
+            if (tipAmount < this.settings.MinMakeItRainTipAmount.ToDecimal(NBitcoin.MoneyUnit.BTC))
             {
                 this.logger.Trace("(-)[TIP_SIZE_TOO_SMALL]'");
                 throw new CommandExecutionException($"Tip amount can't be less than {this.settings.MinMakeItRainTipAmount}.");

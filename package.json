@@ -1,0 +1,26 @@
+{
+  "name": "blockcoretipbot",
+  "version": "0.0.3",
+  "license": "MIT",
+  "author": {
+    "name": "Blockcore",
+    "email": "post@blockcore.net",
+    "url": "https://www.blockcore.net"
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/block-core/blockcore-tipbot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/block-core/blockcore-tipbot/issues"
+  },
+  "homepage": "https://github.com/block-core/blockcore-tipbot#readme",
+  "scripts": {
+    "version": "node -p \"require('./package.json').version\"",
+    "changelog": "conventional-changelog -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
+  },
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {}
+}

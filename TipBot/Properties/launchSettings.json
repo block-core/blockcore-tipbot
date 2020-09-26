@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "CITY": {
+      "commandName": "Project",
+      "commandLineArgs": "--chain=CITY",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "XDS": {
+      "commandName": "Project",
+      "commandLineArgs": "--chain=XDS"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "commandLineArgs": "--chain=CITY",
+      "publishAllPorts": true
+    }
+  }
+}

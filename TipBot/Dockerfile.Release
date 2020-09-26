@@ -1,0 +1,6 @@
+﻿FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS runtime
+
+WORKDIR /app
+COPY ./release ./
+
+ENTRYPOINT ["dotnet", "Blockcore.TipBot.dll"]

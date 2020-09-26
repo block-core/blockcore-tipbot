@@ -1,15 +1,16 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace TipBot.Database
 {
     public class ContextFactory : IContextFactory
     {
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
-        public ContextFactory(Settings settings)
+        public ContextFactory(IOptionsMonitor<TipBotSettings> options)
         {
-            this.settings = settings;
+            this.settings = options.CurrentValue;
         }
 
         public BotDbContext CreateContext()

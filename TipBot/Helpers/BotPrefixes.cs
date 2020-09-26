@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 
 namespace TipBot.Helpers
 {
@@ -11,14 +12,14 @@ namespace TipBot.Helpers
     {
         private List<string> prefixes;
 
-        private readonly Settings settings;
+        private readonly TipBotSettings settings;
 
         /// <summary>Allow 2 spaces after bot name before the commands starts.</summary>
         private const bool AllowDoubleSpaces = true;
 
-        public BotPrefixes(Settings settings)
+        public BotPrefixes(IOptionsMonitor<TipBotSettings> options)
         {
-            this.settings = settings;
+            this.settings = options.CurrentValue;
         }
 
         private List<string> GetPrefixes(SocketSelfUser botUser)
