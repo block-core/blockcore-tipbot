@@ -21,6 +21,8 @@ namespace TipBot
 
         public bool UseSegwit { get; set; } = true;
 
+        public bool TipsEnabled { get; set; } = true;
+
         public string BotToken { get; set; }
 
         public string Ticker { get; set; } = "BTC";

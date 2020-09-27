@@ -49,6 +49,7 @@ networkFee - The network fee for withdraws
 useSegwit - To use segwit addresses, or not. true/false
 token - The applications token given to you from Discord
 connectionString - To configure the database For example, MSSQL: "Data Source=COMPUTERNAME/IP;Initial Catalog=DATABASENAME;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"
+tipsEnabled - If you want to disable tips, set this to false. It is true by default.
 ```
 
 

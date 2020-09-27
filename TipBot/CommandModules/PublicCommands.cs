@@ -64,30 +64,37 @@ namespace TipBot.CommandModules
         public Task TipAsync(IUser userBeingTipped, decimal amount, [Remainder] string message = null)
         {
             this.logger.Trace("({0}:{1},{2}:{3},{4}:'{5}')", nameof(userBeingTipped), userBeingTipped.Id, nameof(amount), amount, nameof(message), message);
-
+            
             IUser sender = this.Context.User;
 
             string response;
 
-            lock (this.lockObject)
+            if (Settings.TipsEnabled)
             {
-                try
+                lock (this.lockObject)
                 {
-                    this.CommandsManager.TipUser(sender, userBeingTipped, amount);
+                    try
+                    {
+                        this.CommandsManager.TipUser(sender, userBeingTipped, amount);
 
-                    response = $"{sender.Mention} tipped {userBeingTipped.Mention} {amount} {this.Settings.Ticker}";
+                        response = $"{sender.Mention} tipped {userBeingTipped.Mention} {amount} {this.Settings.Ticker}";
 
-                    if (message != null)
-                        response += $" with message `{message.Replace("`", "")}`";
+                        if (message != null)
+                            response += $" with message `{message.Replace("`", "")}`";
+                    }
+                    catch (CommandExecutionException exception)
+                    {
+                        response = "Error: " + exception.Message;
+                    }
                 }
-                catch (CommandExecutionException exception)
-                {
-                    response = "Error: " + exception.Message;
-                }
+
+                response = this.TrimMessage(response);
             }
-
-            response = this.TrimMessage(response);
-
+            else
+            {
+                string tipsDisabledMessage = "Sorry, tips are currently disabled.";
+                response = this.TrimMessage(tipsDisabledMessage);
+            }
             this.logger.Trace("(-)");
             return this.ReplyAsync(response);
         }
@@ -518,7 +525,7 @@ namespace TipBot.CommandModules
                 var client = new WebClient();
                 logo = client.DownloadData(ChainSettings.Icon);
             }
-            
+
             var stream = new MemoryStream(logo);
 
             this.logger.Trace("(-)");
