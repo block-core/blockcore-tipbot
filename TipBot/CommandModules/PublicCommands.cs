@@ -119,7 +119,7 @@ namespace TipBot.CommandModules
                 }
                 catch (OutOfDepositAddressesException)
                 {
-                    response = $"Bot ran out of deposit addresses. Tell bot admin ({this.Settings.SupportUsername}:{this.Settings.SupportDiscriminator}) about it.";
+                    response = $"Bot ran out of deposit addresses. Tell bot admin ({this.Settings.Discord.SupportUsername}:{this.Settings.Discord.SupportDiscriminator}) about it.";
                 }
             }
 

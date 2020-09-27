@@ -100,7 +100,7 @@ namespace TipBot.Logic
                 client.Log += this.LogAsync;
                 this.commandService.Log += this.LogAsync;
 
-                await client.LoginAsync(TokenType.Bot, settings.BotToken).ConfigureAwait(false);
+                await client.LoginAsync(TokenType.Bot, settings.Discord.Token).ConfigureAwait(false);
                 await client.StartAsync().ConfigureAwait(false);
 
                 this.discordConnectionKeepAlive.Initialize();

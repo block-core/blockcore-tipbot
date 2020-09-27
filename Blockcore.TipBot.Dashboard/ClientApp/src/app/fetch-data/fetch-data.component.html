@@ -1,0 +1,20 @@
+<h1 id="tableLabel">TipBot Dashboard</h1>
+
+<p>Gain insight to the tipbot, who tips who and check your own personal balance.</p>
+
+<p *ngIf="!forecasts"><em>Loading...</em></p>
+
+<table class='table table-striped' aria-labelledby="tableLabel" *ngIf="forecasts">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let forecast of forecasts">
+      <td>{{ forecast.username }}</td>
+      <td>{{ forecast.balance }}</td>
+    </tr>
+  </tbody>
+</table>

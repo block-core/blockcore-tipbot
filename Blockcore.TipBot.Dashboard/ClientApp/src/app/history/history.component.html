@@ -1,0 +1,24 @@
+<h1 id="tableLabel">TipBot Dashboard: History</h1>
+
+<p>Gain insight to the tipbot, who tips who and check your own personal balance.</p>
+
+<p *ngIf="!forecasts"><em>Loading...</em></p>
+
+<table class='table table-striped' aria-labelledby="tableLabel" *ngIf="forecasts">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Amount</th>
+      <th>From</th>
+      <th>To</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let forecast of forecasts">
+      <td>{{ forecast.creationTime }}</td>
+      <td>{{ forecast.amount }}</td>
+      <td><fa-icon [icon]="faDiscord"></fa-icon> {{ forecast.senderDiscordUserName }}</td>
+      <td><fa-icon [icon]="faDiscord"></fa-icon> {{ forecast.receiverDiscordUserName }}</td>
+    </tr>
+  </tbody>
+</table>

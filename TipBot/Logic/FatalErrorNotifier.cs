@@ -19,13 +19,13 @@ namespace TipBot.Logic
 
             await Task.Delay(20000).ConfigureAwait(false);
 
-            if (settings.SupportUserId > 0)
+            if (settings.Discord.SupportUserId > 0)
             {
-                this.SupportUser = client.GetUser(settings.SupportUserId);
+                this.SupportUser = client.GetUser(settings.Discord.SupportUserId);
             }
             else
             {
-                this.SupportUser = client.GetUser(settings.SupportUsername, settings.SupportDiscriminator);
+                this.SupportUser = client.GetUser(settings.Discord.SupportUsername, settings.Discord.SupportDiscriminator);
             }
 
             if (this.SupportUser == null)

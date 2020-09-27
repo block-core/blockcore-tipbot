@@ -3,8 +3,53 @@ using TipBot.Helpers;
 
 namespace TipBot
 {
+    public class TipBotDiscordSettings {
+        public bool Enabled { get; set; }
+
+        public string Token { get; set; }
+
+        /// <summary>Nickname of a user that will receive a message in case of a fatal error.</summary>
+        public string SupportUsername { get; set; }
+
+        public string SupportDiscriminator { get; set; }
+
+        public ulong SupportUserId { get; set; } = 0;
+    }
+
+    public class TipBotTwitchSettings
+    {
+        public bool Enabled { get; set; }
+
+        public string ClientId { get; set; }
+
+        public string AccessToken { get; set; }
+
+        public string Username { get; set; }
+
+        public string OAuth { get; set; }
+
+        public string[] Channels { get; set; }
+    }
+
+    public class TipBotTwitterSettings {
+        public bool Enabled { get; set; }
+    }
+
+
+    public class TipBotRedditSettings { 
+        public bool Enabled { get; set; }
+    }
+
     public class TipBotSettings
     {
+        public TipBotDiscordSettings Discord { get; set; }
+
+        public TipBotTwitchSettings Twitch { get; set; }
+
+        public TipBotTwitterSettings Twitter { get; set; }
+
+        public TipBotRedditSettings Reddit { get; set; }
+
         public string ApiUrl { get; set; } = "http://127.0.0.1:48334/";
 
         /// <summary>
@@ -22,8 +67,6 @@ namespace TipBot
         public bool UseSegwit { get; set; } = true;
 
         public bool TipsEnabled { get; set; } = true;
-
-        public string BotToken { get; set; }
 
         public string Ticker { get; set; } = "BTC";
 
@@ -47,13 +90,6 @@ namespace TipBot
 
         /// <summary>Specifies if bit should attempt to update the database on startup.</summary>
         public bool EnableMigrations { get; set; } = true;
-
-        /// <summary>Nickname of a user that will receive a message in case of a fatal error.</summary>
-        public string SupportUsername { get; set; } = "";
-
-        public string SupportDiscriminator { get; set; } = "";
-
-        public ulong SupportUserId { get; set; } = 0;
 
         /// <summary>DB connection string. Local db will be used if it's null.</summary>
         public string ConnectionString { get; set; } = @"Data Source=127.0.0.1;Initial Catalog=TipBot;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
