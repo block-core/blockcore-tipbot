@@ -39,18 +39,16 @@ Now you can run the bot using powershell or cmd:
 dotnet exec TipBot.dll -apiUrl=http://127.0.0.1:PORT/ -walletName=WALLETNAME -walletPassword=WALLETPASSWORD -networkFee=0.01 -useSegwit=true -token=DISCORDBOTTOKEN
 ```
 
-Bot configuration parameters: 
 
-```
-apiUrl - URL of API server. Usually http://127.0.0.1:<API port>/
-walletName - the wallet name
-walletPassword - the wallet password
-networkFee - The network fee for withdraws
-useSegwit - To use segwit addresses, or not. true/false
-token - The applications token given to you from Discord
-connectionString - To configure the database For example, MSSQL: "Data Source=COMPUTERNAME/IP;Initial Catalog=DATABASENAME;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"
-tipsEnabled - If you want to disable tips, set this to false. It is true by default.
-```
+#### Bot configuration
+
+Please refer to the [appsettings.sample.json](TipBot/appsettings.sample.json), which includes all available settings with descriptions.
+
+
+#### Local debug configuration
+
+When you run the project from Visual Studio, you can right-click on the "Blockcore.TipBot" solution and choose "Manage User Secrets". This will open an secrets.json file, where you can 
+add your configuration secrets, such as the Discord Bot token. This file will never be checked into source code.
 
 
 #### Creating a Discord Bot
@@ -106,7 +104,7 @@ Server=127.0.0.1,14330;Database=TipBot;User Id=SA;Password=MyVeryOwnPassword!23
 
 ## Docker Cleanup
 
-Docker provides a single command that will clean up any resources — images, containers, volumes, and networks — that are dangling (not associated with a container):
+Docker provides a single command that will clean up any resources ï¿½ images, containers, volumes, and networks ï¿½ that are dangling (not associated with a container):
 
 ```
 docker system prune
