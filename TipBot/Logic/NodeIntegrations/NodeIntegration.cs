@@ -46,7 +46,7 @@ namespace TipBot.Logic.NodeIntegrations
         private string WalletName { get; set; }
         private string WalletPassword { get; set; }
         private string AccountName { get; set; }
-        private Money MinFee { get; set; }
+        private decimal MinFee { get; set; }
         private bool UseSegwit { get; set; }
 
         private readonly TipBotSettings settings;
