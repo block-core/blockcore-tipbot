@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TipBot.Database.Models
 {
@@ -6,6 +7,7 @@ namespace TipBot.Database.Models
     {
         public int Id { get; set; }
 
+        [Column(TypeName = "decimal(18,8)")]
         public decimal Amount { get; set; }
 
         public DateTime CreationTime { get; set; }
