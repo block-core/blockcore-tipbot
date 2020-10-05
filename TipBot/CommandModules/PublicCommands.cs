@@ -406,7 +406,7 @@ namespace TipBot.CommandModules
 
                 if (quizes.Count != 0)
                 {
-                    builder.AppendLine("__List of all active quizes:__");
+                    builder.AppendLine("__List of all active quizzes:__");
                     builder.AppendLine();
 
                     foreach (QuizViewModel quiz in quizes)
