@@ -23,6 +23,9 @@ namespace TipBot.Database
 
         /// <summary>Pregenerated receiving addresses that will be assigned to users who wish to deposit.</summary>
         public DbSet<AddressModel> UnusedAddresses { get; set; }
+
+        public DbSet<WithdrawHistory> WithdrawHistories { get; set; }
+
     }
 
     //public class DesignTimeBotDbContextContextFactory : IDesignTimeDbContextFactory<BotDbContext>

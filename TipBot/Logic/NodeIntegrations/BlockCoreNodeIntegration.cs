@@ -67,12 +67,12 @@ namespace TipBot.Logic.NodeIntegrations
 
         /// <inheritdoc />
         /// <exception cref="InvalidAddressException">Thrown if <paramref name="address"/> is invalid.</exception>
-        public void Withdraw(decimal amount, string address)
+        public BuildTransactionResult Withdraw(decimal amount, string address)
         {
             this.logger.Trace("({0}:{1},{2}:'{3}')", nameof(amount), amount, nameof(address), address);
 
             ValidateAddressResult validationResult = blockCoreNodeAPI.ValidateAddress(address).Result;
-
+            var result = new BuildTransactionResult();
             if (!validationResult.isvalid)
             {
                 this.logger.Trace("(-)[INVALID_ADDRESS]");
@@ -81,7 +81,7 @@ namespace TipBot.Logic.NodeIntegrations
 
             try
             {
-                blockCoreNodeAPI.SendTo(address, amount).ConfigureAwait(false);
+                result = blockCoreNodeAPI.SendTo(address, amount).Result;
             }
             catch (Exception ex)
             {
@@ -97,6 +97,8 @@ namespace TipBot.Logic.NodeIntegrations
             }
 
             this.logger.Trace("(-)");
+
+            return result;
         }
 
         /// <summary>Populates database with unused addresses.</summary>

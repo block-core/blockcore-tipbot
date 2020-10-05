@@ -151,12 +151,25 @@ namespace TipBot.Logic
 
                 try
                 {
-                    this.nodeIntegration.Withdraw(amountToSend, address);
+                    var withdrawResult = this.nodeIntegration.Withdraw(amountToSend, address);
 
                     discordUser.Balance -= amount;
 
                     context.Update(discordUser);
                     context.SaveChanges();
+
+                    var withdrawHistoryItem = new WithdrawHistory
+                    {
+                        DiscordUserId = discordUser.DiscordUserId,
+                        Amount = amountToSend,
+                        ToAddress = address,
+                        TransactionId = withdrawResult.TransactionId,
+                        WithdrawTime = DateTime.UtcNow
+                    };
+
+                    context.Add(withdrawHistoryItem);
+                    context.SaveChanges();
+
                     this.logger.Debug("User '{0}' withdrew {1} to address '{2}'. After fee subtracted '{3}'", discordUser, amount, address, amountToSend);
                 }
                 catch (InvalidAddressException)

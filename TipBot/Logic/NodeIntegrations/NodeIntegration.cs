@@ -19,7 +19,7 @@ namespace TipBot.Logic.NodeIntegrations
         /// <summary>Withdraws specified amount or money to specified address.</summary>
         /// <remarks>Address will be validated prior to withdrawal.</remarks>
         /// <remarks>The fee will be taken out of this amount.</remarks>
-        void Withdraw(decimal amount, string address);
+        BuildTransactionResult Withdraw(decimal amount, string address);
     }
 
     public class InvalidAddressException : Exception
@@ -78,17 +78,18 @@ namespace TipBot.Logic.NodeIntegrations
             return result;
         }
 
-        public async Task SendTo(string address, decimal amount)
+        public async Task<BuildTransactionResult> SendTo(string address, decimal amount)
         {
-            var transaction = await BuildTransaction(address, Money.FromUnit(amount, MoneyUnit.BTC));
-            if (transaction == null)
+            var buildResult = await BuildTransaction(address, Money.FromUnit(amount, MoneyUnit.BTC));
+            if (buildResult == null)
             {
                 throw new Exception("There was an issue building a transaction.");
             }
             else
             {
-                await SendTransaction(transaction.Hex);
+                await SendTransaction(buildResult.Hex);
             }
+            return buildResult;
         }
 
         public async Task<BuildTransactionResult> BuildTransaction(string address, Money amount)
