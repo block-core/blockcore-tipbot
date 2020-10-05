@@ -152,6 +152,11 @@ namespace TipBot.Logic
                 try
                 {
                     this.nodeIntegration.Withdraw(amountToSend, address);
+
+                    discordUser.Balance -= amount;
+
+                    context.Update(discordUser);
+                    context.SaveChanges();
                     this.logger.Debug("User '{0}' withdrew {1} to address '{2}'. After fee subtracted '{3}'", discordUser, amount, address, amountToSend);
                 }
                 catch (InvalidAddressException)
@@ -159,11 +164,12 @@ namespace TipBot.Logic
                     this.logger.Trace("(-)[INVALID_ADDRESS]");
                     throw new CommandExecutionException("Address specified is invalid.");
                 }
-
-                discordUser.Balance -= amount;
-
-                context.Update(discordUser);
-                context.SaveChanges();
+                catch (Exception ex)
+                {
+                    this.logger.Trace("(-)[FAILED_WITHDRAW]");
+                    this.logger.Debug($"(WITHDRAW_ERROR)[{ex.Message}]");
+                    throw new CommandExecutionException($"Failed to withdraw. Contact {this.settings.Discord.SupportUsername}");
+                }   
             }
 
             this.logger.Trace("(-)");
