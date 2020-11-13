@@ -17,20 +17,24 @@ namespace TipBot.Logic
         {
             this.logger.Trace("()");
 
-            await Task.Delay(20000).ConfigureAwait(false);
-
-            if (settings.Discord.SupportUserId > 0)
+            while (this.SupportUser == null)
             {
-                this.SupportUser = client.GetUser(settings.Discord.SupportUserId);
-            }
-            else
-            {
-                this.SupportUser = client.GetUser(settings.Discord.SupportUsername, settings.Discord.SupportDiscriminator);
-            }
+                await Task.Delay(20000).ConfigureAwait(false);
 
-            if (this.SupportUser == null)
-                throw new Exception("Support user is null!");
+                if (settings.Discord.SupportUserId > 0)
+                {
+                    this.SupportUser = client.GetUser(settings.Discord.SupportUserId);
+                }
+                else
+                {
+                    this.SupportUser = client.GetUser(settings.Discord.SupportUsername, settings.Discord.SupportDiscriminator);
+                }
 
+                if (this.SupportUser == null)
+                {
+                    this.logger.Warn("Support user is null!");
+                }
+            }
             this.logger.Trace("(-)");
         }
 
