@@ -14,7 +14,7 @@
 
 # Introduction
 
-The bot is added to the [Blockcore community discord](hhttps://discord.gg/5aJk8Vv). You can check it out there.
+The bot is added to the [Blockcore community discord](https://www.blockcore.net/discord). You can check it out there.
 
 Or you can [add Blockcore tipbot](https://discord.com/api/oauth2/authorize?client_id=<CLIENT ID>&permissions=2048&scope=bot) to your server.
 
