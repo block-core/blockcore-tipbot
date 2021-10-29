@@ -1,6 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
+    "LOCAL": {
+      "commandName": "Project",
+      "commandLineArgs": "--local=appsettings.sample.json"
+    },
     "X42": {
       "commandName": "Project",
       "commandLineArgs": "--chain=X42",
