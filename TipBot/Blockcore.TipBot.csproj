@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Exe</OutputType>
     <PackageId>Blockcore.TipBot</PackageId>
     <AssemblyName>Blockcore.TipBot</AssemblyName>
@@ -17,7 +16,6 @@
 
   <ItemGroup>
     <PackageReference Include="Blockcore.Core" Version="1.0.13" />
-    <PackageReference Include="Blockcore.NBitcoin" Version="1.0.13" />
     <PackageReference Include="Discord.Net" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.8">
       <PrivateAssets>all</PrivateAssets>
