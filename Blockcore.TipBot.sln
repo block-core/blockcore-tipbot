@@ -8,12 +8,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB149BCB-313D-4CB7-BDDB-ABE7747A2AEE}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		package.json = package.json
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.TipBot.Dashboard", "Blockcore.TipBot.Dashboard\Blockcore.TipBot.Dashboard.csproj", "{4FA6E1B6-5AEE-42B3-8499-856345200459}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +24,6 @@ Global
 		{83547242-EFAE-451B-9232-0E121A7FA1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83547242-EFAE-451B-9232-0E121A7FA1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83547242-EFAE-451B-9232-0E121A7FA1AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4FA6E1B6-5AEE-42B3-8499-856345200459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4FA6E1B6-5AEE-42B3-8499-856345200459}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4FA6E1B6-5AEE-42B3-8499-856345200459}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4FA6E1B6-5AEE-42B3-8499-856345200459}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

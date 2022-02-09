@@ -67,7 +67,7 @@ namespace TipBot.Logic.NodeIntegrations
         {
             var result = new ValidateAddressResult();
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/Node/validateaddress", Method.GET);
+            var request = new RestRequest("/api/Node/validateaddress", Method.Get);
             request.AddParameter("address", address);
 
             var response = await client.ExecuteAsync<ValidateAddressResult>(request);
@@ -117,7 +117,7 @@ namespace TipBot.Logic.NodeIntegrations
             };
 
             var client = new RestClient(ApiUrl);
-            var request = new RestRequest("/api/Wallet/build-transaction", Method.POST);
+            var request = new RestRequest("/api/Wallet/build-transaction", Method.Post);
             var transactionToSend = JsonConvert.SerializeObject(newTransaction);
             request.AddParameter("application/json; charset=utf-8", transactionToSend, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
@@ -143,7 +143,7 @@ namespace TipBot.Logic.NodeIntegrations
             };
 
             var client = new RestClient(ApiUrl);
-            var request = new RestRequest("/api/Wallet/send-transaction", Method.POST);
+            var request = new RestRequest("/api/Wallet/send-transaction", Method.Post);
             var transactionToSend = JsonConvert.SerializeObject(sendTransactionRequest);
             request.AddParameter("application/json; charset=utf-8", transactionToSend, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
@@ -160,7 +160,7 @@ namespace TipBot.Logic.NodeIntegrations
         {
             var result = new List<string>();
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/Wallet/unusedaddresses", Method.GET);
+            var request = new RestRequest("/api/Wallet/unusedaddresses", Method.Get);
             request.AddParameter("Count", count);
             request.AddParameter("Segwit", UseSegwit);
             request.AddParameter("WalletName", WalletName);
@@ -177,7 +177,7 @@ namespace TipBot.Logic.NodeIntegrations
         public async Task<bool> CreateWallet()
         {
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/Wallet/recover", Method.POST);
+            var request = new RestRequest("/api/Wallet/recover", Method.Post);
 
             var body = new WalletModel { 
                 Name = settings.WalletName,
@@ -196,7 +196,7 @@ namespace TipBot.Logic.NodeIntegrations
         public async Task<bool> LoadWallet()
         {
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/Wallet/load", Method.POST);
+            var request = new RestRequest("/api/Wallet/load", Method.Post);
 
             var body = new WalletModel
             {
@@ -215,7 +215,7 @@ namespace TipBot.Logic.NodeIntegrations
         {
             var result = new GetNodeStatusResult();
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/Node/status", Method.GET);
+            var request = new RestRequest("/api/Node/status", Method.Get);
 
             var response = await client.ExecuteAsync<GetNodeStatusResult>(request);
             if (response.StatusCode == HttpStatusCode.OK)
@@ -229,7 +229,7 @@ namespace TipBot.Logic.NodeIntegrations
         {
             var result = new GetAddressBalanceResult();
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/BlockStore/getaddressesbalances", Method.GET);
+            var request = new RestRequest("/api/BlockStore/getaddressesbalances", Method.Get);
             request.AddParameter("addresses", addresses);
             request.AddParameter("minConfirmations", minConfirmations);
 
@@ -245,7 +245,7 @@ namespace TipBot.Logic.NodeIntegrations
         {
             var result = new GetAddressesHistory();
             var client = new RestClient($"{ApiUrl}");
-            var request = new RestRequest("/api/Wallet/history", Method.GET);
+            var request = new RestRequest("/api/Wallet/history", Method.Get);
             request.AddParameter("WalletName", WalletName);
             request.AddParameter("AccountName", AccountName);
             request.AddParameter("Address", addresses);
