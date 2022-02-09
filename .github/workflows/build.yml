@@ -57,7 +57,7 @@ jobs:
       run: dotnet restore ${{env.SOLUTION_PATH}}
 
     - name: Publish
-      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{ matrix.runtime }} /p:Version=${{ env.VERSION }} -v m -o ./${{ env.PROJECT_NAME }}/bin/publish ${{env.PROJECT_PATH}}
+      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{ matrix.runtime }} -v m -o ./${{ env.PROJECT_NAME }}/bin/publish ${{env.PROJECT_PATH}}
 
     - name: Package Name
       run: |
