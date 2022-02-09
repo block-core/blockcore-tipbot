@@ -1,7 +1,45 @@
-## <small>0.0.4 (2020-09-27)</small>
+## <small>0.1.8 (2022-02-09)</small>
 
-* WIP: Add improved settings and beginning of dashboard ([95cbe4a](https://github.com/block-core/blockcore-tipbot/commit/95cbe4a))
+* Added withdraw history. ([d861dbf](https://github.com/block-core/blockcore-tipbot/commit/d861dbf))
+* Can no longer build using specific identifier ([bfe0c2f](https://github.com/block-core/blockcore-tipbot/commit/bfe0c2f))
+* Complain, don't crash. ([4701d60](https://github.com/block-core/blockcore-tipbot/commit/4701d60))
+* Do NOT change balance if withdraw fails. ([679ddf4](https://github.com/block-core/blockcore-tipbot/commit/679ddf4))
+* Drop the version from publish ([9000cbc](https://github.com/block-core/blockcore-tipbot/commit/9000cbc))
+* Ensure that all tags are published to Docker Hub ([b90682c](https://github.com/block-core/blockcore-tipbot/commit/b90682c))
+* Fixed Typo for quizzes ([499e2fb](https://github.com/block-core/blockcore-tipbot/commit/499e2fb))
+* Make specific use of bash for shell ([ab586b5](https://github.com/block-core/blockcore-tipbot/commit/ab586b5))
+* Migrate build workflow to correct variable usage ([b28adf4](https://github.com/block-core/blockcore-tipbot/commit/b28adf4))
+* Prepare for next release. ([14d4319](https://github.com/block-core/blockcore-tipbot/commit/14d4319))
+* Provide example of launching with custom config ([d3be60a](https://github.com/block-core/blockcore-tipbot/commit/d3be60a))
+* Specify branch for action ([2d825c3](https://github.com/block-core/blockcore-tipbot/commit/2d825c3))
+* Update the Discord link ([3055622](https://github.com/block-core/blockcore-tipbot/commit/3055622))
+* Upgrade packages and remove dashboard ([81c18c9](https://github.com/block-core/blockcore-tipbot/commit/81c18c9))
+* WIP: Upgrading TipBot to latest packages and .NET 6 ([e52962e](https://github.com/block-core/blockcore-tipbot/commit/e52962e))
+
+
+
+## <small>0.0.7 (2020-09-29)</small>
+
+* Adjusted Decmil Precision to be 8, from 2 ([7ac2d68](https://github.com/block-core/blockcore-tipbot/commit/7ac2d68))
+
+
+
+## <small>0.0.6 (2020-09-29)</small>
+
+* Fixed issue with money type configuration not loading. ([e597663](https://github.com/block-core/blockcore-tipbot/commit/e597663))
+* Update version for next release ([8daf3dd](https://github.com/block-core/blockcore-tipbot/commit/8daf3dd))
+* Update version for next release ([18cdc04](https://github.com/block-core/blockcore-tipbot/commit/18cdc04))
+* Update version for next release ([4763c33](https://github.com/block-core/blockcore-tipbot/commit/4763c33))
+
+
+
+## <small>0.0.4 (2020-09-28)</small>
+
+* Add a sample file for configuration ([f7c9ac0](https://github.com/block-core/blockcore-tipbot/commit/f7c9ac0))
 * Fixed local chain config, Added config to disable tipping, x42 launch settings (#9) ([53da6b0](https://github.com/block-core/blockcore-tipbot/commit/53da6b0)), closes [#9](https://github.com/block-core/blockcore-tipbot/issues/9)
+* Missing save of project file ([6d0d79d](https://github.com/block-core/blockcore-tipbot/commit/6d0d79d))
+* Prepare for next release ([c8ef4fa](https://github.com/block-core/blockcore-tipbot/commit/c8ef4fa))
+* WIP: Add improved settings and beginning of dashboard ([95cbe4a](https://github.com/block-core/blockcore-tipbot/commit/95cbe4a))
 
 
 
